@@ -1,0 +1,4 @@
+{
+    "name": "gridworld",
+    "load": ["gridworld.lua"]
+}
