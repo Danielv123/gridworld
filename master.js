@@ -86,14 +86,16 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		// message.data === { x_size: 500, y_size: 500, x_count: 2, y_count: 2 }
 		// Create a new gridworld.
 		let instances = []
-		console.log(this.master.slaves, [...this.master.slaves][0][1].id)
+		
+		console.log(this.master.plugins.get("edge_transports"))
 
+		if(!message.data.use_edge_transports) return
 		try {
 			for (let x = 1; x <= message.data.x_count; x++) {
 				for (let y = 1; y <= message.data.y_count; y++) {
 					// Create instance
 					let instance = {
-						instanceId: await this.createInstance(`Gridworld x${x} y${y}`, x, y),
+						instanceId: await this.createInstance(`${message.data.name_prefix} x${x} y${y}`, x, y),
 						x,
 						y,
 						slaveId: [...this.master.slaves][0][1].id,
@@ -104,16 +106,76 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 					// Create map
 					await this.createSave(instance.instanceId)
 
-					// Save position in grid
-
-
 					instances.push(instance)
+				}
+			}
+			for (let x = 1; x <= message.data.x_count; x++) {
+				for (let y = 1; y <= message.data.y_count; y++) {
+					if (message.data.use_edge_transports) {
+						// Create edges and add to edge_transports settings
+						let instanceTemplate = instances.find(instance => instance.x === x && instance.y === y)
+						let field = "edge_transports.internal"
+						let value = {
+							edges: []
+						}
+
+						// Edge indexes: 1 = north, 2 = east, 3 = south, 4 = west
+						// Northern edge
+						if (y < message.data.y_count) {
+							value.edges.push({
+								id: 1,
+								origin: [Math.floor(message.data.x_size / 2) * -1, Math.floor(message.data.y_size / 2) * -1],
+								surface: 1,
+								direction: 0, // East
+								length: message.data.x_size,
+								target_instance: instances.find(instance => instance.x === x && instance.y === y + 1).instanceId,
+								target_edge: 3
+							})
+						}
+						// Southern edge
+						if (y > 1) {
+							value.edges.push({
+								id: 3,
+								origin: [Math.floor(message.data.x_size / 2), Math.floor(message.data.y_size / 2)],
+								surface: 1,
+								direction: 4, // West
+								length: message.data.x_size,
+								target_instance: instances.find(instance => instance.x === x && instance.y === y - 1).instanceId,
+								target_edge: 1
+							})
+						}
+						// Eastern edge
+						if (x < message.data.y_count) {
+							value.edges.push({
+								id: 2,
+								origin: [Math.floor(message.data.x_size / 2), Math.floor(message.data.y_size / 2) * -1],
+								surface: 1,
+								direction: 2, // South
+								length: message.data.x_size,
+								target_instance: instances.find(instance => instance.x === x + 1 && instance.y === y).instanceId,
+								target_edge: 4
+							})
+						}
+						// Western edge
+						if (x > 1) {
+							value.edges.push({
+								id: 4,
+								origin: [Math.floor(message.data.x_size / 2) * -1, Math.floor(message.data.y_size / 2)],
+								surface: 1,
+								direction: 6, // North
+								length: message.data.x_size,
+								target_instance: instances.find(instance => instance.x === x - 1 && instance.y === y).instanceId,
+								target_edge: 2
+							})
+						}
+						// Update instance with edges
+						await this.setInstanceConfigField(instanceTemplate.instanceId, field, value)
+					}
 				}
 			}
 		} catch (e) {
 			this.logger.error(e)
 		}
-		// let instance1 = await this.createInstance("Test instance")
 	}
 
 	async createInstance(name, x, y) {
@@ -123,7 +185,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		instanceConfig.set("instance.name", name);
 		instanceConfig.set("gridworld.grid_x_position", x);
 		instanceConfig.set("gridworld.grid_y_position", y);
-		
+
 		let instanceId = instanceConfig.get("instance.id");
 		if (this.master.instances.has(instanceId)) {
 			throw new libErrors.RequestError(`Instance with ID ${instanceId} already exists`);
@@ -181,7 +243,37 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		});
 		return response
 	}
+	async setInstanceConfigField(instanceId, field, value) {
+		// Code lifted from ControlConnection.js setInstanceConfigFieldRequestHandler(message)
+		let instance = this.master.instances.get(instanceId);
+		if (!instance) {
+			throw new libErrors.RequestError(`Instance with ID ${instanceId} does not exist`);
+		}
 
+		if (field === "instance.assigned_slave") {
+			throw new libErrors.RequestError("instance.assigned_slave must be set through the assign-slave interface");
+		}
+
+		if (field === "instance.id") {
+			// XXX is this worth implementing?  It's race condition galore.
+			throw new libErrors.RequestError("Setting instance.id is not supported");
+		}
+
+		instance.config.set(field, value, "control");
+		await this.updateInstanceConfig(instance);
+	}
+	async updateInstanceConfig(instance) {
+		let slaveId = instance.config.get("instance.assigned_slave");
+		if (slaveId) {
+			let connection = this.master.wsServer.slaveConnections.get(slaveId);
+			if (connection) {
+				await libLink.messages.assignInstance.send(connection, {
+					instance_id: instance.config.get("instance.id"),
+					serialized_config: instance.config.serialize("slave"),
+				});
+			}
+		}
+	}
 	async onShutdown() {
 		clearInterval(this.autosaveId);
 		await saveDatabase(this.master.config, this.gridworldDatastore, this.logger);
@@ -209,6 +301,7 @@ class ControlConnector extends libLink.WebSocketClientConnector {
 	}
 }
 
+let sleep = s => new Promise(r => setTimeout(r, s * 1000))
 module.exports = {
 	MasterPlugin,
 };

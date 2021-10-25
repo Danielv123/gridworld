@@ -65,6 +65,8 @@ module.exports = {
 			links: ["control-master"],
 			permission: "gridworld.create",
 			requestProperties: {
+				"name_prefix": { type: "string" },
+				"use_edge_transports": { type: "boolean" },
 				"x_size": { type: "integer" },
 				"y_size": { type: "integer" },
 				"x_count": { type: "integer" },
