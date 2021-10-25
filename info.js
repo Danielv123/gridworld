@@ -16,6 +16,20 @@ MasterConfigGroup.finalize();
 class InstanceConfigGroup extends libConfig.PluginConfigGroup { }
 InstanceConfigGroup.defaultAccess = ["master", "slave", "control"];
 InstanceConfigGroup.groupName = "gridworld";
+InstanceConfigGroup.define({
+	name: "grid_x_position",
+	title: "Server position on X axis",
+	description: "Server position index along the X axis in the gridworld",
+	type: "number",
+	initial_value: 1000,
+});
+InstanceConfigGroup.define({
+	name: "grid_y_position",
+	title: "Server position on Y axis",
+	description: "Server position index along the Y axis in the gridworld",
+	type: "number",
+	initial_value: 1000,
+});
 InstanceConfigGroup.finalize();
 
 libUsers.definePermission({
@@ -46,22 +60,6 @@ module.exports = {
 	routes: ["/gridworld/overview"],
 
 	messages: {
-		// acquire: new libLink.Request({
-		// 	type: "gridworld:acquire",
-		// 	links: ["instance-slave", "slave-master"],
-		// 	forwardTo: "master",
-		// 	requestProperties: {
-		// 		"instance_id": { type: "integer" },
-		// 		"player_name": { type: "string" },
-		// 	},
-		// 	responseRequired: ["status"],
-		// 	responseProperties: {
-		// 		"status": { enum: ["acquired", "error", "busy"] },
-		// 		"generation": { type: "integer" },
-		// 		"has_data": { type: "boolean" },
-		// 		"message": { type: "string" },
-		// 	},
-		// }),
 		create: new libLink.Request({
 			type: "gridworld:create",
 			links: ["control-master"],

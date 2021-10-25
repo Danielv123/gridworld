@@ -5,6 +5,8 @@ const path = require("path");
 const { libConfig, libLink } = require("@clusterio/lib");
 const libPlugin = require("@clusterio/lib/plugin");
 const libErrors = require("@clusterio/lib/errors");
+const { Control } = require("../../packages/ctl/ctl");
+const loadMapSettings = require("./src/loadMapSettings");
 
 async function loadDatabase(config, logger) {
 	let itemsPath = path.resolve(config.get("master.database_directory"), "gridworld.json");
@@ -39,6 +41,40 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 				this.logger.error(`Unexpected error autosaving gridworld data:\n${err.stack}`);
 			});
 		}, this.master.config.get("gridworld.autosave_interval") * 1000);
+
+		let controlConfig = new libConfig.ControlConfig("control");
+		try {
+			await controlConfig.load(JSON.parse(await fs.readFile("config-control.json")));
+		} catch (err) {
+			if (err.code === "ENOENT") {
+				logger.verbose("Config not found, initializing new config");
+				await controlConfig.init();
+
+			} else {
+				throw new libErrors.StartupError(`Failed to load ${args.config}: ${err.message}`);
+			}
+		}
+
+		this._controlConnector = new ControlConnector(
+			controlConfig.get("control.master_url"),
+			controlConfig.get("control.max_reconnect_delay"),
+			null,
+			controlConfig.get("control.master_token"),
+			this.logger,
+		);
+		this._control = new Control(this._controlConnector, controlConfig, null, new Map());
+		this._selfConnect()
+	}
+	async _selfConnect() {
+		try {
+			await this._controlConnector.connect();
+			this.logger.info("Connected!")
+		} catch (err) {
+			if (err instanceof libErrors.AuthenticationFailed) {
+				throw new libErrors.StartupError(err.message);
+			}
+			throw err;
+		}
 	}
 
 	async onInstanceStatusChanged(instance) {
@@ -50,34 +86,44 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		// message.data === { x_size: 500, y_size: 500, x_count: 2, y_count: 2 }
 		// Create a new gridworld.
 		let instances = []
-		console.log(this.master.slaves)
-		for (let x = 1; x < message.data.x_count; x++) {
-			for (let y = 1; y < message.data.y_count; y++) {
-				// return
-				// Create instance
-				let instance = {
-					instanceId: await this.createInstance(`Gridworld x${x} y${y}`),
-					x,
-					y,
+		console.log(this.master.slaves, [...this.master.slaves][0][1].id)
+
+		try {
+			for (let x = 1; x <= message.data.x_count; x++) {
+				for (let y = 1; y <= message.data.y_count; y++) {
+					// Create instance
+					let instance = {
+						instanceId: await this.createInstance(`Gridworld x${x} y${y}`, x, y),
+						x,
+						y,
+						slaveId: [...this.master.slaves][0][1].id,
+					}
+					// Assign instance to a slave (using first slave as a placeholder)
+					await this.assignInstance(instance.instanceId, instance.slaveId)
+
+					// Create map
+					await this.createSave(instance.instanceId)
+
+					// Save position in grid
+
+
+					instances.push(instance)
 				}
-				// Assign instance to a slave (using first slave as a placeholder)
-				await this.assignInstance(instance.instanceId, [...this.master.slaves][0].id)
-
-				// Create map
-				await this.createSave()
-
-				instances.push(instance)
 			}
+		} catch (e) {
+			this.logger.error(e)
 		}
-		let instance1 = await this.createInstance("Test instance")
+		// let instance1 = await this.createInstance("Test instance")
 	}
 
-	async createInstance(name) {
+	async createInstance(name, x, y) {
 		this.logger.info("Creating instance", name)
 		let instanceConfig = new libConfig.InstanceConfig("master");
 		await instanceConfig.init();
 		instanceConfig.set("instance.name", name);
-
+		instanceConfig.set("gridworld.grid_x_position", x);
+		instanceConfig.set("gridworld.grid_y_position", y);
+		
 		let instanceId = instanceConfig.get("instance.id");
 		if (this.master.instances.has(instanceId)) {
 			throw new libErrors.RequestError(`Instance with ID ${instanceId} already exists`);
@@ -116,50 +162,50 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		return instanceConfig.get("instance.id")
 	}
 	async assignInstance(instance_id, slave_id) {
-		let instance = this.master.instances.get(instance_id);
-		if (!instance) {
-			throw new libErrors.RequestError(`Instance with ID ${instance_id} does not exist`);
-		}
-
-		// Check if target slave is connected
-		let newSlaveConnection;
-		if (slave_id !== null) {
-			newSlaveConnection = this.master.wsServer.slaveConnections.get(slave_id);
-			if (!newSlaveConnection) {
-				// The case of the slave not getting the assign instance message
-				// still have to be handled, so it's not a requirement that the
-				// target slave be connected to the master while doing the
-				// assignment, but it is IMHO a better user experience if this
-				// is the case.
-				throw new libErrors.RequestError("Target slave is not connected to the master server");
-			}
-		}
-
-		// Unassign from currently assigned slave if it is connected.
-		let currentAssignedSlave = instance.config.get("instance.assigned_slave");
-		if (currentAssignedSlave !== null && slave_id !== currentAssignedSlave) {
-			let oldSlaveConnection = this.master.wsServer.slaveConnections.get(currentAssignedSlave);
-			if (oldSlaveConnection && !oldSlaveConnection.connector.closing) {
-				await libLink.messages.unassignInstance.send(oldSlaveConnection, { instance_id });
-			}
-		}
-
-		// Assign to target
-		instance.config.set("instance.assigned_slave", slave_id);
-		if (slave_id !== null) {
-			await libLink.messages.assignInstance.send(newSlaveConnection, {
-				instance_id,
-				serialized_config: instance.config.serialize("slave"),
-			});
-		}
+		return libLink.messages.assignInstanceCommand.send(this._control, {
+			instance_id,
+			slave_id,
+		});
 	}
-	async createSave() {
+	async createSave(instance_id) {
+		let instance = this.master.instances.get(instance_id);
+		let slave_id = instance.config.get("instance.assigned_slave");
 
+		let { seed, mapGenSettings, mapSettings } = await loadMapSettings({});
+		let response = await libLink.messages.createSave.send(this._control, {
+			instance_id,
+			name: "Gridworld",
+			seed,
+			map_gen_settings: mapGenSettings,
+			map_settings: mapSettings,
+		});
+		return response
 	}
 
 	async onShutdown() {
 		clearInterval(this.autosaveId);
 		await saveDatabase(this.master.config, this.gridworldDatastore, this.logger);
+	}
+}
+
+/**
+ * Connector for control connection to master server
+ * @private
+ */
+class ControlConnector extends libLink.WebSocketClientConnector {
+	constructor(url, maxReconnectDelay, tlsCa, token, logger) {
+		super(url, maxReconnectDelay, tlsCa);
+		this._token = token;
+		this.logger = logger;
+	}
+
+	register() {
+		this.logger.verbose("Connector | registering control");
+		this.sendHandshake("register_control", {
+			token: this._token,
+			agent: "gridworld",
+			version: "0.0.1",
+		});
 	}
 }
 
