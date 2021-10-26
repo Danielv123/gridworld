@@ -73,5 +73,16 @@ module.exports = {
 				"y_count": { type: "integer" },
 			},
 		}),
+		setupWorld: new libLink.Request({
+			type: "gridworld:setup_world",
+			links: ["master-slave", "slave-instance"],
+			forwardTo: "instance",
+			requestProperties: {
+				"x_size": { type: "integer" },
+				"y_size": { type: "integer" },
+				"world_x": { type: "integer" },
+				"world_y": { type: "integer" },
+			}
+		})
 	},
 };

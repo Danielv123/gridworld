@@ -7,6 +7,7 @@ const libPlugin = require("@clusterio/lib/plugin");
 const libErrors = require("@clusterio/lib/errors");
 const { Control } = require("../../packages/ctl/ctl");
 const loadMapSettings = require("./src/loadMapSettings");
+const info = require("./info")
 
 async function loadDatabase(config, logger) {
 	let itemsPath = path.resolve(config.get("master.database_directory"), "gridworld.json");
@@ -87,7 +88,6 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		// Create a new gridworld.
 		let instances = []
 		
-		console.log(this.master.plugins.get("edge_transports"))
 
 		if(!message.data.use_edge_transports) return
 		try {
@@ -109,6 +109,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 					instances.push(instance)
 				}
 			}
+			// Create edges and configure edge_transports
 			for (let x = 1; x <= message.data.x_count; x++) {
 				for (let y = 1; y <= message.data.y_count; y++) {
 					if (message.data.use_edge_transports) {
@@ -119,39 +120,45 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 							edges: []
 						}
 
+						// x positive is right
+						// y positive is down
+						
+						let worldfactor_x = (x-1) * message.data.x_size
+						let worldfactor_y = (y-1) * message.data.y_size
+
 						// Edge indexes: 1 = north, 2 = east, 3 = south, 4 = west
 						// Northern edge
-						if (y < message.data.y_count) {
+						if (y > 1) {
 							value.edges.push({
 								id: 1,
-								origin: [Math.floor(message.data.x_size / 2) * -1, Math.floor(message.data.y_size / 2) * -1],
+								origin: [worldfactor_x, worldfactor_y],
 								surface: 1,
 								direction: 0, // East
 								length: message.data.x_size,
-								target_instance: instances.find(instance => instance.x === x && instance.y === y + 1).instanceId,
+								target_instance: instances.find(instance => instance.x === x && instance.y === y - 1).instanceId,
 								target_edge: 3
 							})
 						}
 						// Southern edge
-						if (y > 1) {
+						if (y < message.data.y_count) {
 							value.edges.push({
 								id: 3,
-								origin: [Math.floor(message.data.x_size / 2), Math.floor(message.data.y_size / 2)],
+								origin: [message.data.x_size + worldfactor_x, message.data.y_size + worldfactor_y],
 								surface: 1,
 								direction: 4, // West
 								length: message.data.x_size,
-								target_instance: instances.find(instance => instance.x === x && instance.y === y - 1).instanceId,
+								target_instance: instances.find(instance => instance.x === x && instance.y === y + 1).instanceId,
 								target_edge: 1
 							})
 						}
 						// Eastern edge
-						if (x < message.data.y_count) {
+						if (x < message.data.x_count) {
 							value.edges.push({
 								id: 2,
-								origin: [Math.floor(message.data.x_size / 2), Math.floor(message.data.y_size / 2) * -1],
+								origin: [message.data.x_size + worldfactor_x, worldfactor_y],
 								surface: 1,
 								direction: 2, // South
-								length: message.data.x_size,
+								length: message.data.y_size,
 								target_instance: instances.find(instance => instance.x === x + 1 && instance.y === y).instanceId,
 								target_edge: 4
 							})
@@ -160,16 +167,40 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 						if (x > 1) {
 							value.edges.push({
 								id: 4,
-								origin: [Math.floor(message.data.x_size / 2) * -1, Math.floor(message.data.y_size / 2)],
+								origin: [worldfactor_x, message.data.y_size + worldfactor_y],
 								surface: 1,
 								direction: 6, // North
-								length: message.data.x_size,
+								length: message.data.y_size,
 								target_instance: instances.find(instance => instance.x === x - 1 && instance.y === y).instanceId,
 								target_edge: 2
 							})
 						}
 						// Update instance with edges
 						await this.setInstanceConfigField(instanceTemplate.instanceId, field, value)
+					}
+				}
+			}
+			
+			// Start instances and apply ingame world settings
+			for (let x = 1; x <= message.data.x_count; x++) {
+				for (let y = 1; y <= message.data.y_count; y++) {
+					if (message.data.use_edge_transports) {
+						let instanceTemplate = instances.find(instance => instance.x === x && instance.y === y)
+						this.logger.info("Starting instance", instanceTemplate.name)
+						// Start instance
+						let response = await libLink.messages.startInstance.send(this._control, {
+							instance_id: instanceTemplate.instanceId,
+							save: null,
+						});
+
+						// Server should now have status "running"
+						await info.messages.setupWorld.send(this.master.wsServer.slaveConnections.get(instanceTemplate.slaveId), {
+							instance_id: instanceTemplate.instanceId,
+							x_size: message.data.x_size,
+							y_size: message.data.y_size,
+							world_x: x,
+							world_y: y,
+						})
 					}
 				}
 			}
