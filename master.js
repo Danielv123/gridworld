@@ -87,15 +87,14 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		// message.data === { x_size: 500, y_size: 500, x_count: 2, y_count: 2 }
 		// Create a new gridworld.
 		let instances = []
-		
 
-		if(!message.data.use_edge_transports) return
+		if (!message.data.use_edge_transports) return
 		try {
 			for (let x = 1; x <= message.data.x_count; x++) {
 				for (let y = 1; y <= message.data.y_count; y++) {
 					// Create instance
 					let instance = {
-						instanceId: await this.createInstance(`${message.data.name_prefix} x${x} y${y}`, x, y),
+						instanceId: await this.createInstance(`${message.data.name_prefix} x${x} y${y}`, x, y, message.data.x_size, message.data.y_size),
 						x,
 						y,
 						slaveId: [...this.master.slaves][0][1].id,
@@ -122,9 +121,9 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 						// x positive is right
 						// y positive is down
-						
-						let worldfactor_x = (x-1) * message.data.x_size
-						let worldfactor_y = (y-1) * message.data.y_size
+
+						let worldfactor_x = (x - 1) * message.data.x_size
+						let worldfactor_y = (y - 1) * message.data.y_size
 
 						// Edge indexes: 1 = north, 2 = east, 3 = south, 4 = west
 						// Northern edge
@@ -180,42 +179,20 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 					}
 				}
 			}
-			
-			// Start instances and apply ingame world settings
-			for (let x = 1; x <= message.data.x_count; x++) {
-				for (let y = 1; y <= message.data.y_count; y++) {
-					if (message.data.use_edge_transports) {
-						let instanceTemplate = instances.find(instance => instance.x === x && instance.y === y)
-						this.logger.info("Starting instance", instanceTemplate.name)
-						// Start instance
-						let response = await libLink.messages.startInstance.send(this._control, {
-							instance_id: instanceTemplate.instanceId,
-							save: null,
-						});
-
-						// Server should now have status "running"
-						await info.messages.setupWorld.send(this.master.wsServer.slaveConnections.get(instanceTemplate.slaveId), {
-							instance_id: instanceTemplate.instanceId,
-							x_size: message.data.x_size,
-							y_size: message.data.y_size,
-							world_x: x,
-							world_y: y,
-						})
-					}
-				}
-			}
 		} catch (e) {
 			this.logger.error(e)
 		}
 	}
 
-	async createInstance(name, x, y) {
+	async createInstance(name, x, y, x_size, y_size) {
 		this.logger.info("Creating instance", name)
 		let instanceConfig = new libConfig.InstanceConfig("master");
 		await instanceConfig.init();
 		instanceConfig.set("instance.name", name);
 		instanceConfig.set("gridworld.grid_x_position", x);
 		instanceConfig.set("gridworld.grid_y_position", y);
+		instanceConfig.set("gridworld.grid_x_size", x_size);
+		instanceConfig.set("gridworld.grid_y_size", y_size);
 
 		let instanceId = instanceConfig.get("instance.id");
 		if (this.master.instances.has(instanceId)) {

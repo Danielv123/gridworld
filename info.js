@@ -30,6 +30,20 @@ InstanceConfigGroup.define({
 	type: "number",
 	initial_value: 1000,
 });
+InstanceConfigGroup.define({
+	name: "grid_x_size",
+	title: "Server size on X axis",
+	description: "Server size along the X axis",
+	type: "number",
+	initial_value: 512,
+});
+InstanceConfigGroup.define({
+	name: "grid_y_size",
+	title: "Server size on Y axis",
+	description: "Server size along the Y axis",
+	type: "number",
+	initial_value: 512,
+});
 InstanceConfigGroup.finalize();
 
 libUsers.definePermission({
