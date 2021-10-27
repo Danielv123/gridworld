@@ -87,16 +87,16 @@ module.exports = {
 				"y_count": { type: "integer" },
 			},
 		}),
-		setupWorld: new libLink.Request({
-			type: "gridworld:setup_world",
+		populateNeighborData: new libLink.Request({
+			type: "gridworld:populate_neighbor_data",
 			links: ["master-slave", "slave-instance"],
 			forwardTo: "instance",
 			requestProperties: {
-				"x_size": { type: "integer" },
-				"y_size": { type: "integer" },
-				"world_x": { type: "integer" },
-				"world_y": { type: "integer" },
-			}
-		})
+				north: { type: ["integer", "null"] },
+				south: { type: ["integer", "null"] },
+				east: { type: ["integer", "null"] },
+				west: { type: ["integer", "null"] },
+			},
+		}),
 	},
 };

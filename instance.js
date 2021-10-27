@@ -28,6 +28,14 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		await Promise.all(this.pendingTasks);
 	}
 
+	onMasterConnectionEvent(event) {
+		if (event === "drop" || event === "close") {
+			this.sendRcon('/sc gridworld.populate_neighbor_data(nil, nil, nil, nil)').catch(
+				err => this.logger(`Error deactivating neighbors:\n${err.stack}`)
+			);
+		}
+	}
+
 	onPrepareMasterDisconnect() {
 		this.disconnecting = true;
 	}
@@ -51,21 +59,14 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		return task
 	}
 
-	async setupWorldRequestHandler(message) {
+	async populateNeighborDataRequestHandler(message) {
 		if (this.instance.status !== "running") {
 			return;
 		}
-		let data = message.data;
+		let { north, south, east, west} = message.data;
 
-		let task = this.sendRcon(`/c gridworld.create_spawn("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}")`, true);
-		let task2 = this.sendRcon(`/c gridworld.create_world_limit("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}")`, true);
-		this.pendingTasks.add(task);
-		this.pendingTasks.add(task2);
-		task.finally(() => { this.pendingTasks.delete(task); });
-		task2.finally(() => { this.pendingTasks.delete(task2); });
-		await task;
-		await task2;
-		return
+		// Update neighboring nodes for edge_teleports
+		return this.runTask(this.sendRcon(`/c gridworld.populate_neighbor_data(${north || "nil"}, ${south || "nil"}, ${east || "nil"}, ${west || "nil"})`))
 	}
 }
 
