@@ -40,6 +40,14 @@ gridworld.events[defines.events.on_player_joined_game] = function(event)
 	if global.gridworld.players[player.name] == nil then
 		global.gridworld.players[player.name] = {}
 	end
+	edge_teleport.receive_teleport(player)
+end
+gridworld.events[defines.events.on_player_left_game] = function(event)
+	local player = game.get_player(event.player_index)
+	local teleport_destination = global.gridworld.players[player.name].teleport_destination
+	if teleport_destination ~= nil then
+		edge_teleport.send_teleport_command_on_player_leave(player.name, teleport_destination.instance_id, teleport_destination.x, teleport_destination.y)
+	end
 end
 gridworld.events[defines.events.on_built_entity] = function(event)
 	local entity = event.created_entity
@@ -75,5 +83,6 @@ end
 gridworld.create_world_limit = create_world_limit
 gridworld.create_spawn = create_spawn
 gridworld.populate_neighbor_data = populate_neighbor_data
+gridworld.receive_teleport_data = edge_teleport.receive_teleport_data
 
 return gridworld
