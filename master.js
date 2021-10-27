@@ -81,6 +81,21 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	async onInstanceStatusChanged(instance) {
 		let instanceId = instance.config.get("instance.id");
 		console.log(instance.status, instanceId)
+
+		if (instance.status === "running") {
+			let slaveId = instance.config.get("instance.assigned_slave");
+			let x = instance.config.get("gridworld.grid_x_position");
+			let y = instance.config.get("gridworld.grid_y_position");
+			let slaveConnection = this.master.wsServer.slaveConnections.get(slaveId);
+			let instances = [...this.master.instances]
+			await this.info.messages.populateNeighborData.send(slaveConnection, {
+				instance_id: instanceId,
+				north: instances.find(instance => instance[1].config.get("gridworld.grid_y_position") === y - 1)?.[0] || null,
+				south: instances.find(instance => instance[1].config.get("gridworld.grid_y_position") === y + 1)?.[0] || null,
+				east: instances.find(instance => instance[1].config.get("gridworld.grid_x_position") === x + 1)?.[0] || null,
+				west: instances.find(instance => instance[1].config.get("gridworld.grid_x_position") === x - 1)?.[0] || null,
+			});
+		}
 	}
 
 	async createRequestHandler(message) {
