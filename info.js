@@ -11,6 +11,20 @@ MasterConfigGroup.define({
 	type: "number",
 	initial_value: 600, // 10 minutes
 });
+MasterConfigGroup.define({
+	name: "gridworld_seed",
+	title: "Gridworld seed",
+	description: "Seed for servers created using gridworld generator",
+	type: "number",
+	initial_value: 999,
+});
+MasterConfigGroup.define({
+	name: "gridworld_map_exchange_string",
+	title: "Gridworld map exchange string",
+	description: "Map exchange string for servers created using gridworld generator",
+	type: "string",
+	initial_value: ">>>eNpjZGBk0GIAgwZ7EOZgSc5PzIHwDjiAMFdyfkFBapFuflEqsjBnclFpSqpufiaq4tS81NxK3aTEYqhiiMkcmUX5eegmsBaX5OehipQUpaYWw5wCwtylRYl5maW5EL0H7OGqGb+qrnZoaJFjAOH/9QwK//+DMJD1AGgjCDMwNoBVMwLFYIA1OSczLY2BQcERiJ1A0owMjNUi69wfVk0BMsFAzwHK+AAVOZAEE/GEMfwccEqpwBgmSOYYg8FnJAbE0hKQ/RBVHA4IBkSyBSTJyNj7duuC78cu2DH+Wfnxkm9Sgj2joavIuw9G6+yAkuwgfzLBiVkzQWAnzCsMMDMf2EOlbtoznj0DAm/sGVlBOkRAhIMFkDjgzczAKMAHZC3oARIKMgwwp9nBjBFxYEwDg28wnzyGMS7bo/sDGBA2IMPlQMQJEAG2EO4yRgjTod+B0UEeJiuJUALUb8SA7IYUhA9Pwqw9jGQ/mkMwIwLZH2giKg5YooELZGEKnHjBDHcNMDwvsMN4DvMdGJlBDJCqL0AxCA8kAzMKQgs4gIObmQEBPtgzuMX47gAAJhSjWw==<<<",
+});
 MasterConfigGroup.finalize();
 
 class InstanceConfigGroup extends libConfig.PluginConfigGroup { }
@@ -79,12 +93,12 @@ module.exports = {
 			links: ["control-master"],
 			permission: "gridworld.create",
 			requestProperties: {
-				"name_prefix": { type: "string" },
-				"use_edge_transports": { type: "boolean" },
-				"x_size": { type: "integer" },
-				"y_size": { type: "integer" },
-				"x_count": { type: "integer" },
-				"y_count": { type: "integer" },
+				name_prefix: { type: "string" },
+				use_edge_transports: { type: "boolean" },
+				x_size: { type: "integer" },
+				y_size: { type: "integer" },
+				x_count: { type: "integer" },
+				y_count: { type: "integer" },
 			},
 		}),
 		populateNeighborData: new libLink.Request({
@@ -98,5 +112,15 @@ module.exports = {
 				west: { type: ["integer", "null"] },
 			},
 		}),
+		teleportPlayer: new libLink.Request({
+			type: "gridworld:teleport_player",
+			links: ["instance-slave", "slave-master", "master-slave", "slave-instance"],
+			forwardTo: "instance",
+			requestProperties: {
+				player_name: { type: "string" },
+				x: { type: "number" },
+				y: { type: "number" },
+			}
+		})
 	},
 };

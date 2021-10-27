@@ -10,17 +10,23 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	async init() {
 		this.pendingTasks = new Set();
 		this.disconnecting = false;
+
+		this.instance.server.on("ipc-gridworld:send_teleport_command", data => {
+			this.teleportPlayer(data).catch(err => this.logger.error(
+				`Error handling player teleport:\n${err.stack}`
+			));
+		});
 	}
 
 	async onStart() {
 		let data = {
 			x_size: this.instance.config.get("gridworld.grid_x_size"),
 			y_size: this.instance.config.get("gridworld.grid_y_size"),
-			world_x : this.instance.config.get("gridworld.grid_x_position"),
-			world_y : this.instance.config.get("gridworld.grid_y_position"),
+			world_x: this.instance.config.get("gridworld.grid_x_position"),
+			world_y: this.instance.config.get("gridworld.grid_y_position"),
 		}
-		await this.sendRcon(`/c gridworld.create_spawn("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
 		await this.sendRcon(`/c gridworld.create_world_limit("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
+		await this.sendRcon(`/c gridworld.create_spawn("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
 	}
 
 	async onStop() {
@@ -63,10 +69,27 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		if (this.instance.status !== "running") {
 			return;
 		}
-		let { north, south, east, west} = message.data;
+		let { north, south, east, west } = message.data;
 
 		// Update neighboring nodes for edge_teleports
-		return this.runTask(this.sendRcon(`/c gridworld.populate_neighbor_data(${north || "nil"}, ${south || "nil"}, ${east || "nil"}, ${west || "nil"})`))
+		return this.runTask(this.sendRcon(`/sc gridworld.populate_neighbor_data(${north || "nil"}, ${south || "nil"}, ${east || "nil"}, ${west || "nil"})`))
+	}
+
+	async teleportPlayer(data) {
+		await this.info.messages.teleportPlayer.send(this.instance, {
+			instance_id: data.instance_id,
+			player_name: data.player_name,
+			x: data.x,
+			y: data.y,
+		});
+	}
+
+	async teleportPlayerRequestHandler(message) {
+		if (this.instance.status !== "running") {
+			return;
+		}
+
+		return this.runTask(this.sendRcon(`/sc gridworld.receive_teleport_data("${libLuaTools.escapeString(JSON.stringify(message.data))}")`))
 	}
 }
 

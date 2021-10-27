@@ -79,10 +79,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	}
 
 	async onInstanceStatusChanged(instance) {
-		let instanceId = instance.config.get("instance.id");
-		console.log(instance.status, instanceId)
-
 		if (instance.status === "running") {
+			let instanceId = instance.config.get("instance.id");
 			let slaveId = instance.config.get("instance.assigned_slave");
 			let x = instance.config.get("gridworld.grid_x_position");
 			let y = instance.config.get("gridworld.grid_y_position");
@@ -90,10 +88,14 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 			let instances = [...this.master.instances]
 			await this.info.messages.populateNeighborData.send(slaveConnection, {
 				instance_id: instanceId,
-				north: instances.find(instance => instance[1].config.get("gridworld.grid_y_position") === y - 1)?.[0] || null,
-				south: instances.find(instance => instance[1].config.get("gridworld.grid_y_position") === y + 1)?.[0] || null,
-				east: instances.find(instance => instance[1].config.get("gridworld.grid_x_position") === x + 1)?.[0] || null,
-				west: instances.find(instance => instance[1].config.get("gridworld.grid_x_position") === x - 1)?.[0] || null,
+				north: instances.find(instance => instance[1].config.get("gridworld.grid_x_position") === x
+					&& instance[1].config.get("gridworld.grid_y_position") === y - 1)?.[0] || null,
+				south: instances.find(instance => instance[1].config.get("gridworld.grid_x_position") === x
+					&& instance[1].config.get("gridworld.grid_y_position") === y + 1)?.[0] || null,
+				east: instances.find(instance => instance[1].config.get("gridworld.grid_x_position") === x + 1
+					&& instance[1].config.get("gridworld.grid_y_position") === y)?.[0] || null,
+				west: instances.find(instance => instance[1].config.get("gridworld.grid_x_position") === x - 1
+					&& instance[1].config.get("gridworld.grid_y_position") === y)?.[0] || null,
 			});
 		}
 	}
@@ -118,7 +120,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 					await this.assignInstance(instance.instanceId, instance.slaveId)
 
 					// Create map
-					await this.createSave(instance.instanceId)
+					await this.createSave(instance.instanceId, this.master.config.get("gridworld.gridworld_seed"), this.master.config.get("gridworld.gridworld_map_exchange_string"))
 
 					instances.push(instance)
 				}
@@ -252,11 +254,14 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 			slave_id,
 		});
 	}
-	async createSave(instance_id) {
+	async createSave(instance_id, seed_orig, mapExchangeString) {
 		let instance = this.master.instances.get(instance_id);
 		let slave_id = instance.config.get("instance.assigned_slave");
 
-		let { seed, mapGenSettings, mapSettings } = await loadMapSettings({});
+		let { seed, mapGenSettings, mapSettings } = await loadMapSettings({
+			seed: seed_orig,
+			mapExchangeString
+		});
 		let response = await libLink.messages.createSave.send(this._control, {
 			instance_id,
 			name: "Gridworld",
