@@ -1,6 +1,6 @@
 const fs = require("fs-extra");
 
-const { libFactorio } = require("../../../packages/ctl/node_modules/@clusterio/lib");
+const { libFactorio } = require("@clusterio/lib");
 
 /**
  * 
