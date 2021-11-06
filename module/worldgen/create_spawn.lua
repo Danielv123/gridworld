@@ -1,3 +1,5 @@
+local generation_version = require("modules/gridworld/constants").generation_version
+
 local function create_spawn(x_size, y_size, world_x, world_y, force)
 	if not force and global.gridworld.world_limit_version >= generation_version then return end
 	global.gridworld.x_size = x_size
