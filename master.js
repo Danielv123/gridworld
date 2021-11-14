@@ -66,7 +66,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	}
 
 	async createRequestHandler(message) {
-		// message.data === { x_size: 500, y_size: 500, x_count: 2, y_count: 2 }
+		// message.data === { name_prefix: "Gridworld", use_edge_transports: true, x_size: 500, y_size: 500, x_count: 2, y_count: 2, slave: slave_id }
 		// Create a new gridworld.
 		let instances = []
 
@@ -79,7 +79,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 						instanceId: await this.createInstance(`${message.data.name_prefix} x${x} y${y}`, x, y, message.data.x_size, message.data.y_size),
 						x,
 						y,
-						slaveId: [...this.master.slaves][0][1].id,
+						slaveId: message.data.slave,
 					}
 					// Assign instance to a slave (using first slave as a placeholder)
 					await this.assignInstance(instance.instanceId, instance.slaveId)
