@@ -20,7 +20,9 @@
     "@clusterio/lib": "^2.0.0-alpha.0"
   },
   "dependencies": {
-    "fs-extra": "^8.1.0"
+    "fs-extra": "^8.1.0",
+    "mapbox-gl": "^1.13.2",
+    "react-mapbox-gl": "^5.1.1"
   },
   "devDependencies": {
     "@clusterio/web_ui": "^2.0.0-alpha.10",

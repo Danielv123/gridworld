@@ -14,6 +14,11 @@ local create_spawn = require("modules/gridworld/worldgen/create_spawn")
 local populate_neighbor_data = require("modules/gridworld/populate_neighbor_data")
 
 gridworld = {}
+-- Declare globals to make linter happy
+game = game
+global = global
+defines = defines
+log = log
 
 gridworld.events = {}
 gridworld.events[clusterio_api.events.on_server_startup] = function(event)

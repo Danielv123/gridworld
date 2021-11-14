@@ -85,7 +85,10 @@ module.exports = {
 	MasterConfigGroup,
 
 	webEntrypoint: "./web",
-	routes: ["/gridworld/overview"],
+	routes: [
+		"/gridworld",
+		"/gridworld/create",
+	],
 
 	messages: {
 		create: new libLink.Request({
@@ -99,6 +102,7 @@ module.exports = {
 				y_size: { type: "integer" },
 				x_count: { type: "integer" },
 				y_count: { type: "integer" },
+				slave: { type: "integer" }, // slaveID to use for instance creation
 			},
 		}),
 		populateNeighborData: new libLink.Request({
