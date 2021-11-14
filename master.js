@@ -301,6 +301,9 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 			}
 		}
 	}
+	getMapDataRequestHandler(message) {
+
+	}
 	async onShutdown() {
 		clearInterval(this.autosaveId);
 		await saveDatabase(this.master.config, this.gridworldDatastore, this.logger);

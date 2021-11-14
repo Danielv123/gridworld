@@ -11,8 +11,8 @@ Dependencies:
 
 Run the following commands in the folder Clusterio is installed to:
 
-    npm install @clusterio/plugin-gridworld
-    npx clusteriomaster plugin add @clusterio/plugin-gridworld
+    npm install @danielv123/gridworld
+    npx clusteriomaster plugin add @danielv123/gridworld
 
 Substitute clusteriomaster with clusterioslave or clusterioctl if this a dedicated slave or ctl installation respectively.
 
