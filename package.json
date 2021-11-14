@@ -1,5 +1,5 @@
 {
-  "name": "@clusterio/plugin-gridworld",
+  "name": "@danielv123/gridworld",
   "version": "0.0.1",
   "description": "Clusterio plugin for gridworld setup",
   "author": "Danielv <danielv@danielv.no>",
@@ -21,7 +21,11 @@
   },
   "dependencies": {
 	"fs-extra": "^8.1.0",
+	"leaflet": "^1.7.1",
+	"leaflet-rastercoords": "^1.0.4",
 	"mapbox-gl": "^1.13.2",
+	"react-leaflet": "^2.8.0",
+	"react-leaflet-enhanced-marker": "^1.0.21",
 	"react-mapbox-gl": "^5.1.1"
   },
   "devDependencies": {

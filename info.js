@@ -105,6 +105,41 @@ module.exports = {
 				slave: { type: "integer" }, // slaveID to use for instance creation
 			},
 		}),
+		getMapData: new libLink.Request({
+			type: "gridworld:get_map_data",
+			links: ["control-master"],
+			permission: "gridworld.overview.view",
+			responseProperties: {
+				map_data: {
+					type: "array",
+					items: { 
+						type: "object",
+						additionalProperties: false,
+						properties: {
+							instance_id: { type: "integer" },
+							edges: {
+								type: "array",
+								items: {
+									type: "object",
+									properties: {
+										id: { type: "integer" },
+										origin: {
+											type: "array",
+											items: { type: "integer" },
+										},
+										surface: { type: "integer" },
+										direction: { type: "integer" },
+										length: { type: "integer" },
+										target_instance: { type: "integer" },
+										target_edge: { type: "integer" },
+									}
+								}
+							}
+						}
+					}
+				},
+			}
+		}),
 		populateNeighborData: new libLink.Request({
 			type: "gridworld:populate_neighbor_data",
 			links: ["master-slave", "slave-instance"],
@@ -125,6 +160,6 @@ module.exports = {
 				x: { type: "number" },
 				y: { type: "number" },
 			}
-		})
+		}),
 	},
 };
