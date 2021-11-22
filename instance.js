@@ -2,7 +2,6 @@
  * @module
  */
 "use strict";
-const libErrors = require("@clusterio/lib/errors");
 const libPlugin = require("@clusterio/lib/plugin");
 const libLuaTools = require("@clusterio/lib/lua_tools");
 
@@ -72,7 +71,7 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		let { north, south, east, west } = message.data;
 
 		// Update neighboring nodes for edge_teleports
-		return this.runTask(this.sendRcon(`/sc gridworld.populate_neighbor_data(${north || "nil"}, ${south || "nil"}, ${east || "nil"}, ${west || "nil"})`));
+		await this.runTask(this.sendRcon(`/sc gridworld.populate_neighbor_data(${north || "nil"}, ${south || "nil"}, ${east || "nil"}, ${west || "nil"})`));
 	}
 
 	async teleportPlayer(data) {
@@ -89,7 +88,7 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			return;
 		}
 
-		return this.runTask(this.sendRcon(`/sc gridworld.receive_teleport_data("${libLuaTools.escapeString(JSON.stringify(message.data))}")`));
+		await this.runTask(this.sendRcon(`/sc gridworld.receive_teleport_data("${libLuaTools.escapeString(JSON.stringify(message.data))}")`));
 	}
 }
 

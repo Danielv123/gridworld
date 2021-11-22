@@ -6,7 +6,6 @@ const { libConfig, libLink } = require("@clusterio/lib");
 const libPlugin = require("@clusterio/lib/plugin");
 const libErrors = require("@clusterio/lib/errors");
 const loadMapSettings = require("./src/loadMapSettings");
-const info = require("./info");
 
 async function loadDatabase(config, logger) {
 	let itemsPath = path.resolve(config.get("master.database_directory"), "gridworld.json");
@@ -53,40 +52,52 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 			let instances = [...this.master.instances];
 			await this.info.messages.populateNeighborData.send(slaveConnection, {
 				instance_id: instanceId,
-				north: instances.find(instance => instance[1].config.get("gridworld.grid_x_position") === x
+				north: instances.find(z => z[1].config.get("gridworld.grid_x_position") === x
 					&& instance[1].config.get("gridworld.grid_y_position") === y - 1)?.[0] || null,
-				south: instances.find(instance => instance[1].config.get("gridworld.grid_x_position") === x
+				south: instances.find(z => z[1].config.get("gridworld.grid_x_position") === x
 					&& instance[1].config.get("gridworld.grid_y_position") === y + 1)?.[0] || null,
-				east: instances.find(instance => instance[1].config.get("gridworld.grid_x_position") === x + 1
+				east: instances.find(z => z[1].config.get("gridworld.grid_x_position") === x + 1
 					&& instance[1].config.get("gridworld.grid_y_position") === y)?.[0] || null,
-				west: instances.find(instance => instance[1].config.get("gridworld.grid_x_position") === x - 1
+				west: instances.find(z => z[1].config.get("gridworld.grid_x_position") === x - 1
 					&& instance[1].config.get("gridworld.grid_y_position") === y)?.[0] || null,
 			});
 		}
 	}
 
-	async getMapDataRequestHandler(message) {
+	async getMapDataRequestHandler() {
 		const instances = [...this.master.instances];
 		return {
 			map_data: instances.map(instance => ({
 				instance_id: instance[1].config.get("instance.id"),
 				center: [
-					(instance[1].config.get("gridworld.grid_x_position") - 1) * instance[1].config.get("gridworld.grid_x_size") + instance[1].config.get("gridworld.grid_x_size") / 2,
-					(instance[1].config.get("gridworld.grid_y_position") - 1) * instance[1].config.get("gridworld.grid_y_size") + instance[1].config.get("gridworld.grid_y_size") / 2,
+					(instance[1].config.get("gridworld.grid_x_position") - 1) *
+					instance[1].config.get("gridworld.grid_x_size") +
+					instance[1].config.get("gridworld.grid_x_size") / 2,
+					(instance[1].config.get("gridworld.grid_y_position") - 1) *
+					instance[1].config.get("gridworld.grid_y_size") +
+					instance[1].config.get("gridworld.grid_y_size") / 2,
 				],
 				bounds: [
 					[ // Top left
-						(instance[1].config.get("gridworld.grid_x_position") - 1) * instance[1].config.get("gridworld.grid_x_size"),
-						(instance[1].config.get("gridworld.grid_y_position") - 1) * instance[1].config.get("gridworld.grid_y_size"),
+						(instance[1].config.get("gridworld.grid_x_position") - 1) *
+						instance[1].config.get("gridworld.grid_x_size"),
+						(instance[1].config.get("gridworld.grid_y_position") - 1) *
+						instance[1].config.get("gridworld.grid_y_size"),
 					], [ // Bottom left
-						(instance[1].config.get("gridworld.grid_x_position") - 1) * instance[1].config.get("gridworld.grid_x_size"),
-						instance[1].config.get("gridworld.grid_y_position") * instance[1].config.get("gridworld.grid_y_size"),
+						(instance[1].config.get("gridworld.grid_x_position") - 1) *
+						instance[1].config.get("gridworld.grid_x_size"),
+						instance[1].config.get("gridworld.grid_y_position") *
+						instance[1].config.get("gridworld.grid_y_size"),
 					], [ // Bottom right
-						instance[1].config.get("gridworld.grid_x_position") * instance[1].config.get("gridworld.grid_x_size"),
-						instance[1].config.get("gridworld.grid_y_position") * instance[1].config.get("gridworld.grid_y_size"),
+						instance[1].config.get("gridworld.grid_x_position") *
+						instance[1].config.get("gridworld.grid_x_size"),
+						instance[1].config.get("gridworld.grid_y_position") *
+						instance[1].config.get("gridworld.grid_y_size"),
 					], [ // Top right
-						instance[1].config.get("gridworld.grid_x_position") * instance[1].config.get("gridworld.grid_x_size"),
-						(instance[1].config.get("gridworld.grid_y_position") - 1) * instance[1].config.get("gridworld.grid_y_size"),
+						instance[1].config.get("gridworld.grid_x_position") *
+						instance[1].config.get("gridworld.grid_x_size"),
+						(instance[1].config.get("gridworld.grid_y_position") - 1) *
+						instance[1].config.get("gridworld.grid_y_size"),
 					],
 				],
 				edges: instance[1].config.get("edge_transports.internal").edges,
@@ -94,8 +105,72 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		};
 	}
 
+	_getEdge({
+		worldfactor_x,
+		worldfactor_y,
+		x_size,
+		y_size,
+		instances,
+	}) {
+		// Edge indexes: 1 = north, 2 = east, 3 = south, 4 = west
+		// Northern edge
+		if (y > 1) {
+			value.edges.push({
+				id: 1,
+				origin: [worldfactor_x, worldfactor_y],
+				surface: 1,
+				direction: 0, // East
+				length: x_size,
+				target_instance: instances.find(instance => instance.x === x && instance.y === y - 1).instanceId,
+				target_edge: 3,
+			});
+		}
+		// Southern edge
+		if (y < message.data.y_count) {
+			value.edges.push({
+				id: 3,
+				origin: [x_size + worldfactor_x, y_size + worldfactor_y],
+				surface: 1,
+				direction: 4, // West
+				length: x_size,
+				target_instance: instances.find(instance => instance.x === x && instance.y === y + 1).instanceId,
+				target_edge: 1,
+			});
+		}
+		// Eastern edge
+		if (x < message.data.x_count) {
+			value.edges.push({
+				id: 2,
+				origin: [x_size + worldfactor_x, worldfactor_y],
+				surface: 1,
+				direction: 2, // South
+				length: y_size,
+				target_instance: instances.find(instance => instance.x === x + 1 && instance.y === y).instanceId,
+				target_edge: 4,
+			});
+		}
+		// Western edge
+		if (x > 1) {
+			value.edges.push({
+				id: 4,
+				origin: [worldfactor_x, y_size + worldfactor_y],
+				surface: 1,
+				direction: 6, // North
+				length: y_size,
+				target_instance: instances.find(instance => instance.x === x - 1 && instance.y === y).instanceId,
+				target_edge: 2,
+			});
+		}
+	}
+
 	async createRequestHandler(message) {
-		// message.data === { name_prefix: "Gridworld", use_edge_transports: true, x_size: 500, y_size: 500, x_count: 2, y_count: 2, slave: slave_id }
+		// message.data === {
+		// name_prefix: "Gridworld",
+		// use_edge_transports: true,
+		// x_size: 500, y_size: 500,
+		// x_count: 2, y_count: 2,
+		// slave: slave_id
+		// }
 		// Create a new gridworld.
 		let instances = [];
 
@@ -105,7 +180,13 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 				for (let y = 1; y <= message.data.y_count; y++) {
 					// Create instance
 					let instance = {
-						instanceId: await this.createInstance(`${message.data.name_prefix} x${x} y${y}`, x, y, message.data.x_size, message.data.y_size),
+						instanceId: await this.createInstance(
+							`${message.data.name_prefix} x${x} y${y}`,
+							x,
+							y,
+							message.data.x_size,
+							message.data.y_size
+						),
 						x,
 						y,
 						slaveId: message.data.slave,
@@ -114,80 +195,46 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 					await this.assignInstance(instance.instanceId, instance.slaveId);
 
 					// Create map
-					await this.createSave(instance.instanceId, this.master.config.get("gridworld.gridworld_seed"), this.master.config.get("gridworld.gridworld_map_exchange_string"));
+					await this.createSave(
+						instance.instanceId,
+						this.master.config.get("gridworld.gridworld_seed"),
+						this.master.config.get("gridworld.gridworld_map_exchange_string")
+					);
 
 					instances.push(instance);
 				}
 			}
 			// Create edges and configure edge_transports
+			if (!message.data.use_edge_transports) { return; }
 			for (let x = 1; x <= message.data.x_count; x++) {
 				for (let y = 1; y <= message.data.y_count; y++) {
-					if (message.data.use_edge_transports) {
-						// Create edges and add to edge_transports settings
-						let instanceTemplate = instances.find(instance => instance.x === x && instance.y === y);
-						let field = "edge_transports.internal";
-						let value = {
-							edges: [],
-						};
+					// Create edges and add to edge_transports settings
+					let instanceTemplate = instances.find(instance => instance.x === x && instance.y === y);
+					let field = "edge_transports.internal";
+					let value = {
+						edges: [],
+					};
 
-						// x positive is right
-						// y positive is down
+					// x positive is right
+					// y positive is down
 
-						let worldfactor_x = (x - 1) * message.data.x_size;
-						let worldfactor_y = (y - 1) * message.data.y_size;
+					let worldfactor_x = (x - 1) * message.data.x_size;
+					let worldfactor_y = (y - 1) * message.data.y_size;
 
-						// Edge indexes: 1 = north, 2 = east, 3 = south, 4 = west
-						// Northern edge
-						if (y > 1) {
-							value.edges.push({
-								id: 1,
-								origin: [worldfactor_x, worldfactor_y],
-								surface: 1,
-								direction: 0, // East
-								length: message.data.x_size,
-								target_instance: instances.find(instance => instance.x === x && instance.y === y - 1).instanceId,
-								target_edge: 3,
-							});
-						}
-						// Southern edge
-						if (y < message.data.y_count) {
-							value.edges.push({
-								id: 3,
-								origin: [message.data.x_size + worldfactor_x, message.data.y_size + worldfactor_y],
-								surface: 1,
-								direction: 4, // West
-								length: message.data.x_size,
-								target_instance: instances.find(instance => instance.x === x && instance.y === y + 1).instanceId,
-								target_edge: 1,
-							});
-						}
-						// Eastern edge
-						if (x < message.data.x_count) {
-							value.edges.push({
-								id: 2,
-								origin: [message.data.x_size + worldfactor_x, worldfactor_y],
-								surface: 1,
-								direction: 2, // South
-								length: message.data.y_size,
-								target_instance: instances.find(instance => instance.x === x + 1 && instance.y === y).instanceId,
-								target_edge: 4,
-							});
-						}
-						// Western edge
-						if (x > 1) {
-							value.edges.push({
-								id: 4,
-								origin: [worldfactor_x, message.data.y_size + worldfactor_y],
-								surface: 1,
-								direction: 6, // North
-								length: message.data.y_size,
-								target_instance: instances.find(instance => instance.x === x - 1 && instance.y === y).instanceId,
-								target_edge: 2,
-							});
-						}
-						// Update instance with edges
-						await this.setInstanceConfigField(instanceTemplate.instanceId, field, value);
+					let edge = this._getEdge({
+						worldfactor_x,
+						worldfactor_y,
+						x_size: message.data.x_size,
+						y_size: message.data.y_size,
+						instances,
+					});
+
+					if (edge) {
+						value.edges.push(edge);
 					}
+
+					// Update instance with edges
+					await this.setInstanceConfigField(instanceTemplate.instanceId, field, value);
 				}
 			}
 		} catch (e) {
@@ -341,7 +388,6 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	}
 }
 
-let sleep = s => new Promise(r => setTimeout(r, s * 1000));
 module.exports = {
 	MasterPlugin,
 };

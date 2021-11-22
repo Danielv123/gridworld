@@ -59,7 +59,9 @@ function InstanceModal(props) {
 						: slave["name"] || instance["assigned_slave"]
 					}
 				</Descriptions.Item>
-				{instance["status"] && <Descriptions.Item label="Status"><InstanceStatusTag status={instance["status"]} /></Descriptions.Item>}
+				{instance["status"] && <Descriptions.Item label="Status">
+					<InstanceStatusTag status={instance["status"]} />
+				</Descriptions.Item>}
 			</Descriptions>
 			<Tabs defaultActiveKey="1">
 				{
@@ -73,7 +75,8 @@ function InstanceModal(props) {
 					&& <Tabs.TabPane tab="Console" key="console">
 						<Typography.Title level={5} style={{ marginTop: 16 }}>Console</Typography.Title>
 						{account.hasPermission("core.log.follow") && <LogConsole instances={[props.instance_id]} />}
-						{account.hasPermission("core.instance.send_rcon") && <InstanceRcon id={props.instance_id} disabled={instance["status"] !== "running"} />}
+						{account.hasPermission("core.instance.send_rcon")
+							&& <InstanceRcon id={props.instance_id} disabled={instance["status"] !== "running"} />}
 					</Tabs.TabPane>
 				}
 				{
