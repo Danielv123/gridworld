@@ -29,7 +29,7 @@ function InstanceModal(props) {
 				extra={<Space>
 					{
 						account.hasAnyPermission("core.instance.start", "core.instance.stop")
-                        && <StartStopInstanceButton instance={instance} />
+						&& <StartStopInstanceButton instance={instance} />
 					}
 					{account.hasPermission("core.instance.delete") && <Popconfirm
 						title="Permanently delete instance and server saves?"
@@ -59,28 +59,31 @@ function InstanceModal(props) {
 						: slave["name"] || instance["assigned_slave"]
 					}
 				</Descriptions.Item>
-				{instance["status"] && <Descriptions.Item label="Status"><InstanceStatusTag status={instance["status"]} /></Descriptions.Item>}
+				{instance["status"] && <Descriptions.Item label="Status">
+					<InstanceStatusTag status={instance["status"]} />
+				</Descriptions.Item>}
 			</Descriptions>
 			<Tabs defaultActiveKey="1">
 				{
 					account.hasAllPermission("core.instance.save.list", "core.instance.save.list_subscribe")
-                    && <Tabs.TabPane tab="Saves" key="saves">
-                    	<SavesList instance={instance} />
-                    </Tabs.TabPane>
+					&& <Tabs.TabPane tab="Saves" key="saves">
+						<SavesList instance={instance} />
+					</Tabs.TabPane>
 				}
 				{
 					account.hasAnyPermission("core.log.follow", "core.instance.send_rcon")
-                    && <Tabs.TabPane tab="Console" key="console">
-                    	<Typography.Title level={5} style={{ marginTop: 16 }}>Console</Typography.Title>
-                    	{account.hasPermission("core.log.follow") && <LogConsole instances={[props.instance_id]} />}
-                    	{account.hasPermission("core.instance.send_rcon") && <InstanceRcon id={props.instance_id} disabled={instance["status"] !== "running"} />}
-                    </Tabs.TabPane>
+					&& <Tabs.TabPane tab="Console" key="console">
+						<Typography.Title level={5} style={{ marginTop: 16 }}>Console</Typography.Title>
+						{account.hasPermission("core.log.follow") && <LogConsole instances={[props.instance_id]} />}
+						{account.hasPermission("core.instance.send_rcon")
+							&& <InstanceRcon id={props.instance_id} disabled={instance["status"] !== "running"} />}
+					</Tabs.TabPane>
 				}
 				{
 					account.hasPermission("core.instance.get_config")
-                    && <Tabs.TabPane tab="Config" key="config">
-                    	<InstanceConfigTree id={props.instance_id} />
-                    </Tabs.TabPane>
+					&& <Tabs.TabPane tab="Config" key="config">
+						<InstanceConfigTree id={props.instance_id} />
+					</Tabs.TabPane>
 				}
 			</Tabs>
 		</>}

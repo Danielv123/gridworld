@@ -20,22 +20,29 @@ function NewGridworldForm() {
 	let [loading, setLoading] = useState();
 	let [slaveList] = useSlaveList();
 
-	const onFinish = async (values) => {
-		console.log("Success:", values);
+	async function onFinish(values) {
+		// console.log("Success:", values);
 		setLoading(true);
 		await info.messages.create.send(control, values);
 		setLoading(false);
 	};
 
-	const onFinishFailed = (errorInfo) => {
-		console.log("Failed:", errorInfo);
+	function onFinishFailed(errorInfo) {
+		// console.log("Failed:", errorInfo);
 		setLoading(false);
 	};
 
 	return <Form
 		name="basic"
 		{...layout}
-		initialValues={{ name_prefix: "Gridworld", use_edge_transports: true, x_size: 500, y_size: 500, x_count: 2, y_count: 2 }}
+		initialValues={{
+			name_prefix: "Gridworld",
+			use_edge_transports: true,
+			x_size: 500,
+			y_size: 500,
+			x_count: 2,
+			y_count: 2,
+		}}
 		onFinish={onFinish}
 		onFinishFailed={onFinishFailed}
 		autoComplete="off"
@@ -46,19 +53,39 @@ function NewGridworldForm() {
 		<Form.Item name="use_edge_transports" label="Use edge transports" valuePropName="checked">
 			<Checkbox />
 		</Form.Item>
-		<Form.Item name={"x_size"} label="World size along X axis" rules={[{ required: true, type: "number", min: 0, max: 10000 }]}>
+		<Form.Item
+			name={"x_size"}
+			label="World size along X axis"
+			rules={[{ required: true, type: "number", min: 0, max: 10000 }]}
+		>
 			<InputNumber />
 		</Form.Item>
-		<Form.Item name={"y_size"} label="World size along Y axis" rules={[{ required: true, type: "number", min: 0, max: 10000 }]}>
+		<Form.Item
+			name={"y_size"}
+			label="World size along Y axis"
+			rules={[{ required: true, type: "number", min: 0, max: 10000 }]}
+		>
 			<InputNumber />
 		</Form.Item>
-		<Form.Item name={"x_count"} label="Number of servers on X axis" rules={[{ required: true, type: "number", min: 0, max: 100 }]}>
+		<Form.Item
+			name={"x_count"}
+			label="Number of servers on X axis"
+			rules={[{ required: true, type: "number", min: 0, max: 100 }]}
+		>
 			<InputNumber />
 		</Form.Item>
-		<Form.Item name={"y_count"} label="Number of servers on Y axis" rules={[{ required: true, type: "number", min: 0, max: 100 }]}>
+		<Form.Item
+			name={"y_count"}
+			label="Number of servers on Y axis"
+			rules={[{ required: true, type: "number", min: 0, max: 100 }]}
+		>
 			<InputNumber />
 		</Form.Item>
-		<Form.Item name="slave" label="Slave to create instances on" rules={[{ required: true }]}>
+		<Form.Item
+			name="slave"
+			label="Slave to create instances on"
+			rules={[{ required: true }]}
+		>
 			<Select
 				placeholder="Select slave"
 			>
@@ -68,7 +95,7 @@ function NewGridworldForm() {
 
 		<Form.Item {...tailLayout}>
 			<Button type="primary" htmlType="submit" loading={loading}>
-                Create gridworld
+				Create gridworld
 			</Button>
 		</Form.Item>
 	</Form>;

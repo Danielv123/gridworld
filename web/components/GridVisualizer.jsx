@@ -1,17 +1,21 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Form, Input, Button, Select, InputNumber, Checkbox, Descriptions, Row, Col } from "antd";
-import { Map, TileLayer, Marker, Popup, Polygon, Polyline, Rectangle, Tooltip, useMapEvents } from "react-leaflet";
+import React, { useContext, useState } from "react";
+import { Row, Col } from "antd";
+import { Map, Polyline, Rectangle, Tooltip } from "react-leaflet";
 
-import { libPlugin } from "@clusterio/lib";
-import { PageLayout, ControlContext, useInstance, statusColors } from "@clusterio/web_ui";
-import info from "../../info";
+import { ControlContext, useInstance, statusColors } from "@clusterio/web_ui";
 import { useMapData } from "../model/mapData";
 import InstanceTooltip from "./InstanceTooltip";
 import InstanceModal from "./InstanceModal";
 
-let instancePositionCache = {};
+function getBounds(points) {
+	let minX = points.sort((a, b) => a[1] - b[1])[0][1];
+	let minY = points.sort((a, b) => a[0] - b[0])[0][0];
+	let maxX = points.sort((a, b) => b[1] - a[1])[0][1];
+	let maxY = points.sort((a, b) => b[0] - a[0])[0][0];
+	return [[maxY, minX], [minY, maxX]];
+}
 
-function GridVisualizer(props) {
+export default function GridVisualizer(props) {
 	const control = useContext(ControlContext);
 	const [mapData] = useMapData();
 	const [activeInstance, setActiveInstance] = useState();
@@ -19,9 +23,11 @@ function GridVisualizer(props) {
 	return <>
 		<div className="grid-visualizer">
 			<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+				// eslint-disable-next-line max-len
 				integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
 				crossOrigin="" />
 			<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+				// eslint-disable-next-line max-len
 				integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
 				crossOrigin=""></script>
 
@@ -33,11 +39,13 @@ function GridVisualizer(props) {
 						scrollWheelZoom={true}
 						style={{ width: "100%", height: "700px", backgroundColor: "#141414" }}
 						attributionControl={false}
-						bounds={getBounds(mapData.map_data?.map?.(instance => instance.bounds.map(position => [-1 * position[1] / 100, position[0] / 100])).flat() ?? [])}
+						bounds={getBounds(mapData.map_data?.map?.(
+							instance => instance.bounds.map(position => [-1 * position[1] / 100, position[0] / 100])
+						).flat() ?? [])}
 					>
 						{mapData?.map_data?.map?.(instance => <div key={instance.instance_id}>
 							{instance.edges.map(edge => {
-								// Coordinates are given as latitudes and longitudes, which corresponds to Y and X in the grid
+								// Coordinates are given as lat and long corresponding to Y and X in the grid
 								let origin = [-1 * edge.origin[1] / 100, edge.origin[0] / 100];
 								let destination = [...origin];
 								if (edge.direction === 0) { destination[1] += edge.length / 100; }
@@ -50,7 +58,11 @@ function GridVisualizer(props) {
 									opacity={0.3}
 								/>;
 							})}
-							<InstanceRender instance={instance} activeInstance={activeInstance} setActiveInstance={setActiveInstance} />
+							<InstanceRender
+								instance={instance}
+								activeInstance={activeInstance}
+								setActiveInstance={setActiveInstance}
+							/>
 						</div>
 						)}
 					</Map> : ""}
@@ -81,13 +93,3 @@ function InstanceRender(props) {
 		</Tooltip>
 	</Rectangle>;
 }
-
-function getBounds(points) {
-	let minX = points.sort((a, b) => a[1] - b[1])[0][1];
-	let minY = points.sort((a, b) => a[0] - b[0])[0][0];
-	let maxX = points.sort((a, b) => b[1] - a[1])[0][1];
-	let maxY = points.sort((a, b) => b[0] - a[0])[0][0];
-	return [[maxY, minX], [minY, maxX]];
-}
-
-export default GridVisualizer;
