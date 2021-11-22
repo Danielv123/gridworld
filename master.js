@@ -6,7 +6,7 @@ const { libConfig, libLink } = require("@clusterio/lib");
 const libPlugin = require("@clusterio/lib/plugin");
 const libErrors = require("@clusterio/lib/errors");
 const loadMapSettings = require("./src/loadMapSettings");
-const info = require("./info")
+const info = require("./info");
 
 async function loadDatabase(config, logger) {
 	let itemsPath = path.resolve(config.get("master.database_directory"), "gridworld.json");
@@ -50,7 +50,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 			let x = instance.config.get("gridworld.grid_x_position");
 			let y = instance.config.get("gridworld.grid_y_position");
 			let slaveConnection = this.master.wsServer.slaveConnections.get(slaveId);
-			let instances = [...this.master.instances]
+			let instances = [...this.master.instances];
 			await this.info.messages.populateNeighborData.send(slaveConnection, {
 				instance_id: instanceId,
 				north: instances.find(instance => instance[1].config.get("gridworld.grid_x_position") === x
@@ -65,12 +65,43 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		}
 	}
 
+	async getMapDataRequestHandler(message) {
+		const instances = [...this.master.instances];
+		return {
+			map_data: instances.map(instance => {
+				return {
+					instance_id: instance[1].config.get("instance.id"),
+					center: [
+						(instance[1].config.get("gridworld.grid_x_position") - 1) * instance[1].config.get("gridworld.grid_x_size") + instance[1].config.get("gridworld.grid_x_size") / 2,
+						(instance[1].config.get("gridworld.grid_y_position") - 1) * instance[1].config.get("gridworld.grid_y_size") + instance[1].config.get("gridworld.grid_y_size") / 2
+					],
+					bounds: [
+						[ // Top left
+							(instance[1].config.get("gridworld.grid_x_position") - 1) * instance[1].config.get("gridworld.grid_x_size"),
+							(instance[1].config.get("gridworld.grid_y_position") - 1) * instance[1].config.get("gridworld.grid_y_size")
+						], [ // Bottom left
+							(instance[1].config.get("gridworld.grid_x_position") - 1) * instance[1].config.get("gridworld.grid_x_size"),
+							instance[1].config.get("gridworld.grid_y_position") * instance[1].config.get("gridworld.grid_y_size")
+						], [ // Bottom right
+							instance[1].config.get("gridworld.grid_x_position") * instance[1].config.get("gridworld.grid_x_size"),
+							instance[1].config.get("gridworld.grid_y_position") * instance[1].config.get("gridworld.grid_y_size")
+						], [ // Top right
+							instance[1].config.get("gridworld.grid_x_position") * instance[1].config.get("gridworld.grid_x_size"),
+							(instance[1].config.get("gridworld.grid_y_position") - 1) * instance[1].config.get("gridworld.grid_y_size")
+						]
+					],
+					edges: instance[1].config.get("edge_transports.internal").edges,
+				}
+			})
+		};
+	}
+
 	async createRequestHandler(message) {
 		// message.data === { name_prefix: "Gridworld", use_edge_transports: true, x_size: 500, y_size: 500, x_count: 2, y_count: 2, slave: slave_id }
 		// Create a new gridworld.
-		let instances = []
+		let instances = [];
 
-		if (!message.data.use_edge_transports) return
+		if (!message.data.use_edge_transports) { return; }
 		try {
 			for (let x = 1; x <= message.data.x_count; x++) {
 				for (let y = 1; y <= message.data.y_count; y++) {
@@ -80,14 +111,14 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 						x,
 						y,
 						slaveId: message.data.slave,
-					}
+					};
 					// Assign instance to a slave (using first slave as a placeholder)
-					await this.assignInstance(instance.instanceId, instance.slaveId)
+					await this.assignInstance(instance.instanceId, instance.slaveId);
 
 					// Create map
-					await this.createSave(instance.instanceId, this.master.config.get("gridworld.gridworld_seed"), this.master.config.get("gridworld.gridworld_map_exchange_string"))
+					await this.createSave(instance.instanceId, this.master.config.get("gridworld.gridworld_seed"), this.master.config.get("gridworld.gridworld_map_exchange_string"));
 
-					instances.push(instance)
+					instances.push(instance);
 				}
 			}
 			// Create edges and configure edge_transports
@@ -95,17 +126,17 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 				for (let y = 1; y <= message.data.y_count; y++) {
 					if (message.data.use_edge_transports) {
 						// Create edges and add to edge_transports settings
-						let instanceTemplate = instances.find(instance => instance.x === x && instance.y === y)
-						let field = "edge_transports.internal"
+						let instanceTemplate = instances.find(instance => instance.x === x && instance.y === y);
+						let field = "edge_transports.internal";
 						let value = {
-							edges: []
-						}
+							edges: [],
+						};
 
 						// x positive is right
 						// y positive is down
 
-						let worldfactor_x = (x - 1) * message.data.x_size
-						let worldfactor_y = (y - 1) * message.data.y_size
+						let worldfactor_x = (x - 1) * message.data.x_size;
+						let worldfactor_y = (y - 1) * message.data.y_size;
 
 						// Edge indexes: 1 = north, 2 = east, 3 = south, 4 = west
 						// Northern edge
@@ -117,8 +148,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 								direction: 0, // East
 								length: message.data.x_size,
 								target_instance: instances.find(instance => instance.x === x && instance.y === y - 1).instanceId,
-								target_edge: 3
-							})
+								target_edge: 3,
+							});
 						}
 						// Southern edge
 						if (y < message.data.y_count) {
@@ -129,8 +160,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 								direction: 4, // West
 								length: message.data.x_size,
 								target_instance: instances.find(instance => instance.x === x && instance.y === y + 1).instanceId,
-								target_edge: 1
-							})
+								target_edge: 1,
+							});
 						}
 						// Eastern edge
 						if (x < message.data.x_count) {
@@ -141,8 +172,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 								direction: 2, // South
 								length: message.data.y_size,
 								target_instance: instances.find(instance => instance.x === x + 1 && instance.y === y).instanceId,
-								target_edge: 4
-							})
+								target_edge: 4,
+							});
 						}
 						// Western edge
 						if (x > 1) {
@@ -153,21 +184,21 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 								direction: 6, // North
 								length: message.data.y_size,
 								target_instance: instances.find(instance => instance.x === x - 1 && instance.y === y).instanceId,
-								target_edge: 2
-							})
+								target_edge: 2,
+							});
 						}
 						// Update instance with edges
-						await this.setInstanceConfigField(instanceTemplate.instanceId, field, value)
+						await this.setInstanceConfigField(instanceTemplate.instanceId, field, value);
 					}
 				}
 			}
 		} catch (e) {
-			this.logger.error(e)
+			this.logger.error(e);
 		}
 	}
 
 	async createInstance(name, x, y, x_size, y_size) {
-		this.logger.info("Creating instance", name)
+		this.logger.info("Creating instance", name);
 		let instanceConfig = new libConfig.InstanceConfig("master");
 		await instanceConfig.init();
 		instanceConfig.set("instance.name", name);
@@ -211,8 +242,9 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		this.master.instances.set(instanceId, instance);
 		await libPlugin.invokeHook(this.master.plugins, "onInstanceStatusChanged", instance, null);
 		this.master.addInstanceHooks(instance);
-		return instanceConfig.get("instance.id")
+		return instanceConfig.get("instance.id");
 	}
+
 	async assignInstance(instance_id, slave_id) {
 		// Code lifted from ControlConnection.js assignInstanceCommandRequestHandler()
 		let instance = this.master.instances.get(instance_id);
@@ -252,13 +284,14 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 			});
 		}
 	}
+
 	async createSave(instance_id, seed_orig, mapExchangeString) {
 		let instance = this.master.instances.get(instance_id);
 		let slave_id = instance.config.get("instance.assigned_slave");
 
 		let { seed, mapGenSettings, mapSettings } = await loadMapSettings({
 			seed: seed_orig,
-			mapExchangeString
+			mapExchangeString,
 		});
 
 		let slaveConnection = this.master.wsServer.slaveConnections.get(slave_id);
@@ -270,6 +303,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 			map_settings: mapSettings,
 		});
 	}
+
 	async setInstanceConfigField(instanceId, field, value) {
 		// Code lifted from ControlConnection.js setInstanceConfigFieldRequestHandler(message)
 		let instance = this.master.instances.get(instanceId);
@@ -289,6 +323,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		instance.config.set(field, value, "control");
 		await this.updateInstanceConfig(instance);
 	}
+
 	async updateInstanceConfig(instance) {
 		let slaveId = instance.config.get("instance.assigned_slave");
 		if (slaveId) {
@@ -301,16 +336,14 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 			}
 		}
 	}
-	getMapDataRequestHandler(message) {
 
-	}
 	async onShutdown() {
 		clearInterval(this.autosaveId);
 		await saveDatabase(this.master.config, this.gridworldDatastore, this.logger);
 	}
 }
 
-let sleep = s => new Promise(r => setTimeout(r, s * 1000))
+let sleep = s => new Promise(r => setTimeout(r, s * 1000));
 module.exports = {
 	MasterPlugin,
 };

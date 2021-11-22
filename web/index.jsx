@@ -24,7 +24,7 @@ export class WebPlugin extends libPlugin.BaseWebPlugin {
 
 	onMasterConnectionEvent(event) {
 		if (event === "connect") {
-			
+
 		}
 	}
 }

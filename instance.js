@@ -24,7 +24,7 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			y_size: this.instance.config.get("gridworld.grid_y_size"),
 			world_x: this.instance.config.get("gridworld.grid_x_position"),
 			world_y: this.instance.config.get("gridworld.grid_y_position"),
-		}
+		};
 		await this.sendRcon(`/c gridworld.create_world_limit("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
 		await this.sendRcon(`/c gridworld.create_spawn("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
 	}
@@ -36,7 +36,7 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 
 	onMasterConnectionEvent(event) {
 		if (event === "drop" || event === "close") {
-			this.sendRcon('/sc gridworld.populate_neighbor_data(nil, nil, nil, nil)').catch(
+			this.sendRcon("/sc gridworld.populate_neighbor_data(nil, nil, nil, nil)").catch(
 				err => this.logger(`Error deactivating neighbors:\n${err.stack}`)
 			);
 		}
@@ -51,7 +51,7 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			this.disconnecting = false;
 			(async () => {
 				if (this.disconnecting) {
-					return;
+
 				}
 			})().catch(
 				err => this.logger.error(`Unexpected error:\n${err.stack}`)
@@ -62,7 +62,7 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	async runTask(task) {
 		this.pendingTasks.add(task);
 		task.finally(() => { this.pendingTasks.delete(task); });
-		return task
+		return task;
 	}
 
 	async populateNeighborDataRequestHandler(message) {
@@ -72,7 +72,7 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		let { north, south, east, west } = message.data;
 
 		// Update neighboring nodes for edge_teleports
-		return this.runTask(this.sendRcon(`/sc gridworld.populate_neighbor_data(${north || "nil"}, ${south || "nil"}, ${east || "nil"}, ${west || "nil"})`))
+		return this.runTask(this.sendRcon(`/sc gridworld.populate_neighbor_data(${north || "nil"}, ${south || "nil"}, ${east || "nil"}, ${west || "nil"})`));
 	}
 
 	async teleportPlayer(data) {
@@ -89,7 +89,7 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			return;
 		}
 
-		return this.runTask(this.sendRcon(`/sc gridworld.receive_teleport_data("${libLuaTools.escapeString(JSON.stringify(message.data))}")`))
+		return this.runTask(this.sendRcon(`/sc gridworld.receive_teleport_data("${libLuaTools.escapeString(JSON.stringify(message.data))}")`));
 	}
 }
 

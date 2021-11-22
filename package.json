@@ -17,7 +17,8 @@
     "node": ">=12"
   },
   "peerDependencies": {
-    "@clusterio/lib": "^2.0.0-alpha.0"
+    "@clusterio/lib": "^2.0.0-alpha.0",
+    "react-router-dom": "*"
   },
   "dependencies": {
     "fs-extra": "^8.1.0",

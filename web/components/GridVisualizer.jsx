@@ -1,49 +1,96 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Form, Input, Button, Select, InputNumber, Checkbox } from 'antd';
-import { Map, TileLayer, Marker, Popup, Polygon } from 'react-leaflet'
+import { Form, Input, Button, Select, InputNumber, Checkbox, Descriptions, Row, Col } from "antd";
+import { Map, TileLayer, Marker, Popup, Polygon, Polyline, Rectangle, Tooltip, useMapEvents } from "react-leaflet";
 
 import { libPlugin } from "@clusterio/lib";
-import { PageLayout, ControlContext, useInstance } from "@clusterio/web_ui";
+import { PageLayout, ControlContext, useInstance, statusColors } from "@clusterio/web_ui";
 import info from "../../info";
+import { useMapData } from "../model/mapData";
+import InstanceTooltip from "./InstanceTooltip";
+import InstanceModal from "./InstanceModal";
 
 let instancePositionCache = {};
 
 function GridVisualizer(props) {
-	let control = useContext(ControlContext);
-	// Map objects
-	let [objects, setObjects] = useState([]);
+	const control = useContext(ControlContext);
+	const [mapData] = useMapData();
+	const [activeInstance, setActiveInstance] = useState();
 
-	// let instances = props.instances.map(x => {
-	// 	let [instance] = useInstance(x.id);
-	// 	return instance;
-	// })
+	return <>
+		<div className="grid-visualizer">
+			<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+				integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+				crossOrigin="" />
+			<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+				integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+				crossOrigin=""></script>
 
-	// console.log(instances)
+			<Row>
+				<Col lg={24} xl={12}>
+					{mapData.map_data?.length ? <Map
+						// center={[-1, 2]}
+						// zoom={7}
+						scrollWheelZoom={true}
+						style={{ width: "100%", height: "700px", backgroundColor: "#141414" }}
+						attributionControl={false}
+						bounds={getBounds(mapData.map_data?.map?.(instance => instance.bounds.map(position => [-1 * position[1] / 100, position[0] / 100])).flat() ?? [])}
+					>
+						{mapData?.map_data?.map?.(instance =>
+							<div key={instance.instance_id}>
+								{instance.edges.map(edge => {
+									// Coordinates are given as latitudes and longitudes, which corresponds to Y and X in the grid
+									let origin = [-1 * edge.origin[1] / 100, edge.origin[0] / 100];
+									let destination = [...origin];
+									if (edge.direction === 0) destination[1] += edge.length / 100;
+									if (edge.direction === 4) destination[1] -= edge.length / 100;
+									if (edge.direction === 2) destination[0] -= edge.length / 100;
+									if (edge.direction === 6) destination[0] += edge.length / 100;
+									return <Polyline
+										key={`${instance.instance_id}${edge.id}`}
+										positions={[origin, destination]}
+										opacity={0.3}
+									/>
+								})}
+								<InstanceRender instance={instance} activeInstance={activeInstance} setActiveInstance={setActiveInstance} />
+							</div>
+						)}
+					</Map> : ""}
+				</Col>
+				<Col xs={24} sm={12}>
+					<InstanceModal instance_id={activeInstance} />
+				</Col>
+			</Row>
+		</div>
+	</>;
+}
 
-	return <div className="grid-visualizer">
-		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-			integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
-			crossOrigin="" />
-		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-			integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-			crossOrigin=""></script>
-		<Map
-			center={[0, 0]}
-			zoom={7}
-			scrollWheelZoom={false}
-			style={{ width: "100%", height: "500px", backgroundColor: "#141414" }}
-		>
-			{/* <TileLayer
-				url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-			/> */}
-			<Polygon pathOptions={{ color: '#FF0000' }} positions={[[0, 0], [1, 0], [1, 1], [0, 1]]} />
-			{/* <Marker position={[0,0]}>
-				<Popup>
-					A pretty CSS3 popup. <br /> Easily customizable.
-				</Popup>
-			</Marker> */}
-		</Map>
-	</div>
+function InstanceRender(props) {
+	const [instance] = useInstance(props.instance.instance_id);
+
+	return <Rectangle
+		bounds={getBounds(props.instance.bounds.map(position => {
+			return [-1 * position[1] / 100, position[0] / 100];
+		}))}
+		onclick={() => {
+			props.setActiveInstance(props.instance.instance_id);
+		}}
+		color={props.instance.instance_id === props.activeInstance ? "#ffff00" : "#3388ff"}
+		fillColor={statusColors[instance.status]}
+		opacity={0.5}
+		stroke={props.instance.instance_id === props.activeInstance}
+	>
+		<Tooltip direction="center">
+			<InstanceTooltip instance_id={props.instance.instance_id} />
+		</Tooltip>
+	</Rectangle>
+}
+
+function getBounds(points) {
+	let minX = points.sort((a, b) => a[1] - b[1])[0][1];
+	let minY = points.sort((a, b) => a[0] - b[0])[0][0];
+	let maxX = points.sort((a, b) => b[1] - a[1])[0][1];
+	let maxY = points.sort((a, b) => b[0] - a[0])[0][0];
+	return [[maxY, minX], [minY, maxX]];
 }
 
 export default GridVisualizer;
