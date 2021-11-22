@@ -8,6 +8,7 @@
   "repository": "Danielv123/gridworld",
   "scripts": {
     "build": "webpack-cli --env production",
+    "lint": "eslint \"*.js\" src web",
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "bugs": {

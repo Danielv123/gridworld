@@ -6,8 +6,8 @@ import { useInstance } from "@clusterio/web_ui";
 function InstanceTooltip(props) {
 	let [instance] = useInstance(props.instance_id);
 
-    return <>
-        <p>{instance?.name}</p>
+	return <>
+		<p>{instance?.name}</p>
 	</>;
 }
 
