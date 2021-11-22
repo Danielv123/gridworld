@@ -1,0 +1,23 @@
+name: lua check
+
+on:
+  push:
+  pull_request:
+
+  workflow_dispatch:
+
+jobs:
+  build:
+	runs-on: ubuntu-latest
+
+	steps:
+	  # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+	  - uses: actions/checkout@v2
+
+	  - uses: nebularg/actions-luacheck@v1.1.0
+		with:
+		  files: module/
+		  config: https://raw.githubusercontent.com/Nexela/Factorio-luacheckrc/master/.luacheckrc
+		  # Emits annotations for source code at locations parsed from the output. Must be set to "none", "warning" or "error".
+		  # Requires that output of warnings not be suppressed through the -qq or -qqq arguments.
+		  annotate: "error"
