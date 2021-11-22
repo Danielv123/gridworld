@@ -12,7 +12,7 @@ local function check_player_position()
 			--[[ Offer teleport through server_select ]]
 			-- Figure out the target instance_id using edge_transports global state
 			local instance_id
-			for id, edge in pairs(global.edge_transports.edges) do
+			for _, edge in pairs(global.edge_transports.edges) do
 				-- north=6, east=0, south=2, and west=4
 				-- Check north edge
 				if edge.direction == 0 and edge.origin[2] > player.position.y then

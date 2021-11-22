@@ -17,11 +17,11 @@ gridworld = {}
 -- Declare globals to make linter happy
 game = game
 global = global
-defines = defines
+-- defines = defines
 log = log
 
 gridworld.events = {}
-gridworld.events[clusterio_api.events.on_server_startup] = function(event)
+gridworld.events[clusterio_api.events.on_server_startup] = function()
 	-- Set up global table
 	if global.gridworld == nil then
 		global.gridworld = {}
@@ -60,7 +60,7 @@ gridworld.events[defines.events.on_built_entity] = function(event)
 
 	local player = false
 	if event.player_index then player = game.players[event.player_index] end
-	
+
 	local x = entity.position.x
 	local y = entity.position.y
 
@@ -79,7 +79,7 @@ gridworld.events[defines.events.on_built_entity] = function(event)
 	end
 end
 gridworld.on_nth_tick = {}
-gridworld.on_nth_tick[37] = function(event)
+gridworld.on_nth_tick[37] = function()
 	-- Periodically check players position for cross server teleport
 	edge_teleport.check_player_position()
 end

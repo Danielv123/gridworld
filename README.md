@@ -36,3 +36,7 @@ Clone the repository to a folder adjacent to your clusterio repository
 	npm install @hornwitser/server_select
 	node packages/master plugin add @hornwitser/server_select
 	node packages/master run --dev --dev-plugin gridworld
+
+Luacheck can be downloaded from https://github.com/mpeterv/luacheck/releases/download/0.23.0/luacheck.exe
+
+Put it in your `%path%` and run `luacheck ./module`
