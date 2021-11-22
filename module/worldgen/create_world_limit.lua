@@ -8,7 +8,7 @@ local function create_world_limit(x_size, y_size, world_x, world_y, force)
 	global.gridworld.world_y = world_y
 
 	--[[ Remove everything inside the border wall area ]]
-	
+
 	local allowed_names = {"steel-chest", "transport-belt", "fast-transport-belt", "express-transport-belt", "loader", "fast-loader", "express-loader", "character"}
 	local allowed_types = {"container", "transport-belt", "loader", "character"}
 	--[[ West of border ]]
