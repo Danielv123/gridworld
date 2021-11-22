@@ -35,24 +35,23 @@ function GridVisualizer(props) {
 						attributionControl={false}
 						bounds={getBounds(mapData.map_data?.map?.(instance => instance.bounds.map(position => [-1 * position[1] / 100, position[0] / 100])).flat() ?? [])}
 					>
-						{mapData?.map_data?.map?.(instance =>
-							<div key={instance.instance_id}>
-								{instance.edges.map(edge => {
-									// Coordinates are given as latitudes and longitudes, which corresponds to Y and X in the grid
-									let origin = [-1 * edge.origin[1] / 100, edge.origin[0] / 100];
-									let destination = [...origin];
-									if (edge.direction === 0) destination[1] += edge.length / 100;
-									if (edge.direction === 4) destination[1] -= edge.length / 100;
-									if (edge.direction === 2) destination[0] -= edge.length / 100;
-									if (edge.direction === 6) destination[0] += edge.length / 100;
-									return <Polyline
-										key={`${instance.instance_id}${edge.id}`}
-										positions={[origin, destination]}
-										opacity={0.3}
-									/>
-								})}
-								<InstanceRender instance={instance} activeInstance={activeInstance} setActiveInstance={setActiveInstance} />
-							</div>
+						{mapData?.map_data?.map?.(instance => <div key={instance.instance_id}>
+							{instance.edges.map(edge => {
+								// Coordinates are given as latitudes and longitudes, which corresponds to Y and X in the grid
+								let origin = [-1 * edge.origin[1] / 100, edge.origin[0] / 100];
+								let destination = [...origin];
+								if (edge.direction === 0) { destination[1] += edge.length / 100; }
+								if (edge.direction === 4) { destination[1] -= edge.length / 100; }
+								if (edge.direction === 2) { destination[0] -= edge.length / 100; }
+								if (edge.direction === 6) { destination[0] += edge.length / 100; }
+								return <Polyline
+									key={`${instance.instance_id}${edge.id}`}
+									positions={[origin, destination]}
+									opacity={0.3}
+								/>;
+							})}
+							<InstanceRender instance={instance} activeInstance={activeInstance} setActiveInstance={setActiveInstance} />
+						</div>
 						)}
 					</Map> : ""}
 				</Col>
@@ -68,9 +67,7 @@ function InstanceRender(props) {
 	const [instance] = useInstance(props.instance.instance_id);
 
 	return <Rectangle
-		bounds={getBounds(props.instance.bounds.map(position => {
-			return [-1 * position[1] / 100, position[0] / 100];
-		}))}
+		bounds={getBounds(props.instance.bounds.map(position => [-1 * position[1] / 100, position[0] / 100]))}
 		onclick={() => {
 			props.setActiveInstance(props.instance.instance_id);
 		}}
@@ -82,7 +79,7 @@ function InstanceRender(props) {
 		<Tooltip direction="center">
 			<InstanceTooltip instance_id={props.instance.instance_id} />
 		</Tooltip>
-	</Rectangle>
+	</Rectangle>;
 }
 
 function getBounds(points) {

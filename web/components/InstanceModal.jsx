@@ -4,13 +4,14 @@ import DeleteOutlined from "@ant-design/icons/DeleteOutlined";
 
 import {
 	useInstance,
-	useSlave, useAccount,
+	useSlave,
+	useAccount,
 	InstanceStatusTag,
 	StartStopInstanceButton,
 	SavesList,
 	InstanceRcon,
 	LogConsole,
-	InstanceConfigTree
+	InstanceConfigTree,
 } from "@clusterio/web_ui";
 
 function InstanceModal(props) {
@@ -60,7 +61,7 @@ function InstanceModal(props) {
 				</Descriptions.Item>
 				{instance["status"] && <Descriptions.Item label="Status"><InstanceStatusTag status={instance["status"]} /></Descriptions.Item>}
 			</Descriptions>
-			<Tabs  defaultActiveKey="1">
+			<Tabs defaultActiveKey="1">
 				{
 					account.hasAllPermission("core.instance.save.list", "core.instance.save.list_subscribe")
 					&& <Tabs.TabPane tab="Saves" key="saves">
@@ -83,7 +84,7 @@ function InstanceModal(props) {
 				}
 			</Tabs>
 		</>}
-	</>
+	</>;
 }
 
 export default InstanceModal;

@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+  workflow_dispatch:
+
+jobs:
+  jslint:
+	name: Eslint
+	runs-on: ubuntu-latest
+
+	steps:
+	- uses: actions/checkout@v2
+	- uses: actions/setup-node@v2
+	  with:
+		node-version: 16.x
+	- run: npm i --no-optional
+	- run: npm i eslint eslint-plugin-node
+	- run: npm run lint
+  lualint:
+	name: Luacheck
+	runs-on: ubuntu-latest
+
+	steps:
+	  - uses: actions/checkout@v2
+	  - uses: nebularg/actions-luacheck@v1.1.0
+		with:
+		  files: module/
+		  annotate: "error"

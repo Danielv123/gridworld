@@ -122,7 +122,7 @@ module.exports = {
 								type: "array", items: {
 									type: "array",
 									items: { type: "number" },
-								}
+								},
 							},
 							edges: {
 								type: "array",
