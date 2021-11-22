@@ -4,7 +4,7 @@ import { ControlContext, useSlaveList } from "@clusterio/web_ui";
 import info from "../../info";
 
 import "../index.css";
-import { Form, Input, Button, Select, InputNumber, Checkbox } from 'antd';
+import { Form, Input, Button, Select, InputNumber, Checkbox } from "antd";
 const { Option } = Select;
 
 const layout = {
@@ -21,14 +21,14 @@ function NewGridworldForm() {
 	let [slaveList] = useSlaveList();
 
 	const onFinish = async (values) => {
-		console.log('Success:', values);
+		console.log("Success:", values);
 		setLoading(true);
-		await info.messages.create.send(control, values)
+		await info.messages.create.send(control, values);
 		setLoading(false);
 	};
 
 	const onFinishFailed = (errorInfo) => {
-		console.log('Failed:', errorInfo);
+		console.log("Failed:", errorInfo);
 		setLoading(false);
 	};
 
@@ -40,22 +40,22 @@ function NewGridworldForm() {
 		onFinishFailed={onFinishFailed}
 		autoComplete="off"
 	>
-		<Form.Item name="name_prefix" label="Instance name prefix" rules={[{ type: 'string' }]}>
+		<Form.Item name="name_prefix" label="Instance name prefix" rules={[{ type: "string" }]}>
 			<Input />
 		</Form.Item>
 		<Form.Item name="use_edge_transports" label="Use edge transports" valuePropName="checked">
 			<Checkbox />
 		</Form.Item>
-		<Form.Item name={"x_size"} label="World size along X axis" rules={[{ required: true,type: 'number', min: 0, max: 10000 }]}>
+		<Form.Item name={"x_size"} label="World size along X axis" rules={[{ required: true, type: "number", min: 0, max: 10000 }]}>
 			<InputNumber />
 		</Form.Item>
-		<Form.Item name={"y_size"} label="World size along Y axis" rules={[{ required: true,type: 'number', min: 0, max: 10000 }]}>
+		<Form.Item name={"y_size"} label="World size along Y axis" rules={[{ required: true, type: "number", min: 0, max: 10000 }]}>
 			<InputNumber />
 		</Form.Item>
-		<Form.Item name={"x_count"} label="Number of servers on X axis" rules={[{ required: true,type: 'number', min: 0, max: 100 }]}>
+		<Form.Item name={"x_count"} label="Number of servers on X axis" rules={[{ required: true, type: "number", min: 0, max: 100 }]}>
 			<InputNumber />
 		</Form.Item>
-		<Form.Item name={"y_count"} label="Number of servers on Y axis" rules={[{ required: true,type: 'number', min: 0, max: 100 }]}>
+		<Form.Item name={"y_count"} label="Number of servers on Y axis" rules={[{ required: true, type: "number", min: 0, max: 100 }]}>
 			<InputNumber />
 		</Form.Item>
 		<Form.Item name="slave" label="Slave to create instances on" rules={[{ required: true }]}>
@@ -71,7 +71,7 @@ function NewGridworldForm() {
 				Create gridworld
 			</Button>
 		</Form.Item>
-	</Form>
+	</Form>;
 }
 
 export default NewGridworldForm;

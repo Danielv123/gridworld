@@ -112,11 +112,18 @@ module.exports = {
 			responseProperties: {
 				map_data: {
 					type: "array",
-					items: { 
+					items: {
 						type: "object",
 						additionalProperties: false,
 						properties: {
 							instance_id: { type: "integer" },
+							center: { type: "array", items: { type: "number" } },
+							bounds: {
+								type: "array", items: {
+									type: "array",
+									items: { type: "number" },
+								}
+							},
 							edges: {
 								type: "array",
 								items: {
@@ -132,13 +139,13 @@ module.exports = {
 										length: { type: "integer" },
 										target_instance: { type: "integer" },
 										target_edge: { type: "integer" },
-									}
-								}
-							}
-						}
-					}
+									},
+								},
+							},
+						},
+					},
 				},
-			}
+			},
 		}),
 		populateNeighborData: new libLink.Request({
 			type: "gridworld:populate_neighbor_data",
@@ -159,7 +166,7 @@ module.exports = {
 				player_name: { type: "string" },
 				x: { type: "number" },
 				y: { type: "number" },
-			}
+			},
 		}),
 	},
 };

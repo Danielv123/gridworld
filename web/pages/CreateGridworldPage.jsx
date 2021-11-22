@@ -1,5 +1,5 @@
 import React from "react";
-import { PageHeader } from 'antd';
+import { PageHeader } from "antd";
 
 import { PageLayout } from "@clusterio/web_ui";
 import "../index.css";

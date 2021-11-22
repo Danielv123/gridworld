@@ -3,13 +3,13 @@ const fs = require("fs-extra");
 const { libFactorio } = require("@clusterio/lib");
 
 /**
- * 
+ *
  * @param {object} args
- * @param {number|undefined} args.seed 
+ * @param {number|undefined} args.seed
  * @param {string|undefined} args.mapExchangeString Map exchange string
  * @param {string|undefined} args.mapGenSettings Path to mapGenSettings.json
  * @param {string|undefined} args.mapSettings Path to mapSettings.json
- * @returns 
+ * @returns
  */
 async function loadMapSettings(args) {
 	let seed = args.seed !== undefined ? args.seed : null;
