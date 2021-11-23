@@ -38,8 +38,8 @@ function NewGridworldForm() {
 		initialValues={{
 			name_prefix: "Gridworld",
 			use_edge_transports: true,
-			x_size: 500,
-			y_size: 500,
+			x_size: 512,
+			y_size: 512,
 			x_count: 2,
 			y_count: 2,
 		}}

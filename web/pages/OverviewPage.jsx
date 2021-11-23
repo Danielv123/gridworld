@@ -1,14 +1,17 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { Button, PageHeader, Popconfirm } from "antd";
 import GithubOutlined from "@ant-design/icons/GithubOutlined";
 import DeleteOutlined from "@ant-design/icons/DeleteOutlined";
 
-import { PageLayout, useInstanceList, useAccount } from "@clusterio/web_ui";
+import { libLink } from "@clusterio/lib";
+import { ControlContext, PageLayout, useInstanceList, useAccount, notifyErrorHandler } from "@clusterio/web_ui";
 import "../index.css";
 import GridVisualizer from "../components/GridVisualizer";
+import info from "../../info";
 
 function OverviewPage() {
+	const control = useContext(ControlContext);
 	const history = useHistory();
 	let [instanceList] = useInstanceList();
 	let account = useAccount();
@@ -46,6 +49,18 @@ function OverviewPage() {
 						<DeleteOutlined />
 					</Button>
 				</Popconfirm>,
+				<Button
+					key="refreshTileData"
+					onClick={async () => {
+						for (let instance of instanceList) {
+							// let instance = instanceList[0];
+							console.log("Getting tiles for ", instance, info.messages);
+							await info.messages.refreshTileData.send(control, { instance_id: instance.id });
+						};
+					}}
+				>
+					Refresh tiles
+				</Button>
 			]}
 		/>
 		<p>This plugin handles creation, configuration and management of gridworlds.</p>

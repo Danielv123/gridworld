@@ -90,6 +90,20 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 
 		await this.runTask(this.sendRcon(`/sc gridworld.receive_teleport_data("${libLuaTools.escapeString(JSON.stringify(message.data))}")`));
 	}
+
+	async getTileDataRequestHandler(message) {
+		if (this.instance.status !== "running") {
+			return;
+		}
+		let { position_a, position_b } = message.data;
+		let response = await this.sendRcon(`/sc gridworld.dump_mapview({${position_a}}, {${position_b}})`);
+		let tileData = JSON.parse(response);
+		if(!Array.isArray(tileData)) tileData = [];
+
+		return {
+			tile_data: tileData,
+		}
+	}
 }
 
 module.exports = {
