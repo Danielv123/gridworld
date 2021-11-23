@@ -197,13 +197,6 @@ module.exports = {
 						type: "object",
 						additionalProperties: false,
 						properties: {
-							// p: {
-							// 	type: "object",
-							// 	properties: {
-							// 		x: { type: "number" },
-							// 		y: { type: "number" },
-							// 	},
-							// },
 							c: {
 								type: "object",
 								properties: {
@@ -211,7 +204,7 @@ module.exports = {
 									g: { type: "number" },
 									b: { type: "number" },
 									a: { type: "number" },
-								}
+								},
 							},
 						},
 					},

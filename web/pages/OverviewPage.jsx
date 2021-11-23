@@ -54,13 +54,14 @@ function OverviewPage() {
 					onClick={async () => {
 						for (let instance of instanceList) {
 							// let instance = instanceList[0];
+							// eslint-disable-next-line no-console
 							console.log("Getting tiles for ", instance, info.messages);
 							await info.messages.refreshTileData.send(control, { instance_id: instance.id });
 						};
 					}}
 				>
 					Refresh tiles
-				</Button>
+				</Button>,
 			]}
 		/>
 		<p>This plugin handles creation, configuration and management of gridworlds.</p>

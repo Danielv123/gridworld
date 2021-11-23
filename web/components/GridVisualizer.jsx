@@ -40,7 +40,10 @@ export default function GridVisualizer(props) {
 						style={{ width: "100%", height: "700px", backgroundColor: "#141414" }}
 						attributionControl={false}
 						bounds={getBounds(mapData.map_data?.map?.(
-							instance => instance.bounds.map(position => [-1 * position[1] / scaleFactor, position[0] / scaleFactor])
+							instance => instance.bounds.map(position => [
+								-1 * position[1] / scaleFactor,
+								position[0] / scaleFactor,
+							])
 						).flat() ?? [])}
 						maxZoom={18}
 					>
@@ -85,7 +88,10 @@ function InstanceRender(props) {
 	const [instance] = useInstance(props.instance.instance_id);
 
 	return <Rectangle
-		bounds={getBounds(props.instance.bounds.map(position => [-1 * position[1] / scaleFactor, position[0] / scaleFactor]))}
+		bounds={getBounds(props.instance.bounds.map(position => [
+			-1 * position[1] / scaleFactor,
+			position[0] / scaleFactor,
+		]))}
 		onclick={() => {
 			props.setActiveInstance(props.instance.instance_id);
 		}}
@@ -94,7 +100,13 @@ function InstanceRender(props) {
 		fillOpacity={0}
 		stroke={props.instance.instance_id === props.activeInstance}
 	>
-		{instance.status !== "running" && <SVGOverlay attributes={{ stroke: 'red' }} bounds={getBounds(props.instance.bounds.map(position => [-1 * position[1] / scaleFactor, position[0] / scaleFactor]))}>
+		{instance.status !== "running" && <SVGOverlay
+			attributes={{ stroke: "red" }}
+			bounds={getBounds(props.instance.bounds.map(position => [
+				-1 * position[1] / scaleFactor,
+				position[0] / scaleFactor,
+			]))}
+		>
 			<svg
 				viewBox="64 64 896 896"
 				focusable="false"
@@ -105,7 +117,7 @@ function InstanceRender(props) {
 				height="50%"
 				fill={statusColors[instance.status]}
 				aria-hidden="true">
-				<path d="M464 720a48 48 0 1096 0 48 48 0 10-96 0zm16-304v184c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V416c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8zm475.7 440l-416-720c-6.2-10.7-16.9-16-27.7-16s-21.6 5.3-27.7 16l-416 720C56 877.4 71.4 904 96 904h832c24.6 0 40-26.6 27.7-48zm-783.5-27.9L512 239.9l339.8 588.2H172.2z"></path>
+				<path d={`M464 720a48 48 0 1096 0 48 48 0 10-96 0zm16-304v184c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V416c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8zm475.7 440l-416-720c-6.2-10.7-16.9-16-27.7-16s-21.6 5.3-27.7 16l-416 720C56 877.4 71.4 904 96 904h832c24.6 0 40-26.6 27.7-48zm-783.5-27.9L512 239.9l339.8 588.2H172.2z${" "}`}/>
 			</svg>
 		</SVGOverlay>}
 		<Tooltip direction="center">

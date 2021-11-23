@@ -93,16 +93,16 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 
 	async getTileDataRequestHandler(message) {
 		if (this.instance.status !== "running") {
-			return;
+			throw new libErrors.RequestError(`Instance with ID ${message.data.instance_id} is not running ${this.instance.status}`);
 		}
 		let { position_a, position_b } = message.data;
 		let response = await this.sendRcon(`/sc gridworld.dump_mapview({${position_a}}, {${position_b}})`);
 		let tileData = JSON.parse(response);
-		if(!Array.isArray(tileData)) tileData = [];
+		if (!Array.isArray(tileData)) { tileData = []; }
 
 		return {
 			tile_data: tileData,
-		}
+		};
 	}
 }
 
