@@ -1,3 +1,4 @@
+"use strict";
 const fs = require("fs-extra");
 const path = require("path");
 
@@ -10,5 +11,5 @@ module.exports = function registerTileServer(app, tilesPath) {
 		} catch (e) {
 			res.status(404).send("Tile not found");
 		}
-	})
-}
+	});
+};

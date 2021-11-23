@@ -9,6 +9,7 @@ const libErrors = require("@clusterio/lib/errors");
 const loadMapSettings = require("./src/loadMapSettings");
 const info = require("./info");
 const registerTileServer = require("./src/routes/tileserver");
+const { zoomOutLevel } = require("./src/tileZoomFunctions");
 
 async function loadDatabase(config, logger) {
 	let itemsPath = path.resolve(config.get("master.database_directory"), "gridworld.json");
@@ -45,7 +46,10 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		}, this.master.config.get("gridworld.autosave_interval") * 1000);
 
 		// Prepare tiles folder
-		this._tilesPath = path.resolve(this.master.config.get("master.database_directory"), this.master.config.get("gridworld.tiles_directory"));
+		this._tilesPath = path.resolve(
+			this.master.config.get("master.database_directory"),
+			this.master.config.get("gridworld.tiles_directory")
+		);
 		await fs.ensureDir(this._tilesPath);
 
 		registerTileServer(this.master.app, this._tilesPath);
@@ -174,7 +178,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 				target_edge: 2,
 			});
 		}
-		return edges
+		return edges;
 	}
 
 	async createRequestHandler(message) {
@@ -423,9 +427,9 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		let chunks = [];
 		const CHUNK_SIZE = 512; // About 1kb per chunk
 		for (let x = 0; x < x_size; x += CHUNK_SIZE) {
-			if (x > x_size) break;
+			if (x > x_size) { break; }
 			for (let y = 0; y < y_size; y += CHUNK_SIZE) {
-				if (y > y_size) break;
+				if (y > y_size) { break; }
 				chunks.push({
 					position_a: [
 						((world_x - 1) * x_size + x),
@@ -447,34 +451,34 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 			});
 
 			// Create raw array of pixels
-			let rawPixels = Uint8Array.from(data.tile_data.map(tile => {
-				return [tile.c.r, tile.c.g, tile.c.b, tile.c.a];
-			}).flat());
+			let rawPixels = Uint8Array.from(
+				data.tile_data.map(tile => [tile.c.r, tile.c.g, tile.c.b, tile.c.a]).flat()
+			);
 
 			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE + 512); // 512 at zoom level 10
 			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE + 512);
 
-			let filename = `z10x${x_pos}y${y_pos}.png`
+			let filename = `z10x${x_pos}y${y_pos}.png`;
 			// Create image from tile data
 			let image = await sharp(rawPixels, {
 				raw: {
 					width: CHUNK_SIZE,
 					height: CHUNK_SIZE,
 					channels: 4,
-				}
+				},
 			});
 			await image.toFile(path.resolve(this._tilesPath, filename));
 			// console.log("Processed image", filename);
 
 			// Create zoomed in versions
-			// await createZoomLevel({
-			// 	currentZoomLevel: 10,
-			// 	targetZoomLevel: 14,
-			// 	parentX: x_pos,
-			// 	parentY: y_pos,
-			// 	CHUNK_SIZE,
-			// 	tilePath: this._tilesPath,
-			// 	filename,
+			// await zoomInLevel({
+			// currentZoomLevel: 10,
+			// targetZoomLevel: 14,
+			// parentX: x_pos,
+			// parentY: y_pos,
+			// CHUNK_SIZE,
+			// tilePath: this._tilesPath,
+			// filename,
 			// });
 		}
 		// Create zoomed out tiles
@@ -483,7 +487,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE + 512); // 512 at zoom level 10
 			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE + 512);
 			if (x_pos % 2 === 1 && y_pos % 2 === 1) {
-				await combineZoomLevel({
+				await zoomOutLevel({
 					currentZoomLevel: 10,
 					targetZoomLevel: 7,
 					parentX: x_pos - 1,
@@ -498,102 +502,6 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	async onShutdown() {
 		clearInterval(this.autosaveId);
 		await saveDatabase(this.master.config, this.gridworldDatastore, this.logger);
-	}
-}
-function sleep(ms) {
-	return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function createZoomLevel({ currentZoomLevel, targetZoomLevel, parentX, parentY, CHUNK_SIZE, tilePath, filename }) {
-	for (let a = 0; a < 2; a++) {
-		for (let b = 0; b < 2; b++) {
-			let newFileName = `z${currentZoomLevel + 1}x${parentX * 2 + a}y${parentY * 2 + b}.png`
-
-			// Create image from tile data
-			let newImage = await sharp(path.resolve(tilePath, filename))
-				.extract({
-					width: CHUNK_SIZE / 2,
-					height: CHUNK_SIZE / 2,
-					top: a * CHUNK_SIZE / 2,
-					left: b * CHUNK_SIZE / 2,
-				})
-				.resize(CHUNK_SIZE, CHUNK_SIZE, {
-					kernel: sharp.kernel.nearest,
-				})
-				.toFile(path.resolve(tilePath, newFileName));
-			// console.log("Processed image", newFileName);
-
-			if (currentZoomLevel + 1 < targetZoomLevel) {
-				// recurse
-				await createZoomLevel({
-					currentZoomLevel: currentZoomLevel + 1,
-					targetZoomLevel,
-					parentX: parentX * 2 + a,
-					parentY: parentY * 2 + b,
-					CHUNK_SIZE,
-					tilePath,
-					filename: newFileName,
-				});
-			}
-		}
-	}
-}
-
-async function combineZoomLevel({ currentZoomLevel, targetZoomLevel, parentX, parentY, CHUNK_SIZE, tilePath }) {
-	let newZoom = currentZoomLevel - 1;
-	let filename = `z${newZoom}x${parentX / 2}y${parentY / 2}.png`
-
-	let images = [];
-
-	for (let imageSpec of [{
-		input: path.resolve(tilePath, `z${currentZoomLevel}x${parentX}y${parentY}.png`),
-		gravity: "northwest",
-	}, {
-		input: path.resolve(tilePath, `z${currentZoomLevel}x${parentX + 1}y${parentY}.png`),
-		gravity: "southwest",
-	}, {
-		input: path.resolve(tilePath, `z${currentZoomLevel}x${parentX}y${parentY + 1}.png`),
-		gravity: "northeast",
-	}, {
-		input: path.resolve(tilePath, `z${currentZoomLevel}x${parentX + 1}y${parentY + 1}.png`),
-		gravity: "southeast",
-	},]) {
-		if (await fs.pathExists(imageSpec.input)) {
-			images.push(imageSpec);
-		}
-	}
-	let compositeImage = await sharp({
-		create: {
-			width: CHUNK_SIZE * 2,
-			height: CHUNK_SIZE * 2,
-			channels: 4,
-			background: { r: 0, g: 0, b: 0, alpha: 0 }
-		}
-	})
-		.composite(images)
-		.png()
-		.toBuffer();
-	// This needs to be split into 2 stages to avoid sharp interpreting the operation order incorrectly
-	await sharp(compositeImage)
-		.resize(CHUNK_SIZE, CHUNK_SIZE, {
-			fit: "contain",
-			kernel: sharp.kernel.nearest,
-		})
-		.toFile(path.resolve(tilePath, filename));
-	// console.log("Processed composite image", filename);
-	if (
-		newZoom > targetZoomLevel
-		&& Math.floor(parentX / 2) % 2 === 1
-		&& Math.floor(parentY / 2) % 2 === 1
-	) {
-		await combineZoomLevel({
-			currentZoomLevel: newZoom,
-			targetZoomLevel,
-			parentX: (parentX - 1) / 2,
-			parentY: (parentY - 1) / 2,
-			CHUNK_SIZE,
-			tilePath,
-		});
 	}
 }
 
