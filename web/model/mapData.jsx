@@ -24,7 +24,7 @@ export function useMapData(id) {
 		updateMapData();
 
 		// Periodically update the map data since we don't listen to edge_teleports config changes
-		let interval = setInterval(updateMapData, 5000);
+		let interval = setInterval(updateMapData, 15000);
 		return () => clearInterval(interval);
 	}, [id, instances.length]);
 

@@ -12,6 +12,7 @@ local edge_teleport = require("modules/gridworld/edge_teleport")
 local create_world_limit = require("modules/gridworld/worldgen/create_world_limit")
 local create_spawn = require("modules/gridworld/worldgen/create_spawn")
 local populate_neighbor_data = require("modules/gridworld/populate_neighbor_data")
+local map = require("modules/gridworld/map/map")
 
 gridworld = {}
 -- Declare globals to make linter happy
@@ -89,5 +90,6 @@ gridworld.create_world_limit = create_world_limit
 gridworld.create_spawn = create_spawn
 gridworld.populate_neighbor_data = populate_neighbor_data
 gridworld.receive_teleport_data = edge_teleport.receive_teleport_data
+gridworld.dump_mapview = map.dump_mapview
 
 return gridworld

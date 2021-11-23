@@ -26,6 +26,13 @@ MasterConfigGroup.define({
 	// eslint-disable-next-line max-len
 	initial_value: ">>>eNpjZGBk0GIAgwZ7EOZgSc5PzIHwDjiAMFdyfkFBapFuflEqsjBnclFpSqpufiaq4tS81NxK3aTEYqhiiMkcmUX5eegmsBaX5OehipQUpaYWw5wCwtylRYl5maW5EL0H7OGqGb+qrnZoaJFjAOH/9QwK//+DMJD1AGgjCDMwNoBVMwLFYIA1OSczLY2BQcERiJ1A0owMjNUi69wfVk0BMsFAzwHK+AAVOZAEE/GEMfwccEqpwBgmSOYYg8FnJAbE0hKQ/RBVHA4IBkSyBSTJyNj7duuC78cu2DH+Wfnxkm9Sgj2joavIuw9G6+yAkuwgfzLBiVkzQWAnzCsMMDMf2EOlbtoznj0DAm/sGVlBOkRAhIMFkDjgzczAKMAHZC3oARIKMgwwp9nBjBFxYEwDg28wnzyGMS7bo/sDGBA2IMPlQMQJEAG2EO4yRgjTod+B0UEeJiuJUALUb8SA7IYUhA9Pwqw9jGQ/mkMwIwLZH2giKg5YooELZGEKnHjBDHcNMDwvsMN4DvMdGJlBDJCqL0AxCA8kAzMKQgs4gIObmQEBPtgzuMX47gAAJhSjWw==<<<",
 });
+MasterConfigGroup.define({
+	name: "tiles_directory",
+	title: "Tiles directory",
+	description: "Folder to store map tiles relative to database",
+	type: "string",
+	initial_value: "tiles",
+});
 MasterConfigGroup.finalize();
 
 class InstanceConfigGroup extends libConfig.PluginConfigGroup { }
@@ -71,6 +78,12 @@ libUsers.definePermission({
 	name: "gridworld.create",
 	title: "Create gridworld",
 	description: "Create gridworld",
+	grantByDefault: true,
+});
+libUsers.definePermission({
+	name: "gridworld.map.refresh",
+	title: "Refresh map tiles",
+	description: "Load tile data from factorio and recreate images for web interface map",
 	grantByDefault: true,
 });
 
@@ -167,6 +180,50 @@ module.exports = {
 				player_name: { type: "string" },
 				x: { type: "number" },
 				y: { type: "number" },
+			},
+		}),
+		getTileData: new libLink.Request({
+			type: "gridworld:get_tile_data",
+			links: ["master-slave", "slave-instance"],
+			forwardTo: "instance",
+			requestProperties: {
+				position_a: { type: "array", items: { type: "number" } },
+				position_b: { type: "array", items: { type: "number" } },
+			},
+			responseProperties: {
+				tile_data: {
+					type: "array",
+					items: {
+						type: "object",
+						additionalProperties: false,
+						properties: {
+							// p: {
+							// 	type: "object",
+							// 	properties: {
+							// 		x: { type: "number" },
+							// 		y: { type: "number" },
+							// 	},
+							// },
+							c: {
+								type: "object",
+								properties: {
+									r: { type: "number" },
+									g: { type: "number" },
+									b: { type: "number" },
+									a: { type: "number" },
+								}
+							},
+						},
+					},
+				},
+			},
+		}),
+		refreshTileData: new libLink.Request({
+			type: "gridworld:refresh_tile_data",
+			links: ["control-master"],
+			permission: "gridworld.map.refresh",
+			requestProperties: {
+				instance_id: { type: "integer" },
 			},
 		}),
 	},
