@@ -32,11 +32,11 @@ jobs:
 		  files: module/
 		  annotate: "error"
   publish:
-	needs: jslint lualint
+	needs: [jslint, lualint]
 	name: "Publish to npm"
 	runs-on: ubuntu-latest
 
-	if: github.event.release.published
+	if: github.event.release.action == 'released'
 	steps:
 	  - uses: actions/checkout@v2
 	  - uses: actions/setup-node@v2
