@@ -1,4 +1,5 @@
 import React, { useContext, useState } from "react";
+import { useHistory } from "react-router";
 
 import { ControlContext, useSlaveList } from "@clusterio/web_ui";
 import info from "../../info";
@@ -16,6 +17,7 @@ const tailLayout = {
 };
 
 function NewGridworldForm() {
+	let history = useHistory();
 	let control = useContext(ControlContext);
 	let [loading, setLoading] = useState();
 	let [slaveList] = useSlaveList();
@@ -25,6 +27,8 @@ function NewGridworldForm() {
 		setLoading(true);
 		await info.messages.create.send(control, values);
 		setLoading(false);
+		await new Promise(resolve => setTimeout(resolve, 1500));
+		history.push("/gridworld");
 	};
 
 	function onFinishFailed(errorInfo) {

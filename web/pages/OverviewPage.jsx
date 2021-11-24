@@ -9,6 +9,7 @@ import { ControlContext, PageLayout, useInstanceList, useAccount, notifyErrorHan
 import "../index.css";
 import GridVisualizer from "../components/GridVisualizer";
 import info from "../../info";
+import RefreshTileDataButton from "../components/RefreshTileDataButton";
 
 function OverviewPage() {
 	const control = useContext(ControlContext);
@@ -49,19 +50,7 @@ function OverviewPage() {
 						<DeleteOutlined />
 					</Button>
 				</Popconfirm>,
-				<Button
-					key="refreshTileData"
-					onClick={async () => {
-						for (let instance of instanceList) {
-							// let instance = instanceList[0];
-							// eslint-disable-next-line no-console
-							console.log("Getting tiles for ", instance, info.messages);
-							await info.messages.refreshTileData.send(control, { instance_id: instance.id });
-						};
-					}}
-				>
-					Refresh tiles
-				</Button>,
+				<RefreshTileDataButton key="refresh" />,
 			]}
 		/>
 		<p>This plugin handles creation, configuration and management of gridworlds.</p>
