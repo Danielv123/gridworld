@@ -19,24 +19,24 @@
   },
   "peerDependencies": {
     "@clusterio/lib": "^2.0.0-alpha.0",
+    "@clusterio/web_ui": "^2.0.0-alpha.0",
     "react-router-dom": "*"
   },
   "dependencies": {
     "fs-extra": "^8.1.0",
-    "leaflet": "^1.7.1",
-    "leaflet-rastercoords": "^1.0.4",
-    "react-leaflet": "^2.8.0",
-    "react-leaflet-enhanced-marker": "^1.0.21",
     "sharp": "^0.29.3"
   },
   "devDependencies": {
-    "@clusterio/web_ui": "^2.0.0-alpha.10",
     "antd": "^4.16.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "webpack": "^5.36.2",
     "webpack-cli": "^4.7.0",
-    "webpack-merge": "^5.2.0"
+    "webpack-merge": "^5.2.0",
+    "leaflet": "^1.7.1",
+    "leaflet-rastercoords": "^1.0.4",
+    "react-leaflet": "^2.8.0",
+    "react-leaflet-enhanced-marker": "^1.0.21"
   },
   "publishConfig": {
     "access": "public"
