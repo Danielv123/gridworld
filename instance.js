@@ -97,7 +97,8 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		}
 		let { position_a, position_b } = message.data;
 		let response = await this.sendRcon(`/sc gridworld.dump_mapview({${position_a}}, {${position_b}})`);
-		let tileData = JSON.parse(response);
+		// let tileData = JSON.parse(response);
+		let tileData = response.split(";");
 		if (!Array.isArray(tileData)) { tileData = []; }
 
 		return {

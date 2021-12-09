@@ -59,16 +59,16 @@ async function zoomOutLevel({
 
 	let images = [];
 
-	for (let imageSpec of [{
+	for (let imageSpec of [{ // Top left
 		input: path.resolve(tilePath, `z${currentZoomLevel}x${parentX}y${parentY}.png`),
 		gravity: "northwest",
-	}, {
+	}, { // Top right
 		input: path.resolve(tilePath, `z${currentZoomLevel}x${parentX + 1}y${parentY}.png`),
-		gravity: "southwest",
-	}, {
-		input: path.resolve(tilePath, `z${currentZoomLevel}x${parentX}y${parentY + 1}.png`),
 		gravity: "northeast",
-	}, {
+	}, { // Bottom left
+		input: path.resolve(tilePath, `z${currentZoomLevel}x${parentX}y${parentY + 1}.png`),
+		gravity: "southwest",
+	}, { // Bottom right
 		input: path.resolve(tilePath, `z${currentZoomLevel}x${parentX + 1}y${parentY + 1}.png`),
 		gravity: "southeast",
 	}]) {
@@ -103,8 +103,8 @@ async function zoomOutLevel({
 		await zoomOutLevel({
 			currentZoomLevel: newZoom,
 			targetZoomLevel,
-			parentX: (parentX - 1) / 2,
-			parentY: (parentY - 1) / 2,
+			parentX: parentX / 2 - 1,
+			parentY: parentY / 2 - 1,
 			CHUNK_SIZE,
 			tilePath,
 		});
