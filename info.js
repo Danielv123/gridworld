@@ -194,19 +194,7 @@ module.exports = {
 				tile_data: {
 					type: "array",
 					items: {
-						type: "object",
-						additionalProperties: false,
-						properties: {
-							c: {
-								type: "object",
-								properties: {
-									r: { type: "number" },
-									g: { type: "number" },
-									b: { type: "number" },
-									a: { type: "number" },
-								},
-							},
-						},
+						type: "string",
 					},
 				},
 			},

@@ -50,7 +50,7 @@ export default function GridVisualizer(props) {
 						<TileLayer
 							url="https://clusterio.danielv.no/api/gridworld/tiles/{z}/{x}/{y}.png"
 							maxNativeZoom={10}
-							minNativeZoom={7}
+							minNativeZoom={8}
 						/>
 						{mapData?.map_data?.map?.(instance => <div key={instance.instance_id}>
 							{instance.edges.map(edge => {
