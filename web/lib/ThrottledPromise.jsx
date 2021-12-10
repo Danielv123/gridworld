@@ -4,8 +4,8 @@ export default class ThrottledPromise {
 	 * @param {Function} callback - The function to execute.
 	 */
 	constructor(callback) {
-		if (typeof callback !== 'function') {
-			throw new Error('ThrottledPromise only accepts a function.');
+		if (typeof callback !== "function") {
+			throw new Error("ThrottledPromise only accepts a function.");
 		}
 
 		this.callback = callback;
@@ -13,7 +13,7 @@ export default class ThrottledPromise {
 
 	/**
 	 * Run the ThrottledPromise.
-	 * @return {Promise}
+	 * @return {Promise} - Promise that resolves with the result of the callback.
 	 */
 	run() {
 		return new Promise(this.callback);
@@ -23,14 +23,14 @@ export default class ThrottledPromise {
 	 * Run all `promises` in parallel, limited to `threads`.
 	 * @param {Array} promises - An array of `ThrottledPromise`s.
 	 * @param {Number} threads - The max amount of threads to be executed in parallel.
-	 * @return {Promise}
+	 * @return {Promise} - Promise that resolves with an array of results.
 	 */
 	static all(promises, threads = Infinity) {
 		if (!Array.isArray(promises)) {
-			throw new Error('promises must be an array.');
+			throw new Error("promises must be an array.");
 		}
 		if (!Number.isInteger(threads)) {
-			throw new Error('threads must be an integer.');
+			throw new Error("threads must be an integer.");
 		}
 
 		if (promises.length === 0) {
@@ -46,23 +46,25 @@ export default class ThrottledPromise {
 		 * Starts next Promise.
 		 * @param {Function} resolve - The function to execute after a Promise resolves.
 		 * @param {Function} reject - The function to execute after a Promise rejects.
-		 * @return {Promise}
+		 * @return {Promise} - Promise that resolves with the result of the callback.
 		 */
-		const next = (resolve, reject) => {
+		function next(resolve, reject) {
 			const index = promisesCount - promises.length;
 			const tp = promises.shift();
 
 			if (!(tp instanceof ThrottledPromise)) {
 				resolveValues[index] = tp;
-				promisesCompleted++;
+				promisesCompleted += 1;
 
+				// eslint-disable-next-line no-use-before-define
 				finishPromise(resolve, reject);
 			}
 
 			return tp.run().then((resolveValue) => {
 				resolveValues[index] = resolveValue;
-				promisesCompleted++;
+				promisesCompleted += 1;
 
+				// eslint-disable-next-line no-use-before-define
 				finishPromise(resolve, reject);
 			})
 				.catch(reject);
@@ -73,7 +75,7 @@ export default class ThrottledPromise {
 		 * @param {Function} resolve - The function to execute after a Promise resolves.
 		 * @param {Function} reject - The function to execute after a Promise rejects.
 		 */
-		const finishPromise = (resolve, reject) => {
+		function finishPromise(resolve, reject) {
 			if (promises.length > 0) {
 				next(resolve, reject);
 			} else if (promisesCompleted === promisesCount) {

@@ -484,11 +484,11 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 			// Create raw array of pixels
 			let rawPixels = Uint8Array.from(
-				data.tile_data.map(tile => [Number("0x"+tile.slice(0,2)), Number("0x"+tile.slice(2,4)), Number("0x"+tile.slice(4,6)), 255]).flat()
+				data.tile_data.map(tile => [Number(`0x${tile.slice(0, 2)}`), Number(`0x${tile.slice(2, 4)}`), Number(`0x${tile.slice(4, 6)}`), 255]).flat()
 			);
 
-			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE + 512); // 512 at zoom level 10
-			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE + 512);
+			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE);// + 512); // 512 at zoom level 10
+			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE);// + 512);
 
 			let filename = `z10x${x_pos}y${y_pos}.png`;
 			// Create image from tile data
@@ -522,8 +522,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		// Create zoomed out tiles
 		for (let i = 0; i < chunks.length; i++) {
 			let chunk = chunks[i];
-			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE + 512); // 512 at zoom level 10
-			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE + 512);
+			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE);// + 512); // 512 at zoom level 10
+			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE);// + 512);
 			try {
 				await zoomOutLevel({
 					currentZoomLevel: 10,

@@ -38,8 +38,9 @@ export default function RefreshTileDataModal(props) {
 			let inProgress = 0;
 			let promises = [];
 			for (let instance of instanceList) {
+				// eslint-disable-next-line
 				promises.push(new ThrottledPromise(async (resolve) => {
-					inProgress++;
+					inProgress += 1;
 					setPercent((completed + inProgress) / total * 100);
 					try {
 						await info.messages.refreshTileData.send(control, { instance_id: instance.id });
@@ -65,10 +66,9 @@ export default function RefreshTileDataModal(props) {
 			processing the rest. Using multiple threads will speed up the operation, but will use a lot
 			of memory. The memory usage will be approximately <code>{chartThreads * 2} GB</code>.
 		</p>
-		{isWorking ?
-			<Progress percent={Math.floor(percent)} success={{ percent: Math.floor(success) }} />
-			:
-			<InputNumber defaultValue={chartThreads} onChange={setChartThreads} />
+		{isWorking
+			? <Progress percent={Math.floor(percent)} success={{ percent: Math.floor(success) }} />
+			: <InputNumber defaultValue={chartThreads} onChange={setChartThreads} />
 		}
 	</Modal>;
 }
