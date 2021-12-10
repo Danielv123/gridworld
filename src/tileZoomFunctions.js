@@ -97,14 +97,14 @@ async function zoomOutLevel({
 	// console.log("Processed composite image", filename);
 	if (
 		newZoom > targetZoomLevel
-		&& Math.floor(parentX / 2) % 2 === 1
-		&& Math.floor(parentY / 2) % 2 === 1
+		// && Math.floor(parentX / 2) % 2 === 1
+		// && Math.floor(parentY / 2) % 2 === 1
 	) {
 		await zoomOutLevel({
 			currentZoomLevel: newZoom,
 			targetZoomLevel,
-			parentX: parentX / 2 - 1,
-			parentY: parentY / 2 - 1,
+			parentX: parentX / 2 - (Math.floor(parentX / 2) % 2),
+			parentY: parentY / 2 - (Math.floor(parentY / 2) % 2),
 			CHUNK_SIZE,
 			tilePath,
 		});
