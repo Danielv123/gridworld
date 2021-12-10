@@ -15,7 +15,7 @@ function getBounds(points) {
 	return [[maxY, minX], [minY, maxX]];
 }
 
-const scaleFactor = 1450;
+const scaleFactor = 2048;
 
 export default function GridVisualizer(props) {
 	const control = useContext(ControlContext);
@@ -46,6 +46,7 @@ export default function GridVisualizer(props) {
 							])
 						).flat() ?? [])}
 						maxZoom={18}
+						crs={L.CRS.Simple}
 					>
 						<TileLayer
 							url="https://clusterio.danielv.no/api/gridworld/tiles/{z}/{x}/{y}.png"
