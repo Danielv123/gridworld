@@ -513,27 +513,27 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 			// filename,
 			// });
 		}
-		// Create zoomed out tiles
-		for (let i = 0; i < chunks.length; i++) {
-			let chunk = chunks[i];
-			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE + 512); // 512 at zoom level 10
-			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE + 512);
-			if (x_pos % 2 === 1 && y_pos % 2 === 1) {
-				await zoomOutLevel({
-					currentZoomLevel: 10,
-					targetZoomLevel: 7,
-					parentX: x_pos - 1,
-					parentY: y_pos - 1,
-					CHUNK_SIZE,
-					tilePath: this._tilesPath,
-				});
-			}
-		}
 		if (originalStatus === "stopped") {
 			// Stop instance again
 			await libLink.messages.stopInstance.send(slaveConnection, {
 				instance_id: message.data.instance_id,
 			});
+		}
+		// Create zoomed out tiles
+		for (let i = 0; i < chunks.length; i++) {
+			let chunk = chunks[i];
+			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE + 512); // 512 at zoom level 10
+			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE + 512);
+			try {
+				await zoomOutLevel({
+					currentZoomLevel: 10,
+					targetZoomLevel: 7,
+					parentX: x_pos - (x_pos % 2),
+					parentY: y_pos - (y_pos % 2),
+					CHUNK_SIZE,
+					tilePath: this._tilesPath,
+				});
+			} catch (e) { }
 		}
 	}
 
