@@ -1,6 +1,6 @@
 {
   "name": "@danielv123/gridworld",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Clusterio plugin for automatic creation of gridworlds connected using edge_transports",
   "author": "Danielv <danielv@danielv.no>",
   "homepage": "https://github.com/Danielv123/gridworld",
