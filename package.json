@@ -1,6 +1,6 @@
 {
   "name": "@danielv123/gridworld",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "Clusterio plugin for automatic creation of gridworlds connected using edge_transports",
   "author": "Danielv <danielv@danielv.no>",
   "homepage": "https://github.com/Danielv123/gridworld",
@@ -28,15 +28,17 @@
   },
   "devDependencies": {
 	"antd": "^4.16.0",
-	"react": "^16.13.1",
-	"react-dom": "^16.13.1",
-	"webpack": "^5.36.2",
-	"webpack-cli": "^4.7.0",
-	"webpack-merge": "^5.2.0",
+	"eslint": "^8.4.1",
+	"eslint-plugin-node": "^11.1.0",
 	"leaflet": "^1.7.1",
 	"leaflet-rastercoords": "^1.0.4",
+	"react": "^16.13.1",
+	"react-dom": "^16.13.1",
 	"react-leaflet": "^2.8.0",
-	"react-leaflet-enhanced-marker": "^1.0.21"
+	"react-leaflet-enhanced-marker": "^1.0.21",
+	"webpack": "^5.36.2",
+	"webpack-cli": "^4.7.0",
+	"webpack-merge": "^5.2.0"
   },
   "publishConfig": {
 	"access": "public"

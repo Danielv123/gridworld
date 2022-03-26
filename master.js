@@ -417,6 +417,16 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 			throw new libErrors.RequestError("Instance is assigned to a slave that is not connected");
 		}
 
+		// If the instance is stopped, temporarily start it.
+		let originalStatus = instance.status;
+		if (instance.status === "stopped") {
+			// Start instance
+			await libLink.messages.startInstance.send(slaveConnection, {
+				instance_id: message.data.instance_id,
+				save: null,
+			});
+		}
+
 		// Get bounds
 		const world_x = instance.config.get("gridworld.grid_x_position");
 		const world_y = instance.config.get("gridworld.grid_y_position");
@@ -450,13 +460,35 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 				...chunk,
 			});
 
+			// Flip horizontal
+			let flippedData = [];
+			for (let y = 0; y < data.tile_data.length; y += CHUNK_SIZE) {
+				let row = data.tile_data.slice(y, y + CHUNK_SIZE);
+				let flippedRow = row.reverse();
+				flippedData.push(flippedRow);
+			}
+
+			// Rotate tile counterclockwise
+			let rotatedData = [];
+			for (let x = 0; x < CHUNK_SIZE; x++) {
+				rotatedData.push([]);
+			}
+			for (let x = 0; x < flippedData.length; x++) {
+				for (let y = 0; y < flippedData[x].length; y++) {
+					rotatedData[y][x] = flippedData[x][y];
+				}
+			}
+
+			// Flip vertical
+			data.tile_data = rotatedData.reverse().flat();
+
 			// Create raw array of pixels
 			let rawPixels = Uint8Array.from(
-				data.tile_data.map(tile => [tile.c.r, tile.c.g, tile.c.b, tile.c.a]).flat()
+				data.tile_data.map(tile => [Number(`0x${tile.slice(0, 2)}`), Number(`0x${tile.slice(2, 4)}`), Number(`0x${tile.slice(4, 6)}`), 255]).flat()
 			);
 
-			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE + 512); // 512 at zoom level 10
-			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE + 512);
+			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE);// + 512); // 512 at zoom level 10
+			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE);// + 512);
 
 			let filename = `z10x${x_pos}y${y_pos}.png`;
 			// Create image from tile data
@@ -481,21 +513,27 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 			// filename,
 			// });
 		}
+		if (originalStatus === "stopped") {
+			// Stop instance again
+			await libLink.messages.stopInstance.send(slaveConnection, {
+				instance_id: message.data.instance_id,
+			});
+		}
 		// Create zoomed out tiles
 		for (let i = 0; i < chunks.length; i++) {
 			let chunk = chunks[i];
-			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE + 512); // 512 at zoom level 10
-			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE + 512);
-			if (x_pos % 2 === 1 && y_pos % 2 === 1) {
+			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE);// + 512); // 512 at zoom level 10
+			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE);// + 512);
+			try {
 				await zoomOutLevel({
 					currentZoomLevel: 10,
 					targetZoomLevel: 7,
-					parentX: x_pos - 1,
-					parentY: y_pos - 1,
+					parentX: x_pos - (x_pos % 2),
+					parentY: y_pos - (y_pos % 2),
 					CHUNK_SIZE,
 					tilePath: this._tilesPath,
 				});
-			}
+			} catch (e) { }
 		}
 	}
 
