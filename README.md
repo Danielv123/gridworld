@@ -32,9 +32,17 @@ Clone the repository to a folder adjacent to your clusterio repository
     cd ../clusterio
     node packages/master plugin add ../gridworld
     npm install @clusterio/plugin-edge_transports
-    node packages/master plugin add @clusterio/plugin-edge_transports
     npm install @hornwitser/server_select
+    npx lerna bootstrap --hoist
+    node packages/master/ bootstrap create-admin Danielv123
+    node packages/master plugin add @clusterio/plugin-edge_transports
     node packages/master plugin add @hornwitser/server_select
+    node packages/master plugin add ./plugins/global_chat
+    node packages/master plugin add ./plugins/inventory_sync
+    node packages/master plugin add ./plugins/player_auth
+    node packages/master plugin add ./plugins/research_sync
+    node packages/master plugin add ./plugins/statistics_exporter
+    node packages/master/ bootstrap generate-user-token Danielv123 > token.txt
     node packages/master run --dev --dev-plugin gridworld
 
 Luacheck can be downloaded from https://github.com/mpeterv/luacheck/releases/download/0.23.0/luacheck.exe
