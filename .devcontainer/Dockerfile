@@ -5,7 +5,7 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:0-jammy
 
 # [Optional] Uncomment this section to install additional OS packages.
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends snapd
+    && apt-get -y install --no-install-recommends xz-utils
 
 # replace shell with bash so we can source files
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
