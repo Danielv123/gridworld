@@ -21,19 +21,10 @@ Substitute clusteriomaster with clusterioslave or clusterioctl if this a dedicat
 Clone the repository to a folder adjacent to your clusterio repository
 
 	cd clusterio
-	npm install
-	npx lerna bootstrap --hoist
-	npx lerna run build
-	cd packages/lib
-	npm link
-	cd ../../../gridworld
-	npm install
-	npm link @clusterio/lib
-	cd ../clusterio
-	node packages/master plugin add ../gridworld
-	npm install @clusterio/plugin-edge_transports
-	npm install @hornwitser/server_select
-	npx lerna bootstrap --hoist
+	pnpm install
+	node packages/ctl plugin add external_plugins/gridworld
+	pnpm install @clusterio/plugin-edge_transports -w
+	pnpm install @hornwitser/server_select -w
 	node packages/master/ bootstrap create-admin Danielv123
 	node packages/master plugin add @clusterio/plugin-edge_transports
 	node packages/master plugin add @hornwitser/server_select

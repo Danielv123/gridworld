@@ -14,12 +14,12 @@
 	"forwardPorts": [8080],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "git pull && pnpm install",
+	"postCreateCommand": "cd /factorioClusterio && wget -O factorio.tar.xz https://www.factorio.com/get-download/latest/headless/linux64 && tar -xf factorio.tar.xz && rm factorio.tar.xz && sudo ln -s /workspaces/gridworld /factorioClusterio/external_plugins/ && git pull && pnpm install",
 
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
 	"features": {
-		"docker-in-docker": "latest",
+		// "docker-in-docker": "latest",
 		"git": "latest",
 		"git-lfs": "latest",
 		"github-cli": "latest"
