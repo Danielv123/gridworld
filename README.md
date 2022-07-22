@@ -22,7 +22,7 @@ Clone the repository to a folder adjacent to your clusterio repository
 
     cd clusterio
     pnpm install
-    node packages/ctl plugin add external_plugins/gridworld
+    node packages/ctl plugin add ./external_plugins/gridworld
     pnpm install @clusterio/plugin-edge_transports -w
     pnpm install @hornwitser/server_select -w
     node packages/master/ bootstrap create-admin Danielv123
