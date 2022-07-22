@@ -12,9 +12,9 @@
 	"workspaceFolder": "/factorioClusterio",
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [8080],
-
+	// sudo mv /workspaces/gridworld /factorioClusterio/external_plugins/
 	// Use 'postCreateCommand' to run commands after the container is created. wget -O factorio.tar.xz https://www.factorio.com/get-download/latest/headless/linux64 && tar -xf factorio.tar.xz && rm factorio.tar.xz
-	"postCreateCommand": "cd /factorioClusterio && sudo mv /workspaces/gridworld /factorioClusterio/external_plugins/ && cp /factorioClusterio/external_plugins/gridworld/gridworld.code-workspace /workspaces/gridworld && git pull && pnpm install",
+	"postCreateCommand": "mv /factorioClusterio /workspaces && mount -t bind /workspaces/gridworld /workspaces/factorioClusterio/external_plugins/gridworld && cd /workspaces/factorioClusterio && git pull && pnpm install",
 
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
