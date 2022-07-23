@@ -1,11 +1,12 @@
 import React, { useContext, useState } from "react";
 import { Row, Col } from "antd";
-import { Map, Polyline, Rectangle, Tooltip, TileLayer, SVGOverlay } from "react-leaflet";
+import { Map, Polyline, Rectangle, Tooltip, TileLayer, SVGOverlay, Marker, Popup, Circle } from "react-leaflet";
 
 import { ControlContext, useInstance, statusColors } from "@clusterio/web_ui";
 import { useMapData } from "../model/mapData";
 import InstanceTooltip from "./InstanceTooltip";
 import InstanceModal from "./InstanceModal";
+import usePlayerPosition from "../providers/userPlayerPosition";
 
 function getBounds(points) {
 	let minX = points.sort((a, b) => a[1] - b[1])[0][1];
@@ -19,6 +20,7 @@ const scaleFactor = 2048;
 
 export default function GridVisualizer(props) {
 	const control = useContext(ControlContext);
+	const playerPositions = usePlayerPosition(control);
 	const [mapData] = useMapData();
 	const [activeInstance, setActiveInstance] = useState();
 
@@ -50,8 +52,8 @@ export default function GridVisualizer(props) {
 					>
 						<TileLayer
 							url={`${document.location.origin}/api/gridworld/tiles/{z}/{x}/{y}.png`}
-							maxNativeZoom={10}
-							minNativeZoom={8}
+							maxNativeZoom={10} // 10 max
+							minNativeZoom={7} // 7 min
 						/>
 						{mapData?.map_data?.map?.(instance => <div key={instance.instance_id}>
 							{instance.edges.map(edge => {
@@ -63,7 +65,7 @@ export default function GridVisualizer(props) {
 								if (edge.direction === 2) { destination[0] -= edge.length / scaleFactor; }
 								if (edge.direction === 6) { destination[0] += edge.length / scaleFactor; }
 								return <Polyline
-									key={`${instance.instance_id}${edge.id}`}
+									key={`${instance.instance_id}edge${edge.id}`}
 									positions={[origin, destination]}
 									opacity={0.3}
 								/>;
@@ -75,14 +77,27 @@ export default function GridVisualizer(props) {
 							/>
 						</div>
 						)}
+						{playerPositions.map(player => <PlayerRender player={player} key={player[1].player_name} />)}
 					</Map> : ""}
 				</Col>
-				<Col xs={24} sm={12}>
+				<Col xs={24} sm={12} style={{ paddingLeft: "10px" }}>
 					<InstanceModal instance_id={activeInstance} />
 				</Col>
 			</Row>
 		</div>
 	</>;
+}
+
+function PlayerRender(props) {
+	const player = props.player[1];
+	// Circle has fixed size in the world, can also use <Marker with `position` instead of `center`
+	return <div>
+		<Circle center={[player.y / scaleFactor * -1, player.x / scaleFactor]} radius={5 / 2048}>
+			<Popup>
+				{player.player_name}
+			</Popup>
+		</Circle>
+	</div>;
 }
 
 function InstanceRender(props) {
@@ -118,7 +133,7 @@ function InstanceRender(props) {
 				height="50%"
 				fill={statusColors[instance.status]}
 				aria-hidden="true">
-				<path d={`M464 720a48 48 0 1096 0 48 48 0 10-96 0zm16-304v184c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V416c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8zm475.7 440l-416-720c-6.2-10.7-16.9-16-27.7-16s-21.6 5.3-27.7 16l-416 720C56 877.4 71.4 904 96 904h832c24.6 0 40-26.6 27.7-48zm-783.5-27.9L512 239.9l339.8 588.2H172.2z${" "}`}/>
+				<path d={`M464 720a48 48 0 1096 0 48 48 0 10-96 0zm16-304v184c0 4.4 3.6 8 8 8h48c4.4 0 8-3.6 8-8V416c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8zm475.7 440l-416-720c-6.2-10.7-16.9-16-27.7-16s-21.6 5.3-27.7 16l-416 720C56 877.4 71.4 904 96 904h832c24.6 0 40-26.6 27.7-48zm-783.5-27.9L512 239.9l339.8 588.2H172.2z${" "}`} />
 			</svg>
 		</SVGOverlay>}
 		<Tooltip direction="center">

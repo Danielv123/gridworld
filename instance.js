@@ -15,6 +15,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				`Error handling player teleport:\n${err.stack}`
 			));
 		});
+		this.instance.server.on("ipc-gridworld:send_player_position", data => {
+			this.sendPlayerPosition(data).catch(err => this.logger.error(
+				`Error handling player teleport:\n${err.stack}`
+			));
+		});
 	}
 
 	async onStart() {
@@ -89,6 +94,15 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		}
 
 		await this.runTask(this.sendRcon(`/sc gridworld.receive_teleport_data("${libLuaTools.escapeString(JSON.stringify(message.data))}")`));
+	}
+
+	async sendPlayerPosition(data) {
+		await this.info.messages.playerPosition.send(this.instance, {
+			player_name: data.player_name,
+			instance_id: data.instance_id,
+			x: data.x,
+			y: data.y,
+		});
 	}
 
 	async getTileDataRequestHandler(message) {

@@ -182,6 +182,25 @@ module.exports = {
 				y: { type: "number" },
 			},
 		}),
+		playerPosition: new libLink.Event({
+			type: "gridworld:player_position",
+			links: ["instance-slave", "slave-master", "master-control"],
+			forwardTo: "master",
+			eventProperties: {
+				player_name: { type: "string" },
+				instance_id: { type: "integer" },
+				x: { type: "number" },
+				y: { type: "number" },
+			},
+		}),
+		setPlayerPositionSubscription: new libLink.Request({
+			type: "gridworld:set_player_position_subscription",
+			links: ["control-master"],
+			permission: "gridworld.overview.view",
+			requestProperties: {
+				player_position: { type: "boolean" },
+			},
+		}),
 		getTileData: new libLink.Request({
 			type: "gridworld:get_tile_data",
 			links: ["master-slave", "slave-instance"],

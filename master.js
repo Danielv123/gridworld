@@ -53,6 +53,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		await fs.ensureDir(this._tilesPath);
 
 		registerTileServer(this.master.app, this._tilesPath);
+
+		this.subscribedControlLinks = new Set();
 	}
 
 	async onInstanceStatusChanged(instance) {
@@ -534,6 +536,29 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 					tilePath: this._tilesPath,
 				});
 			} catch (e) { }
+		}
+	}
+
+	async playerPositionEventHandler(message) {
+		// Broadcast player position from instance to web interface
+		// TODO: Save position on master and broadcast full list on connect.
+		// TODO: Don't broadcast individual events unless position has changed.
+		for (let link of this.subscribedControlLinks) {
+			this.info.messages.playerPosition.send(link, message.data);
+		}
+	}
+
+	async setPlayerPositionSubscriptionRequestHandler(message, request, link) {
+		if (message.data.player_position) {
+			this.subscribedControlLinks.add(link);
+		} else {
+			this.subscribedControlLinks.delete(link);
+		}
+	}
+
+	onControlConnectionEvent(connection, event) {
+		if (event === "close") {
+			this.subscribedControlLinks.delete(connection);
 		}
 	}
 

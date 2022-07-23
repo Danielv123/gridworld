@@ -9,6 +9,7 @@ When a player enters a map, generate neighboring maps and connections
 local clusterio_api = require("modules/clusterio/api")
 local out_of_bounds = require("modules/gridworld/util/out_of_bounds")
 local edge_teleport = require("modules/gridworld/edge_teleport")
+local player_tracking = require("modules/gridworld/player_tracking")
 local create_world_limit = require("modules/gridworld/worldgen/create_world_limit")
 local create_spawn = require("modules/gridworld/worldgen/create_spawn")
 local populate_neighbor_data = require("modules/gridworld/populate_neighbor_data")
@@ -47,6 +48,7 @@ gridworld.events[defines.events.on_player_joined_game] = function(event)
 		global.gridworld.players[player.name] = {}
 	end
 	edge_teleport.receive_teleport(player)
+	player_tracking.send_player_position(player)
 end
 gridworld.events[defines.events.on_player_left_game] = function(event)
     local player = game.get_player(event.player_index)
@@ -83,6 +85,10 @@ gridworld.on_nth_tick = {}
 gridworld.on_nth_tick[37] = function()
 	-- Periodically check players position for cross server teleport
 	edge_teleport.check_player_position()
+end
+gridworld.on_nth_tick[121] = function()
+	-- Update player positions on the map
+	player_tracking.check_player_positions()
 end
 
 -- Plugin API
