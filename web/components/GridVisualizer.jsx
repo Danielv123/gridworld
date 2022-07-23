@@ -49,7 +49,7 @@ export default function GridVisualizer(props) {
 						crs={L.CRS.Simple}
 					>
 						<TileLayer
-							url="https://clusterio.danielv.no/api/gridworld/tiles/{z}/{x}/{y}.png"
+							url={`${document.location.origin}/api/gridworld/tiles/{z}/{x}/{y}.png`}
 							maxNativeZoom={10}
 							minNativeZoom={8}
 						/>
