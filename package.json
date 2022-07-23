@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": "Danielv123/gridworld",
   "scripts": {
-	"build": "webpack-cli --env production",
+	"prepare": "webpack-cli --env production",
 	"lint": "eslint \"*.js\" src web",
 	"test": "echo \"Error: run tests from root\" && exit 1"
   },
@@ -19,14 +19,15 @@
   },
   "peerDependencies": {
 	"@clusterio/lib": "^2.0.0-alpha.0",
-	"@clusterio/web_ui": "^2.0.0-alpha.0",
 	"react-router-dom": "*"
   },
   "dependencies": {
+	"@ant-design/icons": "^4.2.2",
 	"fs-extra": "^8.1.0",
 	"sharp": "^0.29.3"
   },
   "devDependencies": {
+	"@clusterio/web_ui": "^2.0.0-alpha.0",
 	"antd": "^4.16.0",
 	"eslint": "^8.4.1",
 	"eslint-plugin-node": "^11.1.0",
