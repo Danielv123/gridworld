@@ -97,5 +97,6 @@ gridworld.create_spawn = create_spawn
 gridworld.populate_neighbor_data = populate_neighbor_data
 gridworld.receive_teleport_data = edge_teleport.receive_teleport_data
 gridworld.dump_mapview = map.dump_mapview
+gridworld.ask_for_teleport = edge_teleport.ask_for_teleport
 
 return gridworld

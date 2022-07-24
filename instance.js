@@ -4,6 +4,7 @@
 "use strict";
 const libPlugin = require("@clusterio/lib/plugin");
 const libLuaTools = require("@clusterio/lib/lua_tools");
+const { libLink } = require("@clusterio/lib");
 
 class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	async init() {
@@ -17,6 +18,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		});
 		this.instance.server.on("ipc-gridworld:send_player_position", data => {
 			this.sendPlayerPosition(data).catch(err => this.logger.error(
+				`Error handling player teleport:\n${err.stack}`
+			));
+		});
+		this.instance.server.on("ipc-gridworld:start_server", data => {
+			this.startServer(data).catch(err => this.logger.error(
 				`Error handling player teleport:\n${err.stack}`
 			));
 		});
@@ -103,6 +109,17 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			x: data.x,
 			y: data.y,
 		});
+	}
+
+	async startServer(data) {
+		// Allow player to start server by moving to its edge
+		await this.info.messages.startInstance.send(this.instance, {
+			instance_id: data.instance_id,
+			save: null,
+		});
+
+		// Ask player to teleport
+		await this.sendRcon(`/sc gridworld.ask_for_teleport("${data.player_name}")`);
 	}
 
 	async getTileDataRequestHandler(message) {

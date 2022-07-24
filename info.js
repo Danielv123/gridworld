@@ -201,6 +201,15 @@ module.exports = {
 				player_position: { type: "boolean" },
 			},
 		}),
+		startInstance: new libLink.Request({
+			type: "gridworld:start_instance",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				instance_id: { type: "integer" },
+				save: { type: ["string", "null"] },
+			},
+		}),
 		getTileData: new libLink.Request({
 			type: "gridworld:get_tile_data",
 			links: ["master-slave", "slave-instance"],
