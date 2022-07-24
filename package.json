@@ -9,7 +9,8 @@
   "scripts": {
     "prepare": "webpack-cli --env production",
     "lint": "eslint \"*.js\" src web",
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "luacheck": "luacheck module/",
+    "test": "npm run lint && npm run luacheck"
   },
   "bugs": {
     "url": "https://github.com/Danielv123/gridworld/issues"
