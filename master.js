@@ -556,6 +556,10 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		}
 	}
 
+	async startInstanceRequestHandler(message, request, link) {
+		return libLink.messages.startInstance.send(link, message.data);
+	}
+
 	onControlConnectionEvent(connection, event) {
 		if (event === "close") {
 			this.subscribedControlLinks.delete(connection);

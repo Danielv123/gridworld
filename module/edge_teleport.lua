@@ -42,7 +42,12 @@ local function check_player_position()
 				if instance == nil then
 					player.print("Error: Instance not found")
 				elseif instance.status ~= "running" then
-					player.print("Error: This server is offline")
+					player.print("Error: This server is offline. Starting server "..instance.name.."...")
+					clusterio_api.send_json("gridworld:start_server", {
+						instance_id = instance_id,
+						player_name = player.name,
+					})
+					-- Once the server is started, /sc gridworld.ask_for_teleport will be called with "player_name"
 				elseif instance.game_version ~= this_instance.game_version then
 					player.print("Error: Instance is running version " .. instance.game_version)
 				else
@@ -96,10 +101,14 @@ local function receive_teleport_data(json)
 		receive_teleport(player)
 	end
 end
+local function ask_for_teleport(player_name)
+	global.gridworld.players[player_name].has_been_offered_teleport = false
+end
 
 return {
 	check_player_position = check_player_position,
 	send_teleport_command_on_player_leave = send_teleport_command_on_player_leave,
 	receive_teleport = receive_teleport,
 	receive_teleport_data = receive_teleport_data,
+	ask_for_teleport = ask_for_teleport,
 }

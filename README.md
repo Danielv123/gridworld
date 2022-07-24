@@ -18,7 +18,7 @@ Substitute clusteriomaster with clusterioslave or clusterioctl if this a dedicat
 
 ## Development setup
 
-Clone the repository to a folder adjacent to your clusterio repository
+Clone the repository in clusterio/external_plugins/
 
 	cd clusterio
 	pnpm install
