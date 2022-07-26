@@ -195,6 +195,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		let instances = [];
 
 		if (!message.data.use_edge_transports) { return; }
+		const lobby_server = await this.createLobbyServer(message.data.slave);
 		try {
 			for (let x = 1; x <= message.data.x_count; x++) {
 				for (let y = 1; y <= message.data.y_count; y++) {
@@ -205,7 +206,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 							x,
 							y,
 							message.data.x_size,
-							message.data.y_size
+							message.data.y_size,
+							lobby_server.config.get("gridworld.grid_id"),
 						),
 						x,
 						y,
@@ -263,7 +265,66 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		}
 	}
 
-	async createInstance(name, x, y, x_size, y_size) {
+	async createLobbyServer(slaveId) {
+		// Create instance
+		this.logger.info("Creating lobby server");
+		const name = "Gridworld lobby server";
+		let instanceConfig = new libConfig.InstanceConfig("master");
+		await instanceConfig.init();
+		instanceConfig.set("instance.name", name);
+		instanceConfig.set("instance.auto_start", true);
+		instanceConfig.set("gridworld.is_lobby_server", true);
+		instanceConfig.set("gridworld.grid_id", Math.ceil(Math.random()*1000));
+
+		let instanceId = instanceConfig.get("instance.id");
+		if (this.master.instances.has(instanceId)) {
+			throw new libErrors.RequestError(`Instance with ID ${instanceId} already exists`);
+		}
+
+		// Add common settings for the Factorio server
+		let settings = {
+			...instanceConfig.get("factorio.settings"),
+
+			"name": `${this.master.config.get("master.name")} - ${name}`,
+			"description": `Clusterio instance for ${this.master.config.get("master.name")}`,
+			"tags": ["clusterio", "gridworld"],
+			"max_players": 0,
+			"visibility": { "public": true, "lan": true },
+			"username": "",
+			"token": "",
+			"game_password": "",
+			"require_user_verification": true,
+			"max_upload_in_kilobytes_per_second": 0,
+			"max_upload_slots": 5,
+			"ignore_player_limit_for_returning_players": false,
+			"allow_commands": "admins-only",
+			"autosave_interval": 10,
+			"autosave_slots": 1,
+			"afk_autokick_interval": 0,
+			"auto_pause": false,
+			"only_admins_can_pause_the_game": true,
+			"autosave_only_on_server": true,
+		};
+		instanceConfig.set("factorio.settings", settings);
+
+		let instance = { config: instanceConfig, status: "unassigned" };
+		this.master.instances.set(instanceId, instance);
+		await libPlugin.invokeHook(this.master.plugins, "onInstanceStatusChanged", instance, null);
+		this.master.addInstanceHooks(instance);
+		const instance_id = instanceConfig.get("instance.id");
+		// Assign instance to a slave (using first slave as a placeholder)
+		await this.assignInstance(instance_id, instance.slaveId);
+
+		// Create map
+		await this.createSave(
+			instance_id,
+			this.master.config.get("gridworld.gridworld_seed"),
+			this.master.config.get("gridworld.gridworld_map_exchange_string")
+		);
+		return instance;
+	}
+
+	async createInstance(name, x, y, x_size, y_size, grid_id) {
 		this.logger.info("Creating instance", name);
 		let instanceConfig = new libConfig.InstanceConfig("master");
 		await instanceConfig.init();
@@ -280,6 +341,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 		// Add common settings for the Factorio server
 		let settings = {
+			...instanceConfig.get("factorio.settings"),
+
 			"name": `${this.master.config.get("master.name")} - ${name}`,
 			"description": `Clusterio instance for ${this.master.config.get("master.name")}`,
 			"tags": ["clusterio"],
@@ -299,8 +362,6 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 			"auto_pause": false,
 			"only_admins_can_pause_the_game": true,
 			"autosave_only_on_server": true,
-
-			...instanceConfig.get("factorio.settings"),
 		};
 		instanceConfig.set("factorio.settings", settings);
 

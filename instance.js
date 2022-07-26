@@ -35,8 +35,15 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			world_x: this.instance.config.get("gridworld.grid_x_position"),
 			world_y: this.instance.config.get("gridworld.grid_y_position"),
 		};
-		await this.sendRcon(`/c gridworld.create_world_limit("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
-		await this.sendRcon(`/c gridworld.create_spawn("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
+		if (this.instance.config.get("gridworld.is_lobby_server")) {
+			await this.sendRcon("/sc gridworld.register_lobby_server(true)");
+			// Get gridworld data
+			const { map_data } = await this.info.messages.getMapData.send(this.instance);
+			await this.sendRcon(`/sc gridworld.register_map_data('${JSON.stringify(map_data)}')`);
+		} else {
+			await this.sendRcon(`/sc gridworld.create_world_limit("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
+			await this.sendRcon(`/sc gridworld.create_spawn("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
+		}
 	}
 
 	async onStop() {
@@ -59,13 +66,6 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	onMasterConnectionEvent(event) {
 		if (event === "connect") {
 			this.disconnecting = false;
-			(async () => {
-				if (this.disconnecting) {
-
-				}
-			})().catch(
-				err => this.logger.error(`Unexpected error:\n${err.stack}`)
-			);
 		}
 	}
 

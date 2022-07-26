@@ -66,6 +66,20 @@ InstanceConfigGroup.define({
 	type: "number",
 	initial_value: 512,
 });
+InstanceConfigGroup.define({
+	name: "is_lobby_server",
+	title: "Server is a lobby server",
+	description: "Make this instance act as a lobby server for a gridworld",
+	type: "boolean",
+	initial_value: false,
+});
+InstanceConfigGroup.define({
+	name: "grid_id",
+	title: "Grid ID",
+	description: "Grid identifier - used to run multiple gridworlds on the same cluster",
+	type: "number",
+	initial_value: 0,
+});
 InstanceConfigGroup.finalize();
 
 libUsers.definePermission({
@@ -121,8 +135,9 @@ module.exports = {
 		}),
 		getMapData: new libLink.Request({
 			type: "gridworld:get_map_data",
-			links: ["control-master"],
+			links: ["control-master", "instance-slave", "slave-master"],
 			permission: "gridworld.overview.view",
+			forwardTo: "master",
 			responseProperties: {
 				map_data: {
 					type: "array",
