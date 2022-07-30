@@ -9,16 +9,16 @@ When a player enters a map, generate neighboring maps and connections
 gridworld = {}
 
 -- flib.gui
-local gui = require("modules/gridworld/flib/gui")
+local gui = require("flib/gui")
 local clusterio_api = require("modules/clusterio/api")
-local out_of_bounds = require("modules/gridworld/util/out_of_bounds")
-local edge_teleport = require("modules/gridworld/edge_teleport")
-local player_tracking = require("modules/gridworld/player_tracking")
-local create_world_limit = require("modules/gridworld/worldgen/create_world_limit")
-local create_spawn = require("modules/gridworld/worldgen/create_spawn")
-local populate_neighbor_data = require("modules/gridworld/populate_neighbor_data")
-local map = require("modules/gridworld/map/map")
-local lobby = require("modules/gridworld/lobby")
+local out_of_bounds = require("util/out_of_bounds")
+local edge_teleport = require("edge_teleport")
+local player_tracking = require("player_tracking")
+local create_world_limit = require("worldgen/create_world_limit")
+local create_spawn = require("worldgen/create_spawn")
+local populate_neighbor_data = require("populate_neighbor_data")
+local map = require("map/map")
+local lobby = require("lobby")
 
 -- Declare globals to make linter happy
 game = game
@@ -56,7 +56,7 @@ gridworld.events[defines.events.on_player_joined_game] = function(event)
 		edge_teleport.receive_teleport(player)
 		player_tracking.send_player_position(player)
 	else
-		lobby.gui.draw_welcome(player)
+		lobby.gui.dialog_welcome.draw(player)
 	end
 end
 gridworld.events[defines.events.on_player_left_game] = function(event)
@@ -91,9 +91,24 @@ gridworld.events[defines.events.on_built_entity] = function(event)
 	end
 end
 gridworld.events[defines.events.on_gui_click] = function(event)
+	local player = game.players[event.player_index]
 	local action = gui.read_action(event)
 	if action then
-		lobby.gui.on_gui_click(event, action)
+		lobby.gui.on_gui_click(event, action, player)
+	end
+end
+gridworld.events[defines.events.on_gui_checked_state_changed] = function(event)
+	local player = game.players[event.player_index]
+	local action = gui.read_action(event)
+	if action then
+		lobby.gui.on_gui_checked_state_changed(event, action, player)
+	end
+end
+gridworld.events[defines.events.on_gui_text_changed] = function(event)
+	local player = game.players[event.player_index]
+	local action = gui.read_action(event)
+	if action then
+		lobby.gui.on_gui_text_changed(event, action, player)
 	end
 end
 gridworld.on_nth_tick = {}

@@ -25,15 +25,20 @@ local function draw_welcome(player)
 					type = "tabbed-pane",
 					style_mods = {
 						maximal_width = 750,
+						height = 500,
+					},
+					elem_mods = {
+						selected_tab_index = 1,
 					},
 					-- Welcome
 					{
 						tab = { type = "tab", caption = "Welcome" },
 						content = {
-							type = "scroll-pane",
+							type = "flow",
 							direction = "vertical",
 							style_mods = {
-								height = 200,
+								maximal_height = 450,
+								natural_height = 450,
 							},
 							{
 								type = "label",
@@ -50,6 +55,14 @@ local function draw_welcome(player)
 							{
 								type = "flow",
 								style = "horizontal_flow",
+								style_mods = {
+									horizontal_align = "center",
+									vertical_align = "center",
+									maximal_width = 999,
+									natural_width = 999,
+									bottom_padding = 30,
+									top_padding = 30,
+								},
 								{
 									type = "button",
 									caption = "Join server",
@@ -80,7 +93,7 @@ local function draw_welcome(player)
 							type = "scroll-pane",
 							direction = "vertical",
 							style_mods = {
-								height = 200,
+								height = 450,
 							},
 							{
 								type = "label",

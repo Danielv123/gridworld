@@ -5,9 +5,9 @@
 	On the profile view you can see your current character, player statistics and your location on the grid. To start, press "Join server". The server will start and a dialog prompting to connect to the server will appear. The player can click "Confirm" or press E to connect to the server.
 ]]
 
-local register_lobby_server = require("modules/gridworld/lobby/register_lobby_server")
-local register_map_data = require("modules/gridworld/lobby/register_map_data")
-local gui = require("modules/gridworld/lobby/gui")
+local register_lobby_server = require("lobby/register_lobby_server")
+local register_map_data = require("lobby/register_map_data")
+local gui = require("lobby/gui")
 
 gridworld.gui = gui
 
