@@ -23,11 +23,6 @@ local function draw_new_game_dialog(player)
 						caption = "New faction",
 						ignored_by_interaction = true,
 					},
-					{
-						type = "empty-widget",
-						style = "draggable_space_header",
-						ignored_by_interaction = true,
-					},
 				},
 				{
 					type = "flow",

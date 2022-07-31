@@ -19,6 +19,7 @@ local create_spawn = require("worldgen/create_spawn")
 local populate_neighbor_data = require("populate_neighbor_data")
 local map = require("map/map")
 local lobby = require("lobby")
+local factions = require("factions")
 
 -- Declare globals to make linter happy
 game = game
@@ -67,26 +68,28 @@ gridworld.events[defines.events.on_player_left_game] = function(event)
 	end
 end
 gridworld.events[defines.events.on_built_entity] = function(event)
-	local entity = event.created_entity
-	if not (entity and entity.valid) then return end
+	if not global.gridworld.lobby_server then
+		local entity = event.created_entity
+		if not (entity and entity.valid) then return end
 
-	local player = false
-	if event.player_index then player = game.players[event.player_index] end
+		local player = false
+		if event.player_index then player = game.players[event.player_index] end
 
-	local x = entity.position.x
-	local y = entity.position.y
+		local x = entity.position.x
+		local y = entity.position.y
 
-	if out_of_bounds(x,y) then
-		if player and player.valid then
-			-- Tell the player what is happening
-			-- if player then player.print("Attempted building outside allowed area (placed at x "..x.." y "..y..")") end
-			-- kill entity, try to give it back to the player though
-			if not player.mine_entity(entity, true) then
+		if out_of_bounds(x,y) then
+			if player and player.valid then
+				-- Tell the player what is happening
+				-- if player then player.print("Attempted building outside allowed area (placed at x "..x.." y "..y..")") end
+				-- kill entity, try to give it back to the player though
+				if not player.mine_entity(entity, true) then
+					entity.destroy()
+				end
+			else
+				-- it wasn't placed by a player, we can't tell em whats wrong
 				entity.destroy()
 			end
-		else
-			-- it wasn't placed by a player, we can't tell em whats wrong
-			entity.destroy()
 		end
 	end
 end
@@ -95,6 +98,7 @@ gridworld.events[defines.events.on_gui_click] = function(event)
 	local action = gui.read_action(event)
 	if action then
 		lobby.gui.on_gui_click(event, action, player)
+		factions.gui.on_gui_click(event, action, player)
 	end
 end
 gridworld.events[defines.events.on_gui_checked_state_changed] = function(event)
@@ -134,5 +138,7 @@ gridworld.dump_mapview = map.dump_mapview
 gridworld.ask_for_teleport = edge_teleport.ask_for_teleport
 gridworld.register_lobby_server = lobby.register_lobby_server
 gridworld.register_map_data = lobby.register_map_data
+gridworld.sync_faction = factions.sync_faction
+gridworld.open_faction_admin_screen = factions.open_faction_admin_screen
 
 return gridworld

@@ -1,6 +1,8 @@
 "use strict";
 const { libConfig, libLink, libUsers } = require("@clusterio/lib");
 
+const factionProperties = require("./src/factions/faction_message_properties");
+
 class MasterConfigGroup extends libConfig.PluginConfigGroup { }
 MasterConfigGroup.defaultAccess = ["master", "slave", "control"];
 MasterConfigGroup.groupName = "gridworld";
@@ -223,6 +225,19 @@ module.exports = {
 			requestProperties: {
 				instance_id: { type: "integer" },
 				save: { type: ["string", "null"] },
+			},
+		}),
+		createFaction: new libLink.Request({
+			type: "gridworld:create_faction",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: factionProperties,
+			responseProperties: {
+				ok: { type: "boolean" },
+				faction: {
+					type: "object",
+					properties: factionProperties,
+				},
 			},
 		}),
 		getTileData: new libLink.Request({

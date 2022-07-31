@@ -9,8 +9,6 @@ local register_lobby_server = require("lobby/register_lobby_server")
 local register_map_data = require("lobby/register_map_data")
 local gui = require("lobby/gui")
 
-gridworld.gui = gui
-
 return {
 	register_lobby_server = register_lobby_server,
 	register_map_data = register_map_data,

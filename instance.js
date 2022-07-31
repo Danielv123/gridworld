@@ -26,6 +26,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				`Error handling player teleport:\n${err.stack}`
 			));
 		});
+		this.instance.server.on("ipc-gridworld:create_faction", data => {
+			this.createFaction(data).catch(err => this.logger.error(
+				`Error creating faction:\n${err.stack}`
+			));
+		});
 	}
 
 	async onStart() {
@@ -120,6 +125,32 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 
 		// Ask player to teleport
 		await this.sendRcon(`/sc gridworld.ask_for_teleport("${data.player_name}")`);
+	}
+
+	async createFaction(data) {
+		const status = await this.info.messages.createFaction.send(this.instance, {
+			faction_id: data.faction_id,
+			name: data.name,
+			open: data.open,
+			members: [{
+				name: data.owner,
+				role: "leader",
+			}],
+			friends: [],
+			enemies: [],
+			instances: [],
+			about: {
+				header: `${data.name} description`,
+				description: `${data.name} was started by ${data.owner} on ${new Date().toISOString()}`,
+				rules: "The faction leader has not set any rules",
+			},
+		});
+		if (status.ok) {
+			// Sync faction with lobby world
+			await this.sendRcon(`/sc gridworld.sync_faction("${data.faction_id}","${libLuaTools.escapeString(JSON.stringify(status.faction))}")`);
+			// Open faction admin screen for owner
+			await this.sendRcon(`/sc gridworld.open_faction_admin_screen("${data.owner}","${data.faction_id}")`);
+		}
 	}
 
 	async getTileDataRequestHandler(message) {

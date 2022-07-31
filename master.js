@@ -11,8 +11,8 @@ const info = require("./info");
 const registerTileServer = require("./src/routes/tileserver");
 const { zoomOutLevel } = require("./src/tileZoomFunctions");
 
-async function loadDatabase(config, logger) {
-	let itemsPath = path.resolve(config.get("master.database_directory"), "gridworld.json");
+async function loadDatabase(config, filename, logger) {
+	let itemsPath = path.resolve(config.get("master.database_directory"), filename);
 	logger.verbose(`Loading ${itemsPath}`);
 	try {
 		let content = await fs.readFile(itemsPath);
@@ -27,21 +27,25 @@ async function loadDatabase(config, logger) {
 	}
 }
 
-async function saveDatabase(masterConfig, gridworldDatastore, logger) {
-	if (gridworldDatastore) {
-		let file = path.resolve(masterConfig.get("master.database_directory"), "gridworld.json");
+async function saveDatabase(masterConfig, datastore, filename, logger) {
+	if (datastore) {
+		let file = path.resolve(masterConfig.get("master.database_directory"), filename);
 		logger.verbose(`writing ${file}`);
-		let content = JSON.stringify(Array.from(gridworldDatastore));
+		let content = JSON.stringify(Array.from(datastore));
 		await fs.outputFile(file, content);
 	}
 }
 
 class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	async init() {
-		this.gridworldDatastore = await loadDatabase(this.master.config, this.logger);
+		this.gridworldDatastore = await loadDatabase(this.master.config, "gridworld.json", this.logger);
+		this.factionsDatastore = await loadDatabase(this.master.config, "factions.json", this.logger);
 		this.autosaveId = setInterval(() => {
-			saveDatabase(this.master.config, this.gridworldDatastore, this.logger).catch(err => {
+			saveDatabase(this.master.config, this.gridworldDatastore, "gridworld.json", this.logger).catch(err => {
 				this.logger.error(`Unexpected error autosaving gridworld data:\n${err.stack}`);
+			});
+			saveDatabase(this.master.config, this.factionsDatastore, "factions.json", this.logger).catch(err => {
+				this.logger.error(`Unexpected error autosaving factions data:\n${err.stack}`);
 			});
 		}, this.master.config.get("gridworld.autosave_interval") * 1000);
 
@@ -274,7 +278,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		instanceConfig.set("instance.name", name);
 		instanceConfig.set("instance.auto_start", true);
 		instanceConfig.set("gridworld.is_lobby_server", true);
-		instanceConfig.set("gridworld.grid_id", Math.ceil(Math.random()*1000));
+		instanceConfig.set("gridworld.grid_id", Math.ceil(Math.random() * 1000));
 
 		let instanceId = instanceConfig.get("instance.id");
 		if (this.master.instances.has(instanceId)) {
@@ -619,6 +623,21 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 	async startInstanceRequestHandler(message, request, link) {
 		return libLink.messages.startInstance.send(link, message.data);
+	}
+
+	async createFactionRequestHandler(message, request, link) {
+		const new_faction = {
+			faction_id: message.data.faction_id,
+			name: message.data.name,
+			open: message.data.open,
+			members: message.data.members,
+			about: message.data.about,
+		};
+		this.factionsDatastore.set(message.data.faction_id, new_faction);
+		return {
+			ok: true,
+			faction: new_faction,
+		};
 	}
 
 	onControlConnectionEvent(connection, event) {
