@@ -4,3 +4,6 @@ package-lock.json
 
 # Web build
 dist/
+
+# Binary files
+bin/
