@@ -42,6 +42,7 @@ local function draw_faction_admin_screen(player, faction_id)
 							on_click = {
 								location = "faction_admin_screen",
 								action = "edit_faction",
+								faction_id = faction_id,
 							}
 						},
 					},

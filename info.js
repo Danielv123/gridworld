@@ -240,6 +240,30 @@ module.exports = {
 				},
 			},
 		}),
+		updateFaction: new libLink.Request({
+			type: "gridworld:update_faction",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				faction_id: { type: "string" },
+				name: { type: "string" },
+				open: { type: "boolean" },
+				about: {
+					type: "object",
+					properties: {
+						header: { type: "string" },
+						description: { type: "string" },
+						rules: { type: "string" },
+					},
+				},
+			},
+			responseRequired: ["ok", "message"],
+			responseProperties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+				faction: factionProperties,
+			},
+		}),
 		getTileData: new libLink.Request({
 			type: "gridworld:get_tile_data",
 			links: ["master-slave", "slave-instance"],

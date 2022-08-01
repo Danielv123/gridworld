@@ -20,6 +20,7 @@ local populate_neighbor_data = require("populate_neighbor_data")
 local map = require("map/map")
 local lobby = require("lobby")
 local factions = require("factions")
+local show_progress = require("util/gui/show_progress/dialog")
 
 -- Declare globals to make linter happy
 game = game
@@ -140,5 +141,6 @@ gridworld.register_lobby_server = lobby.register_lobby_server
 gridworld.register_map_data = lobby.register_map_data
 gridworld.sync_faction = factions.sync_faction
 gridworld.open_faction_admin_screen = factions.open_faction_admin_screen
+gridworld.show_progress = show_progress.draw
 
 return gridworld

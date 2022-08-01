@@ -31,6 +31,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				`Error creating faction:\n${err.stack}`
 			));
 		});
+		this.instance.server.on("ipc-gridworld:update_faction", data => {
+			this.updateFaction(data).catch(err => this.logger.error(
+				`Error updating faction:\n${err.stack}`
+			));
+		});
 	}
 
 	async onStart() {
@@ -151,6 +156,24 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			// Open faction admin screen for owner
 			await this.sendRcon(`/sc gridworld.open_faction_admin_screen("${data.owner}","${data.faction_id}")`);
 		}
+	}
+
+	async updateFaction(data) {
+		// Show received progress in game
+		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Saving faction", "Propagating changes", 2, 3)`);
+
+		// Update master server
+		const status = await this.info.messages.updateFaction.send(this.instance, {
+			faction_id: data.faction_id,
+			name: data.name,
+			open: data.open,
+			about: data.about,
+		});
+		// Show completed progress in game
+		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Saving faction", "Finishing", 3, 3)`);
+		await new Promise(r => setTimeout(r, 500));
+		// Navigate to updated faction screen
+		await this.sendRcon(`/sc gridworld.open_faction_admin_screen("${data.player_name}","${data.faction_id}")`);
 	}
 
 	async getTileDataRequestHandler(message) {
