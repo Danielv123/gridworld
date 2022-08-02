@@ -18,7 +18,7 @@ end
 local function draw_factions_table()
 	local factions_table = {
 		type = "table",
-		column_count = 4,
+		column_count = 5,
 		draw_vertical_lines = true,
 		draw_horizontal_lines = true,
 		{
@@ -37,6 +37,10 @@ local function draw_factions_table()
 			type = "label",
 			caption = "Open",
 		},
+		{
+			type = "label",
+			caption = "",
+		},
 	}
 
 	local factions = global.gridworld.factions
@@ -52,6 +56,18 @@ local function draw_factions_table()
 		end
 		insert_cell(factions_table, 80, playercount)
 		insert_cell(factions_table, 50, tostring(faction.open))
+		table.insert(factions_table, {
+			type = "sprite-button",
+			sprite = "utility/search_icon",
+			style = "tool_button",
+			actions = {
+				on_click = {
+					location = "factions_table",
+					action = "view_faction",
+					faction_id = faction.faction_id,
+				}
+			},
+		})
 	end
 
 	return factions_table

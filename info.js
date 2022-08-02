@@ -261,7 +261,10 @@ module.exports = {
 			responseProperties: {
 				ok: { type: "boolean" },
 				message: { type: "string" },
-				faction: factionProperties,
+				faction: {
+					type: "object",
+					properties: factionProperties,
+				},
 			},
 		}),
 		getTileData: new libLink.Request({

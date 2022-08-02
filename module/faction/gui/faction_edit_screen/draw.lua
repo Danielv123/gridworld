@@ -66,6 +66,7 @@ local function draw_faction_edit_screen(player, faction_id)
 							on_click = {
 								location = "faction_edit_screen",
 								action = "return_to_faction_screen",
+								faction_id = faction_id,
 							}
 						},
 					},
@@ -73,107 +74,106 @@ local function draw_faction_edit_screen(player, faction_id)
 			},
 			-- Content
 			{
-				type = "flow",
-				{
-					type = "tabbed-pane",
-					style_mods = {
-						maximal_width = 750,
-						height = 500,
-					},
-					elem_mods = {
-						selected_tab_index = 1,
-					},
-					-- User customizable front page and statistics
-					{
-						tab = { type = "tab", caption = "Welcome" },
-						content = {
-							type = "flow",
-							direction = "vertical",
-							style_mods = {
-								maximal_height = 450,
-								natural_height = 450,
-							},
-							{
-								type = "label",
-								caption = "Faction name",
-								style = "heading_2_label",
-							},
-							{
-								type = "textfield",
-								text = faction.name,
-								style = "heading_2_label",
-								actions = {
-									on_text_changed = {
-										location = "faction_edit_screen",
-										action = "set_faction_name",
-									},
-								},
-							},
-							{
-								type = "label",
-								caption = "Open for players to join",
-								style = "heading_2_label",
-							},
-							{
-								type = "checkbox",
-								state = faction.open,
-								actions = {
-									on_checked_state_changed = {
-										location = "faction_edit_screen",
-										action = "set_faction_open",
-									},
-								},
-							},
-							{
-								type = "label",
-								caption = "Header",
-								style = "heading_2_label",
-							},
-							{
-								type = "textfield",
-								text = faction.about.header,
-								style = "heading_2_label",
-								actions = {
-									on_text_changed = {
-										location = "faction_edit_screen",
-										action = "set_faction_about_header",
-									},
-								},
-							},
-							{
-								type = "label",
-								caption = "Description",
-								style = "heading_2_label",
-							},
-							{
-								type = "text-box",
-								text = faction.about.description,
-								actions = {
-									on_text_changed = {
-										location = "faction_edit_screen",
-										action = "set_faction_about_description",
-									},
-								},
-							},
-							{
-								type = "label",
-								caption = "Rules",
-								style = "heading_2_label",
-							},
-							{
-								type = "text-box",
-								text = faction.about.rules,
-								actions = {
-									on_text_changed = {
-										location = "faction_edit_screen",
-										action = "set_faction_about_rules",
-									},
-								},
-							},
-						}
-					},
+				type = "tabbed-pane",
+				style_mods = {
+					maximal_width = 750,
+					-- height = 500,
 				},
-			}
+				elem_mods = {
+					selected_tab_index = 1,
+				},
+				-- User customizable front page and statistics
+				{
+					tab = { type = "tab", caption = "Welcome" },
+					content = {
+						type = "flow",
+						direction = "vertical",
+						{
+							type = "label",
+							caption = "Faction name",
+							style = "heading_2_label",
+						},
+						{
+							type = "textfield",
+							text = faction.name,
+							actions = {
+								on_text_changed = {
+									location = "faction_edit_screen",
+									action = "set_faction_name",
+								},
+							},
+						},
+						{
+							type = "label",
+							caption = "Open for players to join",
+							style = "heading_2_label",
+						},
+						{
+							type = "checkbox",
+							state = faction.open,
+							actions = {
+								on_checked_state_changed = {
+									location = "faction_edit_screen",
+									action = "set_faction_open",
+								},
+							},
+						},
+						{
+							type = "label",
+							caption = "Header",
+							style = "heading_2_label",
+						},
+						{
+							type = "textfield",
+							text = faction.about.header,
+							actions = {
+								on_text_changed = {
+									location = "faction_edit_screen",
+									action = "set_faction_about_header",
+								},
+							},
+						},
+						{
+							type = "label",
+							caption = "Description",
+							style = "heading_2_label",
+						},
+						{
+							type = "text-box",
+							text = faction.about.description,
+							style_mods = {
+								height = 200,
+								width = 400,
+							},
+							actions = {
+								on_text_changed = {
+									location = "faction_edit_screen",
+									action = "set_faction_about_description",
+								},
+							},
+						},
+						{
+							type = "label",
+							caption = "Rules",
+							style = "heading_2_label",
+						},
+						{
+							type = "text-box",
+							text = faction.about.rules,
+							style_mods = {
+								height = 200,
+								width = 400,
+							},
+							actions = {
+								on_text_changed = {
+									location = "faction_edit_screen",
+									action = "set_faction_about_rules",
+								},
+							},
+						},
+					}
+				},
+			},
 		}
 	})
 end

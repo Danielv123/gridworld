@@ -6,7 +6,7 @@ local function on_gui_click(_, action, player)
 	if player == nil then return end
 	if action.location == "faction_edit_screen" then
 		if action.action == "return_to_faction_screen" then
-			dialog_welcome_draw(player)
+			gridworld.open_faction_admin_screen(player.name, action.faction_id)
 		end
 		if action.action == "save_faction" then
 			-- Open edit dialog
