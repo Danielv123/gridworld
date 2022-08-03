@@ -59,14 +59,14 @@ function NewGridworldForm() {
 		</Form.Item>
 		<Form.Item
 			name={"x_size"}
-			label="World size along X axis"
+			label="World width"
 			rules={[{ required: true, type: "number", min: 0, max: 10000 }]}
 		>
 			<InputNumber />
 		</Form.Item>
 		<Form.Item
 			name={"y_size"}
-			label="World size along Y axis"
+			label="World height"
 			rules={[{ required: true, type: "number", min: 0, max: 10000 }]}
 		>
 			<InputNumber />

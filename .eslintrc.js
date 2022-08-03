@@ -9,7 +9,7 @@ module.exports = {
 		"es6": true,
 	},
 	"parserOptions": {
-		"ecmaVersion": 11,
+		"ecmaVersion": 2022,
 	},
 
 	"overrides": [
@@ -143,7 +143,7 @@ module.exports = {
 		"max-classes-per-file": "off",
 		"max-depth": "error",
 		"max-len": ["error", {
-			"code": 120,
+			"code": 150,
 			"ignoreTemplateLiterals": true,
 		}],
 		"max-lines": "off",
