@@ -84,7 +84,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	}
 
 	async getMapDataRequestHandler() {
-		const instances = [...this.master.instances];
+		const instances = [...this.master.instances]
+			.filter(instance => instance[1].config.get("gridworld.is_lobby_server") === false);
 		return {
 			map_data: instances.map(instance => ({
 				instance_id: instance[1].config.get("instance.id"),
@@ -317,7 +318,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		this.master.addInstanceHooks(instance);
 		const instance_id = instanceConfig.get("instance.id");
 		// Assign instance to a slave (using first slave as a placeholder)
-		await this.assignInstance(instance_id, instance.slaveId);
+		await this.assignInstance(instance_id, slaveId);
 
 		// Create map
 		await this.createSave(

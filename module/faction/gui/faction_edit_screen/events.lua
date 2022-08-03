@@ -1,5 +1,4 @@
 local clusterio_api = require("modules/clusterio/api")
-local dialog_welcome_draw = require("modules/gridworld/lobby/gui/dialog_welcome/draw")
 local show_progress = require("modules/gridworld/util/gui/show_progress/dialog")
 
 local function on_gui_click(_, action, player)
