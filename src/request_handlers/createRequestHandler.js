@@ -1,4 +1,11 @@
 "use strict";
+
+const assignInstance = require("../worldgen/assignInstance");
+const createInstance = require("../worldgen/createInstance");
+const createLobbyServer = require("../worldgen/createLobbyServer");
+const createSave = require("../worldgen/createSave");
+const getEdges = require("../worldgen/getEdges");
+
 module.exports = async function createRequestHandler(message) {
 	// message.data === {
 	// name_prefix: "Gridworld",
@@ -11,13 +18,14 @@ module.exports = async function createRequestHandler(message) {
 	let instances = [];
 
 	if (!message.data.use_edge_transports) { return; }
-	const lobby_server = await this.createLobbyServer(message.data.slave);
+	const lobby_server = await createLobbyServer(this, message.data.slave);
 	try {
 		for (let x = 1; x <= message.data.x_count; x++) {
 			for (let y = 1; y <= message.data.y_count; y++) {
 				// Create instance
 				let instance = {
-					instanceId: await this.createInstance(
+					instanceId: await createInstance(
+						this,
 						`${message.data.name_prefix} x${x} y${y}`,
 						x,
 						y,
@@ -30,10 +38,11 @@ module.exports = async function createRequestHandler(message) {
 					slaveId: message.data.slave,
 				};
 				// Assign instance to a slave (using first slave as a placeholder)
-				await this.assignInstance(instance.instanceId, instance.slaveId);
+				await assignInstance(this, instance.instanceId, instance.slaveId);
 
 				// Create map
-				await this.createSave(
+				await createSave(
+					this,
 					instance.instanceId,
 					this.master.config.get("gridworld.gridworld_seed"),
 					this.master.config.get("gridworld.gridworld_map_exchange_string")
@@ -59,7 +68,7 @@ module.exports = async function createRequestHandler(message) {
 				let worldfactor_x = (x - 1) * message.data.x_size;
 				let worldfactor_y = (y - 1) * message.data.y_size;
 
-				let edges = this._getEdges({
+				let edges = getEdges({
 					message,
 					worldfactor_x,
 					worldfactor_y,
