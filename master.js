@@ -12,6 +12,7 @@ const setPlayerPositionSubscriptionRequestHandler = require("./src/request_handl
 const startInstanceRequestHandler = require("./src/request_handlers/startInstanceRequestHandler");
 const createFactionRequestHandler = require("./src/request_handlers/createFactionRequestHandler");
 const updateFactionRequestHandler = require("./src/request_handlers/updateFactionRequestHandler");
+const migrateInstanceCommandRequestHandler = require("./src/instance_migration/migrateInstanceCommandRequestHandler");
 
 const playerPositionEventHandler = require("./src/event_handlers/playerPositionEventHandler");
 
@@ -80,6 +81,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	createFactionRequestHandler = createFactionRequestHandler;
 
 	updateFactionRequestHandler = updateFactionRequestHandler;
+
+	migrateInstanceCommandRequestHandler = migrateInstanceCommandRequestHandler;
 
 	async onInstanceStatusChanged(instance) {
 		if (instance.status === "running") {

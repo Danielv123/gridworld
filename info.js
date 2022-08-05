@@ -2,6 +2,10 @@
 const { libConfig, libLink, libUsers } = require("@clusterio/lib");
 
 const factionProperties = require("./src/factions/faction_message_properties");
+const migrateInstanceCommandRequest = require("./src/instance_migration/info/migrateInstanceCommandRequest");
+
+// Define migrate instance permission
+require("./src/instance_migration/info/migrateInstancePermission");
 
 class MasterConfigGroup extends libConfig.PluginConfigGroup { }
 MasterConfigGroup.defaultAccess = ["master", "slave", "control"];
