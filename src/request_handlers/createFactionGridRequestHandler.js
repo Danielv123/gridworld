@@ -11,8 +11,7 @@ module.exports = async function createRequestHandler(message) {
 	// name_prefix: "Gridworld",
 	// use_edge_transports: true,
 	// x_size: 500, y_size: 500,
-	// x_count: 2, y_count: 2,
-	// slave: slave_id
+	// slave: slave_id - should be picked automatically from connected slaves
 	// }
 	// Create a new gridworld.
 	let instances = [];
@@ -65,8 +64,13 @@ module.exports = async function createRequestHandler(message) {
 				// x positive is right
 				// y positive is down
 
+				let worldfactor_x = (x - 1) * message.data.x_size;
+				let worldfactor_y = (y - 1) * message.data.y_size;
+
 				let edges = getEdges({
 					message,
+					worldfactor_x,
+					worldfactor_y,
 					x_size: message.data.x_size,
 					y_size: message.data.y_size,
 					x,
