@@ -28,7 +28,7 @@ Forward request to master using gridworld:join_gridworld message. Once we get th
 
 Get current player location in gridworld by looking up the player profile. If the player does not have a disconnect location, use the default spawn point for the faction.
 
-Look up the server using the player location. If the server doesn't exist, generate it using `src/worldgen/factionGrid/generateServer`. If its stopped, start it.
+Look up the server using the player location. If the server doesn't exist, generate it using `src/worldgen/factionGrid/createServer`. If its stopped, start it.
 
 Once its started, we send data about the connecting player to the instance:
 
