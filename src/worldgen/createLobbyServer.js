@@ -3,7 +3,7 @@ const { libConfig, libPlugin, libErrors } = require("@clusterio/lib");
 const assignInstance = require("./assignInstance");
 const createSave = require("./createSave");
 
-module.exports = async function createLobbyServer(plugin, slaveId) {
+module.exports = async function createLobbyServer(plugin, slaveId, x_size, y_size) {
 	// Create instance
 	plugin.logger.info("Creating lobby server");
 	const name = "Gridworld lobby server";
@@ -13,6 +13,8 @@ module.exports = async function createLobbyServer(plugin, slaveId) {
 	instanceConfig.set("instance.auto_start", true);
 	instanceConfig.set("gridworld.is_lobby_server", true);
 	instanceConfig.set("gridworld.grid_id", Math.ceil(Math.random() * 1000));
+	instanceConfig.set("gridworld.x_size", x_size);
+	instanceConfig.set("gridworld.y_size", y_size);
 
 	let instanceId = instanceConfig.get("instance.id");
 	if (plugin.master.instances.has(instanceId)) {
