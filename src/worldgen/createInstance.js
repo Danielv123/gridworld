@@ -1,7 +1,7 @@
 "use strict";
 const { libConfig, libPlugin, libErrors } = require("@clusterio/lib");
 
-module.exports = async function createInstance(plugin, name, x, y, x_size, y_size, grid_id) {
+module.exports = async function createInstance(plugin, name, x, y, x_size, y_size, grid_id, game_port) {
 	plugin.logger.info("Creating instance", name);
 	let instanceConfig = new libConfig.InstanceConfig("master");
 	await instanceConfig.init();
@@ -11,6 +11,9 @@ module.exports = async function createInstance(plugin, name, x, y, x_size, y_siz
 	instanceConfig.set("gridworld.grid_y_position", y);
 	instanceConfig.set("gridworld.grid_x_size", x_size);
 	instanceConfig.set("gridworld.grid_y_size", y_size);
+	if (game_port) {
+		instanceConfig.set("factorio.game_port", game_port);
+	}
 
 	let instanceId = instanceConfig.get("instance.id");
 	if (plugin.master.instances.has(instanceId)) {

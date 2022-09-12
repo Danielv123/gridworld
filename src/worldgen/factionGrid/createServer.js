@@ -7,6 +7,7 @@ const getEdges = require("../getEdges");
 const packagejson = require("../../../package.json");
 const mapFind = require("../../util/mapFind");
 const mapFilter = require("../../util/mapFilter");
+const slaveGetNextFreePort = require("../../util/slaveGetNextFreePort");
 
 const edge_target_position_offets = [
 	{},
@@ -48,8 +49,8 @@ module.exports = async function createServer({
 	}
 
 	// Create instance
-	// TODO: Find a way to assign ports in incrementing order
-	const instanceId = await createInstance(plugin, `Grid square ${Math.floor(Math.random() * 2 ** 16).toString()}`, x, y, x_size, y_size, grid_id);
+	const instance_game_port = slaveGetNextFreePort(plugin.master, slaveId);
+	const instanceId = await createInstance(plugin, `Grid square ${Math.floor(Math.random() * 2 ** 16).toString()}`, x, y, x_size, y_size, grid_id, instance_game_port);
 
 	// Assign instance to slave
 	await assignInstance(plugin, instanceId, slaveId);
