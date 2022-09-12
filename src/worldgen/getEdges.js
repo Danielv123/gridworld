@@ -1,5 +1,7 @@
 "use strict";
 
+const mapFind = require("../util/mapFind");
+
 module.exports = function getEdges({
 	x_size,
 	y_size,
@@ -18,7 +20,7 @@ module.exports = function getEdges({
 		surface: 1,
 		direction: 0, // East
 		length: x_size,
-		target_instance: instances.find(instance => instance.x === x && instance.y === y - 1)?.instanceId || 0,
+		target_instance: mapFind(instances, instance => instance.x === x && instance.y === y - 1)?.instanceId || 0,
 		target_edge: 3,
 	});
 	// Southern edge
@@ -28,7 +30,7 @@ module.exports = function getEdges({
 		surface: 1,
 		direction: 4, // West
 		length: x_size,
-		target_instance: instances.find(instance => instance.x === x && instance.y === y + 1)?.instanceId || 0,
+		target_instance: mapFind(instances, instance => instance.x === x && instance.y === y + 1)?.instanceId || 0,
 		target_edge: 1,
 	});
 	// Eastern edge
@@ -38,7 +40,7 @@ module.exports = function getEdges({
 		surface: 1,
 		direction: 2, // South
 		length: y_size,
-		target_instance: instances.find(instance => instance.x === x + 1 && instance.y === y)?.instanceId || 0,
+		target_instance: mapFind(instances, instance => instance.x === x + 1 && instance.y === y)?.instanceId || 0,
 		target_edge: 4,
 	});
 	// Western edge
@@ -48,7 +50,7 @@ module.exports = function getEdges({
 		surface: 1,
 		direction: 6, // North
 		length: y_size,
-		target_instance: instances.find(instance => instance.x === x - 1 && instance.y === y)?.instanceId || 0,
+		target_instance: mapFind(instances, instance => instance.x === x - 1 && instance.y === y)?.instanceId || 0,
 		target_edge: 2,
 	});
 	return edges;

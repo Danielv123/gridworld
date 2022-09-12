@@ -271,6 +271,23 @@ module.exports = {
 				},
 			},
 		}),
+		joinGridworld: new libLink.Request({
+			type: "gridworld:join_gridworld",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				player_name: { type: "string" },
+				grid_id: { type: "integer" },
+			},
+			responseRequired: ["ok", "message"],
+			responseProperties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+				connection_address: { type: "string" },
+				server_name: { type: "string" },
+				server_description: { type: "string" },
+			},
+		}),
 		getTileData: new libLink.Request({
 			type: "gridworld:get_tile_data",
 			links: ["master-slave", "slave-instance"],

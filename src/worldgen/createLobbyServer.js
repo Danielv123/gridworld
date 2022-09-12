@@ -13,8 +13,8 @@ module.exports = async function createLobbyServer(plugin, slaveId, x_size, y_siz
 	instanceConfig.set("instance.auto_start", true);
 	instanceConfig.set("gridworld.is_lobby_server", true);
 	instanceConfig.set("gridworld.grid_id", Math.ceil(Math.random() * 1000));
-	instanceConfig.set("gridworld.x_size", x_size);
-	instanceConfig.set("gridworld.y_size", y_size);
+	instanceConfig.set("gridworld.grid_x_size", x_size);
+	instanceConfig.set("gridworld.grid_y_size", y_size);
 
 	let instanceId = instanceConfig.get("instance.id");
 	if (plugin.master.instances.has(instanceId)) {

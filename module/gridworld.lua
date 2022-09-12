@@ -45,6 +45,9 @@ gridworld.events[clusterio_api.events.on_server_startup] = function()
 	end
 	if global.gridworld.neighbor_data == nil then
 		global.gridworld.neighbor_data = {}
+    end
+	if global.gridworld.factions == nil then
+		global.gridworld.factions = {}
 	end
 end
 gridworld.events[defines.events.on_player_joined_game] = function(event)

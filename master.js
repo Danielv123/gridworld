@@ -6,15 +6,15 @@ const { libLink, libPlugin, libErrors } = require("@clusterio/lib");
 const registerTileServer = require("./src/routes/tileserver");
 
 const getMapDataRequestHandler = require("./src/request_handlers/getMapDataRequestHandler");
-const createRequestHandler = require("./src/request_handlers/createRequestHandler");
 const refreshTileDataRequestHandler = require("./src/request_handlers/refreshTileDataRequestHandler");
 const setPlayerPositionSubscriptionRequestHandler = require("./src/request_handlers/setPlayerPositionSubscriptionRequestHandler");
 const startInstanceRequestHandler = require("./src/request_handlers/startInstanceRequestHandler");
 const createFactionRequestHandler = require("./src/request_handlers/createFactionRequestHandler");
 const updateFactionRequestHandler = require("./src/request_handlers/updateFactionRequestHandler");
 const migrateInstanceCommandRequestHandler = require("./src/instance_migration/migrateInstanceCommandRequestHandler");
-
 const playerPositionEventHandler = require("./src/event_handlers/playerPositionEventHandler");
+const createFactionGridRequestHandler = require("./src/request_handlers/createFactionGridRequestHandler");
+const joinGridworldRequestHandler = require("./src/request_handlers/joinGridworldRequestHandler");
 
 async function loadDatabase(config, filename, logger) {
 	let itemsPath = path.resolve(config.get("master.database_directory"), filename);
@@ -70,7 +70,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 	getMapDataRequestHandler = getMapDataRequestHandler;
 
-	createRequestHandler = createRequestHandler;
+	createRequestHandler = createFactionGridRequestHandler;
 
 	refreshTileDataRequestHandler = refreshTileDataRequestHandler;
 
@@ -83,6 +83,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	updateFactionRequestHandler = updateFactionRequestHandler;
 
 	migrateInstanceCommandRequestHandler = migrateInstanceCommandRequestHandler;
+
+	joinGridworldRequestHandler = joinGridworldRequestHandler;
 
 	async onInstanceStatusChanged(instance) {
 		if (instance.status === "running") {
@@ -147,7 +149,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 	async onShutdown() {
 		clearInterval(this.autosaveId);
-		await saveDatabase(this.master.config, this.gridworldDatastore, this.logger);
+		await saveDatabase(this.master.config, this.gridworldDatastore, "gridworld.json", this.logger);
+		await saveDatabase(this.master.config, this.factionsDatastore, "factions.json", this.logger);
 	}
 }
 

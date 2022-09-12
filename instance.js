@@ -36,6 +36,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				`Error updating faction:\n${err.stack}`
 			));
 		});
+		this.instance.server.on("ipc-gridworld:join_gridworld", data => {
+			this.joinGridworld(data).catch(err => this.logger.error(
+				`Error joining gridworld:\n${err.stack}`
+			));
+		});
 	}
 
 	async onStart() {
@@ -174,6 +179,25 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		await new Promise(r => setTimeout(r, 500));
 		// Navigate to updated faction screen
 		await this.sendRcon(`/sc gridworld.open_faction_admin_screen("${data.player_name}","${data.faction_id}")`);
+	}
+
+	async joinGridworld(data) {
+		// Show received progress in game
+		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Finding server", "Loading world", 1, 3)`);
+
+		let response = await this.info.messages.joinGridworld.send(this.instance, {
+			player_name: data.player_name,
+			grid_id: this.instance.config.get("gridworld.grid_id"),
+		});
+
+		// Show completed progress in game
+		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Joining gridworld", "${response.message}", 3, 3)`);
+		await new Promise(r => setTimeout(r, 500));
+
+		// Connect to new server
+		const command = `/sc game.players["${data.player_name}"].connect_to_server({address="${response.connection_address}", name="${response.server_name}", description="${response.server_description}"})`;
+		// this.logger.info(`Sending command to server: ${command}`);
+		await this.sendRcon(command);
 	}
 
 	async getTileDataRequestHandler(message) {

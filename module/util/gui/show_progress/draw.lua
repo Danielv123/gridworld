@@ -51,8 +51,7 @@ local function draw_show_progress(player_name, header, text, progress, max_progr
 				type = "flow",
 				{
 					type = "progressbar",
-					value = progress,
-					max_value = max_progress,
+					value = progress / max_progress,
 					style = "frame_progressbar",
 				},
 				{
