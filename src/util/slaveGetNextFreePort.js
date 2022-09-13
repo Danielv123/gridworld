@@ -9,7 +9,7 @@ module.exports = function slaveGetNextFreePort(master, slave_id) {
 	// Find next free port
 	let port = lowestPort;
 	function portIsInUse() {
-		return mapFind(instances, instance => instance.game_port === port || instance.config.get("factorio.game_port") === slave_id);
+		return mapFind(instances, instance => instance.game_port === port || instance.config.get("factorio.game_port") === port);
 	}
 	while (portIsInUse()) {
 		port += 1;
