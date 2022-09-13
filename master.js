@@ -15,6 +15,7 @@ const migrateInstanceCommandRequestHandler = require("./src/instance_migration/m
 const playerPositionEventHandler = require("./src/event_handlers/playerPositionEventHandler");
 const createFactionGridRequestHandler = require("./src/request_handlers/createFactionGridRequestHandler");
 const joinGridworldRequestHandler = require("./src/request_handlers/joinGridworldRequestHandler");
+const performEdgeTeleportRequestHandler = require("./src/request_handlers/performEdgeTeleportRequestHandler");
 
 async function loadDatabase(config, filename, logger) {
 	let itemsPath = path.resolve(config.get("master.database_directory"), filename);
@@ -85,6 +86,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	migrateInstanceCommandRequestHandler = migrateInstanceCommandRequestHandler;
 
 	joinGridworldRequestHandler = joinGridworldRequestHandler;
+
+	performEdgeTeleportRequestHandler = performEdgeTeleportRequestHandler;
 
 	async onInstanceStatusChanged(instance) {
 		if (instance.status === "running") {

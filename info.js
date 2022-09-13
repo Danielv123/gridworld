@@ -106,6 +106,18 @@ libUsers.definePermission({
 	description: "Load tile data from factorio and recreate images for web interface map",
 	grantByDefault: true,
 });
+libUsers.definePermission({
+	name: "gridworld.map.create_by_exploration",
+	title: "Create servers by exploration",
+	description: "Allow for new instances to be created by exploration through edge_teleports",
+	grantByDefault: true,
+});
+libUsers.definePermission({
+	name: "gridworld.map.start_by_exploration",
+	title: "Start servers by exploration",
+	description: "Allow for existing instances to be started by exploration through edge_teleports",
+	grantByDefault: true,
+});
 
 module.exports = {
 	name: "gridworld",
@@ -286,6 +298,26 @@ module.exports = {
 				connection_address: { type: "string" },
 				server_name: { type: "string" },
 				server_description: { type: "string" },
+			},
+		}),
+		performEdgeTeleport: new libLink.Request({
+			type: "gridworld:perform_edge_teleport",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				player_name: { type: "string" },
+				player_x_position: { type: "number" },
+				player_y_position: { type: "number" },
+				grid_id: { type: "integer" },
+			},
+			responseRequired: ["ok", "message"],
+			responseProperties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+				connection_address: { type: "string" },
+				server_name: { type: "string" },
+				server_description: { type: "string" },
+				instance_id: { type: "integer" },
 			},
 		}),
 		getTileData: new libLink.Request({

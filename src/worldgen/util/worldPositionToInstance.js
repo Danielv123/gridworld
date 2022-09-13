@@ -14,8 +14,8 @@ function worldPositionToInstance(x, y, grid_id, instances) {
 	const grid_x_size = lobby_server.config.get("gridworld.grid_x_size");
 	const grid_y_size = lobby_server.config.get("gridworld.grid_y_size");
 
-	const grid_x_position = Math.floor(x / grid_x_size);
-	const grid_y_position = Math.floor(y / grid_y_size);
+	const grid_x_position = Math.floor(x / grid_x_size) + 1;
+	const grid_y_position = Math.floor(y / grid_y_size) + 1;
 
 	return {
 		x,

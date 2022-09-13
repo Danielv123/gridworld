@@ -29,7 +29,7 @@ module.exports = async function joinGridworldRequestHandler(message, request, li
 	for (let instance of instances) {
 		const instance_id = instance[1].config.get("instance.id");
 		const instance_stats = player.instanceStats.get(instance_id);
-		if (Math.max(instance_stats.last_join_at, instance_stats.last_leave_at) > last_visited_instance_time) {
+		if (instance_stats && Math.max(instance_stats.last_join_at, instance_stats.last_leave_at) > last_visited_instance_time) {
 			last_visited_instance = instance[1];
 			last_visited_instance_time = Math.max(instance_stats.last_join_at, instance_stats.last_leave_at);
 		}
