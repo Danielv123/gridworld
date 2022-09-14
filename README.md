@@ -2,12 +2,14 @@
 
 Automatic gridworld configuration
 
+## [Documentation and FAQ](docs/docs.md)
+
+## Installation
+
 Dependencies:
 
 * https://www.npmjs.com/package/@hornwitser/server_select
 * https://www.npmjs.com/package/@clusterio/plugin-edge_transports
-
-## Installation
 
 Run the following commands in the folder Clusterio is installed to:
 

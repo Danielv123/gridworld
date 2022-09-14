@@ -1,14 +1,6 @@
 # Worldgen - server creation and linking
 
-When creating a new gridworld, only a lobby server is generated. The game worlds are generated on demand as players move around the world. This is a central part of the gridworld faction scenario.
-
-## Event flow (user perspective)
-
-An user joins the gridworld lobby and creates a new faction, then joins the game.
-Pressing the join game button sends a message to the master. It tries to determine the spawn point for the user. If the user hasn't spawned in before it will use the default spawn point of the faction. If the user has spawned in before it will use the last known spawn point.
-
-The spawn point is in absolute coordinates. This is translated to server coordinates using the grid settings of the cluster with a utility function. If the resulting server doesn't exist already it is generated, then the user is prompted to join it using the join_server API.
-Walking to the edge of any server prompts a similar process, except if the server isn't already generated the user will be prompted first.
+This page describes the internal workings of the server creation and linking system. It is not intended for end users. For an overview of server generation, see [generate server](factionGrid/generate%20server.md).
 
 ## Messages
 

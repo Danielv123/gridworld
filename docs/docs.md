@@ -22,15 +22,19 @@ Far fetched goals:
 The current version of the plugin has the following flow:
 
 1. Installation
-2. User clicks "create gridworld" and enters their preferred size and server count
-3. The plugin creates a cluster of servers
-4. The user click "create map"
-5. The plugin starts each server in order, dumps tiles and populates the web map
+1. User clicks "create new gridworld" and enters their preferred grid cell size and the slave used to host the lobby server
+1. User clicks "create gridworld"
+1. The plugin creates a lobby server with a new grid_id
+the web map
 
 The following improvements should be made:
 
-* Creating a gridworld should only create the lobby. The rest of the servers should be created and be configured on demand as the player attempts to join a server from the lobby or by walking to the edge of the map.
 * The map on the website should do partial updates as new tiles are generated/placed in the world.
+
+After the above steps are performed the gridworld is ready for sharing with the world. The following docs covers the rest of the backend and runtime details:
+
+* [Factions overview](factions/factions%20overview.md)
+* [Worldgen overview](worldgen/worldgen%20overview.md)
 
 ## Development setup
 
