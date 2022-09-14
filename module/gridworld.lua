@@ -45,6 +45,9 @@ gridworld.events[clusterio_api.events.on_server_startup] = function()
 	end
 	if global.gridworld.neighbor_data == nil then
 		global.gridworld.neighbor_data = {}
+    end
+	if global.gridworld.factions == nil then
+		global.gridworld.factions = {}
 	end
 end
 gridworld.events[defines.events.on_player_joined_game] = function(event)
@@ -134,6 +137,7 @@ end
 gridworld.create_world_limit = create_world_limit
 gridworld.create_spawn = create_spawn
 gridworld.populate_neighbor_data = populate_neighbor_data
+gridworld.prepare_teleport_data = edge_teleport.prepare_teleport_data
 gridworld.receive_teleport_data = edge_teleport.receive_teleport_data
 gridworld.dump_mapview = map.dump_mapview
 gridworld.ask_for_teleport = edge_teleport.ask_for_teleport

@@ -36,6 +36,16 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				`Error updating faction:\n${err.stack}`
 			));
 		});
+		this.instance.server.on("ipc-gridworld:join_gridworld", data => {
+			this.joinGridworld(data).catch(err => this.logger.error(
+				`Error joining gridworld:\n${err.stack}`
+			));
+		});
+		this.instance.server.on("ipc-gridworld:perform_edge_teleport", data => {
+			this.performEdgeTeleport(data).catch(err => this.logger.error(
+				`Error performing edge teleport:\n${err.stack}`
+			));
+		});
 	}
 
 	async onStart() {
@@ -51,6 +61,7 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			const { map_data } = await this.info.messages.getMapData.send(this.instance);
 			await this.sendRcon(`/sc gridworld.register_map_data('${JSON.stringify(map_data)}')`);
 		} else {
+			await this.sendRcon("/sc global.disable_crashsite = true");
 			await this.sendRcon(`/sc gridworld.create_world_limit("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
 			await this.sendRcon(`/sc gridworld.create_spawn("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
 		}
@@ -174,6 +185,59 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		await new Promise(r => setTimeout(r, 500));
 		// Navigate to updated faction screen
 		await this.sendRcon(`/sc gridworld.open_faction_admin_screen("${data.player_name}","${data.faction_id}")`);
+	}
+
+	async joinGridworld(data) {
+		// Show received progress in game
+		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Finding server", "Loading world", 1, 3)`);
+
+		let response = await this.info.messages.joinGridworld.send(this.instance, {
+			player_name: data.player_name,
+			grid_id: this.instance.config.get("gridworld.grid_id"),
+		});
+
+		// Show completed progress in game
+		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Joining gridworld", "${response.message}", 3, 3)`);
+		await new Promise(r => setTimeout(r, 500));
+
+		// Connect to new server
+		const command = `/sc game.players["${data.player_name}"].connect_to_server({address="${response.connection_address}", name="${response.server_name}", description="${response.server_description}"})`;
+		// this.logger.info(`Sending command to server: ${command}`);
+		await this.sendRcon(command);
+	}
+
+	/**
+	 * Triggered when a player walks to the edge of a server. Prepare the destination server and prompt for teleport.
+	 * @param {object} data - Data sent by the game
+	 * @param {string} data.player_name - Name of the player
+	 * @param {number} data.player_x_position - X position of the player
+	 * @param {number} data.player_y_position - Y position of the player
+	 */
+	async performEdgeTeleport(data) {
+		const response = await this.info.messages.performEdgeTeleport.send(this.instance, {
+			player_name: data.player_name,
+			player_x_position: data.player_x_position,
+			player_y_position: data.player_y_position,
+			grid_id: this.instance.config.get("gridworld.grid_id"),
+		});
+
+		if (response.ok) {
+			// Prepare server in case the player accepts the teleport
+			let teleport_data = {
+				player_name: data.player_name,
+				instance_id: response.instance_id,
+				x: data.player_x_position,
+				y: data.player_y_position,
+			};
+			await this.sendRcon(`/sc gridworld.prepare_teleport_data('${JSON.stringify(teleport_data)}')`);
+			// Ask player to connect to new server
+			const command = `/sc game.players["${data.player_name}"].connect_to_server({address="${response.connection_address}", name="${response.server_name}", description="${response.server_description}"})`;
+			// this.logger.info(`Sending command to server: ${command}`);
+			await this.sendRcon(command);
+		} else {
+			await this.sendRcon(`/sc game.print("Failed to teleport: ${response.message}")`);
+			this.logger.error(`Failed to teleport: ${response.message}`);
+		}
 	}
 
 	async getTileDataRequestHandler(message) {

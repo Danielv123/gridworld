@@ -7,3 +7,6 @@ dist/
 
 # Binary files
 bin/
+
+# Log files
+*.log

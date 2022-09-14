@@ -1,10 +1,10 @@
 {
 	"folders": [
 		{
-			"path": "/factorioClusterio/external_plugins/gridworld"
+			"path": "."
 		},
 		{
-			"path": "/factorioClusterio"
+			"path": "../.."
 		}
 	],
 	"settings": {}

@@ -1,15 +1,21 @@
 "use strict";
 const fs = require("fs-extra");
 const path = require("path");
-const sharp = require("sharp");
 
-const { libConfig, libLink } = require("@clusterio/lib");
-const libPlugin = require("@clusterio/lib/plugin");
-const libErrors = require("@clusterio/lib/errors");
-const loadMapSettings = require("./src/loadMapSettings");
-const info = require("./info");
+const { libLink, libPlugin, libErrors } = require("@clusterio/lib");
 const registerTileServer = require("./src/routes/tileserver");
-const { zoomOutLevel } = require("./src/tileZoomFunctions");
+
+const getMapDataRequestHandler = require("./src/request_handlers/getMapDataRequestHandler");
+const refreshTileDataRequestHandler = require("./src/request_handlers/refreshTileDataRequestHandler");
+const setPlayerPositionSubscriptionRequestHandler = require("./src/request_handlers/setPlayerPositionSubscriptionRequestHandler");
+const startInstanceRequestHandler = require("./src/request_handlers/startInstanceRequestHandler");
+const createFactionRequestHandler = require("./src/request_handlers/createFactionRequestHandler");
+const updateFactionRequestHandler = require("./src/request_handlers/updateFactionRequestHandler");
+const migrateInstanceCommandRequestHandler = require("./src/instance_migration/migrateInstanceCommandRequestHandler");
+const playerPositionEventHandler = require("./src/event_handlers/playerPositionEventHandler");
+const createFactionGridRequestHandler = require("./src/request_handlers/createFactionGridRequestHandler");
+const joinGridworldRequestHandler = require("./src/request_handlers/joinGridworldRequestHandler");
+const performEdgeTeleportRequestHandler = require("./src/request_handlers/performEdgeTeleportRequestHandler");
 
 async function loadDatabase(config, filename, logger) {
 	let itemsPath = path.resolve(config.get("master.database_directory"), filename);
@@ -61,6 +67,28 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		this.subscribedControlLinks = new Set();
 	}
 
+	playerPositionEventHandler = playerPositionEventHandler;
+
+	getMapDataRequestHandler = getMapDataRequestHandler;
+
+	createRequestHandler = createFactionGridRequestHandler;
+
+	refreshTileDataRequestHandler = refreshTileDataRequestHandler;
+
+	setPlayerPositionSubscriptionRequestHandler = setPlayerPositionSubscriptionRequestHandler;
+
+	startInstanceRequestHandler = startInstanceRequestHandler;
+
+	createFactionRequestHandler = createFactionRequestHandler;
+
+	updateFactionRequestHandler = updateFactionRequestHandler;
+
+	migrateInstanceCommandRequestHandler = migrateInstanceCommandRequestHandler;
+
+	joinGridworldRequestHandler = joinGridworldRequestHandler;
+
+	performEdgeTeleportRequestHandler = performEdgeTeleportRequestHandler;
+
 	async onInstanceStatusChanged(instance) {
 		if (instance.status === "running") {
 			let instanceId = instance.config.get("instance.id");
@@ -81,359 +109,6 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 					&& z[1].config.get("gridworld.grid_y_position") === y)?.[0] || null,
 			});
 		}
-	}
-
-	async getMapDataRequestHandler() {
-		const instances = [...this.master.instances]
-			.filter(instance => instance[1].config.get("gridworld.is_lobby_server") === false);
-		return {
-			map_data: instances.map(instance => ({
-				instance_id: instance[1].config.get("instance.id"),
-				center: [
-					(instance[1].config.get("gridworld.grid_x_position") - 1) *
-					instance[1].config.get("gridworld.grid_x_size") +
-					instance[1].config.get("gridworld.grid_x_size") / 2,
-					(instance[1].config.get("gridworld.grid_y_position") - 1) *
-					instance[1].config.get("gridworld.grid_y_size") +
-					instance[1].config.get("gridworld.grid_y_size") / 2,
-				],
-				bounds: [
-					[ // Top left
-						(instance[1].config.get("gridworld.grid_x_position") - 1) *
-						instance[1].config.get("gridworld.grid_x_size"),
-						(instance[1].config.get("gridworld.grid_y_position") - 1) *
-						instance[1].config.get("gridworld.grid_y_size"),
-					], [ // Bottom left
-						(instance[1].config.get("gridworld.grid_x_position") - 1) *
-						instance[1].config.get("gridworld.grid_x_size"),
-						instance[1].config.get("gridworld.grid_y_position") *
-						instance[1].config.get("gridworld.grid_y_size"),
-					], [ // Bottom right
-						instance[1].config.get("gridworld.grid_x_position") *
-						instance[1].config.get("gridworld.grid_x_size"),
-						instance[1].config.get("gridworld.grid_y_position") *
-						instance[1].config.get("gridworld.grid_y_size"),
-					], [ // Top right
-						instance[1].config.get("gridworld.grid_x_position") *
-						instance[1].config.get("gridworld.grid_x_size"),
-						(instance[1].config.get("gridworld.grid_y_position") - 1) *
-						instance[1].config.get("gridworld.grid_y_size"),
-					],
-				],
-				edges: instance[1].config.get("edge_transports.internal").edges,
-			})),
-		};
-	}
-
-	_getEdges({
-		message,
-		worldfactor_x,
-		worldfactor_y,
-		x_size,
-		y_size,
-		x,
-		y,
-		instances,
-	}) {
-		let edges = [];
-		// Edge indexes: 1 = north, 2 = east, 3 = south, 4 = west
-		// Northern edge
-		if (y > 1) {
-			edges.push({
-				id: 1,
-				origin: [worldfactor_x, worldfactor_y],
-				surface: 1,
-				direction: 0, // East
-				length: x_size,
-				target_instance: instances.find(instance => instance.x === x && instance.y === y - 1).instanceId,
-				target_edge: 3,
-			});
-		}
-		// Southern edge
-		if (y < message.data.y_count) {
-			edges.push({
-				id: 3,
-				origin: [x_size + worldfactor_x, y_size + worldfactor_y],
-				surface: 1,
-				direction: 4, // West
-				length: x_size,
-				target_instance: instances.find(instance => instance.x === x && instance.y === y + 1).instanceId,
-				target_edge: 1,
-			});
-		}
-		// Eastern edge
-		if (x < message.data.x_count) {
-			edges.push({
-				id: 2,
-				origin: [x_size + worldfactor_x, worldfactor_y],
-				surface: 1,
-				direction: 2, // South
-				length: y_size,
-				target_instance: instances.find(instance => instance.x === x + 1 && instance.y === y).instanceId,
-				target_edge: 4,
-			});
-		}
-		// Western edge
-		if (x > 1) {
-			edges.push({
-				id: 4,
-				origin: [worldfactor_x, y_size + worldfactor_y],
-				surface: 1,
-				direction: 6, // North
-				length: y_size,
-				target_instance: instances.find(instance => instance.x === x - 1 && instance.y === y).instanceId,
-				target_edge: 2,
-			});
-		}
-		return edges;
-	}
-
-	async createRequestHandler(message) {
-		// message.data === {
-		// name_prefix: "Gridworld",
-		// use_edge_transports: true,
-		// x_size: 500, y_size: 500,
-		// x_count: 2, y_count: 2,
-		// slave: slave_id
-		// }
-		// Create a new gridworld.
-		let instances = [];
-
-		if (!message.data.use_edge_transports) { return; }
-		const lobby_server = await this.createLobbyServer(message.data.slave);
-		try {
-			for (let x = 1; x <= message.data.x_count; x++) {
-				for (let y = 1; y <= message.data.y_count; y++) {
-					// Create instance
-					let instance = {
-						instanceId: await this.createInstance(
-							`${message.data.name_prefix} x${x} y${y}`,
-							x,
-							y,
-							message.data.x_size,
-							message.data.y_size,
-							lobby_server.config.get("gridworld.grid_id"),
-						),
-						x,
-						y,
-						slaveId: message.data.slave,
-					};
-					// Assign instance to a slave (using first slave as a placeholder)
-					await this.assignInstance(instance.instanceId, instance.slaveId);
-
-					// Create map
-					await this.createSave(
-						instance.instanceId,
-						this.master.config.get("gridworld.gridworld_seed"),
-						this.master.config.get("gridworld.gridworld_map_exchange_string")
-					);
-
-					instances.push(instance);
-				}
-			}
-			// Create edges and configure edge_transports
-			if (!message.data.use_edge_transports) { return; }
-			for (let x = 1; x <= message.data.x_count; x++) {
-				for (let y = 1; y <= message.data.y_count; y++) {
-					// Create edges and add to edge_transports settings
-					let instanceTemplate = instances.find(instance => instance.x === x && instance.y === y);
-					let field = "edge_transports.internal";
-					let value = {
-						edges: [],
-					};
-
-					// x positive is right
-					// y positive is down
-
-					let worldfactor_x = (x - 1) * message.data.x_size;
-					let worldfactor_y = (y - 1) * message.data.y_size;
-
-					let edges = this._getEdges({
-						message,
-						worldfactor_x,
-						worldfactor_y,
-						x_size: message.data.x_size,
-						y_size: message.data.y_size,
-						x,
-						y,
-						instances,
-					});
-
-					value.edges.push(...edges);
-
-					// Update instance with edges
-					await this.setInstanceConfigField(instanceTemplate.instanceId, field, value);
-				}
-			}
-		} catch (e) {
-			this.logger.error(e);
-		}
-	}
-
-	async createLobbyServer(slaveId) {
-		// Create instance
-		this.logger.info("Creating lobby server");
-		const name = "Gridworld lobby server";
-		let instanceConfig = new libConfig.InstanceConfig("master");
-		await instanceConfig.init();
-		instanceConfig.set("instance.name", name);
-		instanceConfig.set("instance.auto_start", true);
-		instanceConfig.set("gridworld.is_lobby_server", true);
-		instanceConfig.set("gridworld.grid_id", Math.ceil(Math.random() * 1000));
-
-		let instanceId = instanceConfig.get("instance.id");
-		if (this.master.instances.has(instanceId)) {
-			throw new libErrors.RequestError(`Instance with ID ${instanceId} already exists`);
-		}
-
-		// Add common settings for the Factorio server
-		let settings = {
-			...instanceConfig.get("factorio.settings"),
-
-			"name": `${this.master.config.get("master.name")} - ${name}`,
-			"description": `Clusterio instance for ${this.master.config.get("master.name")}`,
-			"tags": ["clusterio", "gridworld"],
-			"max_players": 0,
-			"visibility": { "public": true, "lan": true },
-			"username": "",
-			"token": "",
-			"game_password": "",
-			"require_user_verification": true,
-			"max_upload_in_kilobytes_per_second": 0,
-			"max_upload_slots": 5,
-			"ignore_player_limit_for_returning_players": false,
-			"allow_commands": "admins-only",
-			"autosave_interval": 10,
-			"autosave_slots": 1,
-			"afk_autokick_interval": 0,
-			"auto_pause": false,
-			"only_admins_can_pause_the_game": true,
-			"autosave_only_on_server": true,
-		};
-		instanceConfig.set("factorio.settings", settings);
-
-		let instance = { config: instanceConfig, status: "unassigned" };
-		this.master.instances.set(instanceId, instance);
-		await libPlugin.invokeHook(this.master.plugins, "onInstanceStatusChanged", instance, null);
-		this.master.addInstanceHooks(instance);
-		const instance_id = instanceConfig.get("instance.id");
-		// Assign instance to a slave (using first slave as a placeholder)
-		await this.assignInstance(instance_id, slaveId);
-
-		// Create map
-		await this.createSave(
-			instance_id,
-			this.master.config.get("gridworld.gridworld_seed"),
-			this.master.config.get("gridworld.gridworld_map_exchange_string")
-		);
-		return instance;
-	}
-
-	async createInstance(name, x, y, x_size, y_size, grid_id) {
-		this.logger.info("Creating instance", name);
-		let instanceConfig = new libConfig.InstanceConfig("master");
-		await instanceConfig.init();
-		instanceConfig.set("instance.name", name);
-		instanceConfig.set("gridworld.grid_x_position", x);
-		instanceConfig.set("gridworld.grid_y_position", y);
-		instanceConfig.set("gridworld.grid_x_size", x_size);
-		instanceConfig.set("gridworld.grid_y_size", y_size);
-
-		let instanceId = instanceConfig.get("instance.id");
-		if (this.master.instances.has(instanceId)) {
-			throw new libErrors.RequestError(`Instance with ID ${instanceId} already exists`);
-		}
-
-		// Add common settings for the Factorio server
-		let settings = {
-			...instanceConfig.get("factorio.settings"),
-
-			"name": `${this.master.config.get("master.name")} - ${name}`,
-			"description": `Clusterio instance for ${this.master.config.get("master.name")}`,
-			"tags": ["clusterio"],
-			"max_players": 0,
-			"visibility": { "public": true, "lan": true },
-			"username": "",
-			"token": "",
-			"game_password": "",
-			"require_user_verification": true,
-			"max_upload_in_kilobytes_per_second": 0,
-			"max_upload_slots": 5,
-			"ignore_player_limit_for_returning_players": false,
-			"allow_commands": "admins-only",
-			"autosave_interval": 10,
-			"autosave_slots": 5,
-			"afk_autokick_interval": 0,
-			"auto_pause": false,
-			"only_admins_can_pause_the_game": true,
-			"autosave_only_on_server": true,
-		};
-		instanceConfig.set("factorio.settings", settings);
-
-		let instance = { config: instanceConfig, status: "unassigned" };
-		this.master.instances.set(instanceId, instance);
-		await libPlugin.invokeHook(this.master.plugins, "onInstanceStatusChanged", instance, null);
-		this.master.addInstanceHooks(instance);
-		return instanceConfig.get("instance.id");
-	}
-
-	async assignInstance(instance_id, slave_id) {
-		// Code lifted from ControlConnection.js assignInstanceCommandRequestHandler()
-		let instance = this.master.instances.get(instance_id);
-		if (!instance) {
-			throw new libErrors.RequestError(`Instance with ID ${instance_id} does not exist`);
-		}
-
-		// Check if target slave is connected
-		let newSlaveConnection;
-		if (slave_id !== null) {
-			newSlaveConnection = this.master.wsServer.slaveConnections.get(slave_id);
-			if (!newSlaveConnection) {
-				// The case of the slave not getting the assign instance message
-				// still have to be handled, so it's not a requirement that the
-				// target slave be connected to the master while doing the
-				// assignment, but it is IMHO a better user experience if this
-				// is the case.
-				throw new libErrors.RequestError("Target slave is not connected to the master server");
-			}
-		}
-
-		// Unassign from currently assigned slave if it is connected.
-		let currentAssignedSlave = instance.config.get("instance.assigned_slave");
-		if (currentAssignedSlave !== null && slave_id !== currentAssignedSlave) {
-			let oldSlaveConnection = this.master.wsServer.slaveConnections.get(currentAssignedSlave);
-			if (oldSlaveConnection && !oldSlaveConnection.connector.closing) {
-				await libLink.messages.unassignInstance.send(oldSlaveConnection, { instance_id });
-			}
-		}
-
-		// Assign to target
-		instance.config.set("instance.assigned_slave", slave_id);
-		if (slave_id !== null) {
-			await libLink.messages.assignInstance.send(newSlaveConnection, {
-				instance_id,
-				serialized_config: instance.config.serialize("slave"),
-			});
-		}
-	}
-
-	async createSave(instance_id, seed_orig, mapExchangeString) {
-		let instance = this.master.instances.get(instance_id);
-		let slave_id = instance.config.get("instance.assigned_slave");
-
-		let { seed, mapGenSettings, mapSettings } = await loadMapSettings({
-			seed: seed_orig,
-			mapExchangeString,
-		});
-
-		let slaveConnection = this.master.wsServer.slaveConnections.get(slave_id);
-		return await libLink.messages.createSave.send(slaveConnection, {
-			instance_id,
-			name: "Gridworld",
-			seed,
-			map_gen_settings: mapGenSettings,
-			map_settings: mapSettings,
-		});
 	}
 
 	async setInstanceConfigField(instanceId, field, value) {
@@ -469,205 +144,6 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 		}
 	}
 
-	async refreshTileDataRequestHandler(message) {
-		let instance = this.master.instances.get(message.data.instance_id);
-		if (!instance) {
-			throw new libErrors.RequestError(`Instance with ID ${message.data.instance_id} does not exist`);
-		}
-
-		let slaveId = instance.config.get("instance.assigned_slave");
-		if (!slaveId) {
-			throw new libErrors.RequestError("Instance is not assigned to a slave");
-		}
-
-		let slaveConnection = this.master.wsServer.slaveConnections.get(slaveId);
-		if (!slaveConnection) {
-			throw new libErrors.RequestError("Instance is assigned to a slave that is not connected");
-		}
-
-		// If the instance is stopped, temporarily start it.
-		let originalStatus = instance.status;
-		if (instance.status === "stopped") {
-			// Start instance
-			await libLink.messages.startInstance.send(slaveConnection, {
-				instance_id: message.data.instance_id,
-				save: null,
-			});
-		}
-
-		// Get bounds
-		const world_x = instance.config.get("gridworld.grid_x_position");
-		const world_y = instance.config.get("gridworld.grid_y_position");
-		const x_size = instance.config.get("gridworld.grid_x_size");
-		const y_size = instance.config.get("gridworld.grid_y_size");
-
-		// Scan as chunks
-		let chunks = [];
-		const CHUNK_SIZE = 512; // About 1kb per chunk
-		for (let x = 0; x < x_size; x += CHUNK_SIZE) {
-			if (x > x_size) { break; }
-			for (let y = 0; y < y_size; y += CHUNK_SIZE) {
-				if (y > y_size) { break; }
-				chunks.push({
-					position_a: [
-						((world_x - 1) * x_size + x),
-						((world_y - 1) * y_size + y),
-					],
-					position_b: [
-						((world_x - 1) * x_size + x + CHUNK_SIZE),
-						((world_y - 1) * y_size + y + CHUNK_SIZE),
-					],
-				});
-			}
-		}
-		for (let i = 0; i < chunks.length; i++) {
-			let chunk = chunks[i];
-
-			let data = await info.messages.getTileData.send(slaveConnection, {
-				instance_id: message.data.instance_id,
-				...chunk,
-			});
-
-			// Flip horizontal
-			let flippedData = [];
-			for (let y = 0; y < data.tile_data.length; y += CHUNK_SIZE) {
-				let row = data.tile_data.slice(y, y + CHUNK_SIZE);
-				let flippedRow = row.reverse();
-				flippedData.push(flippedRow);
-			}
-
-			// Rotate tile counterclockwise
-			let rotatedData = [];
-			for (let x = 0; x < CHUNK_SIZE; x++) {
-				rotatedData.push([]);
-			}
-			for (let x = 0; x < flippedData.length; x++) {
-				for (let y = 0; y < flippedData[x].length; y++) {
-					rotatedData[y][x] = flippedData[x][y];
-				}
-			}
-
-			// Flip vertical
-			data.tile_data = rotatedData.reverse().flat();
-
-			// Create raw array of pixels
-			let rawPixels = Uint8Array.from(
-				data.tile_data.map(tile => [Number(`0x${tile.slice(0, 2)}`), Number(`0x${tile.slice(2, 4)}`), Number(`0x${tile.slice(4, 6)}`), 255]).flat()
-			);
-
-			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE);// + 512); // 512 at zoom level 10
-			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE);// + 512);
-
-			let filename = `z10x${x_pos}y${y_pos}.png`;
-			// Create image from tile data
-			let image = await sharp(rawPixels, {
-				raw: {
-					width: CHUNK_SIZE,
-					height: CHUNK_SIZE,
-					channels: 4,
-				},
-			});
-			await image.toFile(path.resolve(this._tilesPath, filename));
-			// console.log("Processed image", filename);
-
-			// Create zoomed in versions
-			// await zoomInLevel({
-			// currentZoomLevel: 10,
-			// targetZoomLevel: 14,
-			// parentX: x_pos,
-			// parentY: y_pos,
-			// CHUNK_SIZE,
-			// tilePath: this._tilesPath,
-			// filename,
-			// });
-		}
-		if (originalStatus === "stopped") {
-			// Stop instance again
-			await libLink.messages.stopInstance.send(slaveConnection, {
-				instance_id: message.data.instance_id,
-			});
-		}
-		// Create zoomed out tiles
-		for (let i = 0; i < chunks.length; i++) {
-			let chunk = chunks[i];
-			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE);// + 512); // 512 at zoom level 10
-			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE);// + 512);
-			try {
-				await zoomOutLevel({
-					currentZoomLevel: 10,
-					targetZoomLevel: 7,
-					parentX: x_pos - (x_pos % 2),
-					parentY: y_pos - (y_pos % 2),
-					CHUNK_SIZE,
-					tilePath: this._tilesPath,
-				});
-			} catch (e) { }
-		}
-	}
-
-	async playerPositionEventHandler(message) {
-		// Broadcast player position from instance to web interface
-		// TODO: Save position on master and broadcast full list on connect.
-		// TODO: Don't broadcast individual events unless position has changed.
-		for (let link of this.subscribedControlLinks) {
-			this.info.messages.playerPosition.send(link, message.data);
-		}
-	}
-
-	async setPlayerPositionSubscriptionRequestHandler(message, request, link) {
-		if (message.data.player_position) {
-			this.subscribedControlLinks.add(link);
-		} else {
-			this.subscribedControlLinks.delete(link);
-		}
-	}
-
-	async startInstanceRequestHandler(message, request, link) {
-		return libLink.messages.startInstance.send(link, message.data);
-	}
-
-	async createFactionRequestHandler(message, request, link) {
-		const new_faction = {
-			faction_id: message.data.faction_id,
-			name: message.data.name,
-			open: message.data.open,
-			members: message.data.members,
-			about: message.data.about,
-		};
-		this.factionsDatastore.set(message.data.faction_id, new_faction);
-		return {
-			ok: true,
-			faction: new_faction,
-		};
-	}
-
-	async updateFactionRequestHandler(message, request, link) {
-		const faction = this.factionsDatastore.get(message.data.faction_id);
-		if (faction) {
-			faction.name = message.data.name;
-			faction.open = message.data.open;
-			faction.about = message.data.about;
-			this.factionsDatastore.set(message.data.faction_id, faction);
-
-			// Propagate changes to all online instances
-			for (let instance in this.master.instances) {
-				// TODO: Find a way to send the updated faction to all online gridworld instances included lobby server
-				// 1. Use gridworld config?
-				// 2. Loop over all instances on the master?
-			}
-
-			return {
-				ok: true,
-				message: "Faction updated",
-				faction: faction,
-			};
-		}
-		return {
-			ok: false,
-			message: "Faction not found",
-		};
-	}
-
 	onControlConnectionEvent(connection, event) {
 		if (event === "close") {
 			this.subscribedControlLinks.delete(connection);
@@ -676,7 +152,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 	async onShutdown() {
 		clearInterval(this.autosaveId);
-		await saveDatabase(this.master.config, this.gridworldDatastore, this.logger);
+		await saveDatabase(this.master.config, this.gridworldDatastore, "gridworld.json", this.logger);
+		await saveDatabase(this.master.config, this.factionsDatastore, "factions.json", this.logger);
 	}
 }
 
