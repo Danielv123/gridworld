@@ -67,58 +67,29 @@ module.exports = async function refreshTileDataRequestHandler(message) {
 			...chunk,
 		});
 
-		// Flip horizontal
-		let flippedData = [];
-		for (let y = 0; y < data.tile_data.length; y += CHUNK_SIZE) {
-			let row = data.tile_data.slice(y, y + CHUNK_SIZE);
-			let flippedRow = row.reverse();
-			flippedData.push(flippedRow);
+		if (data.tile_data[0].includes("Cannot execute command")) {
+			this.logger.warn(`Getting tile data failed for instance ${message.data.instance_id} at ${chunk.position_a} to ${chunk.position_b} with error: ${data.tile_data[0]}`);
+		} else {
+			// Create raw array of pixels
+			let rawPixels = Uint8Array.from(
+				data.tile_data.map(tile => [Number(`0x${tile.slice(0, 2)}`), Number(`0x${tile.slice(2, 4)}`), Number(`0x${tile.slice(4, 6)}`), 255]).flat()
+			);
+
+			let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE);// + 512); // 512 at zoom level 10
+			let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE);// + 512);
+
+			let filename = `z10x${x_pos}y${y_pos}.png`;
+			// Create image from tile data
+			let image = await sharp(rawPixels, {
+				raw: {
+					width: CHUNK_SIZE,
+					height: CHUNK_SIZE,
+					channels: 4,
+				},
+			});
+			await image.toFile(path.resolve(this._tilesPath, filename));
+			// console.log("Processed image", filename);
 		}
-
-		// Rotate tile counterclockwise
-		let rotatedData = [];
-		for (let x = 0; x < CHUNK_SIZE; x++) {
-			rotatedData.push([]);
-		}
-		for (let x = 0; x < flippedData.length; x++) {
-			for (let y = 0; y < flippedData[x].length; y++) {
-				rotatedData[y][x] = flippedData[x][y];
-			}
-		}
-
-		// Flip vertical
-		data.tile_data = rotatedData.reverse().flat();
-
-		// Create raw array of pixels
-		let rawPixels = Uint8Array.from(
-			data.tile_data.map(tile => [Number(`0x${tile.slice(0, 2)}`), Number(`0x${tile.slice(2, 4)}`), Number(`0x${tile.slice(4, 6)}`), 255]).flat()
-		);
-
-		let x_pos = Math.round(chunk.position_a[0] / CHUNK_SIZE);// + 512); // 512 at zoom level 10
-		let y_pos = Math.round(chunk.position_a[1] / CHUNK_SIZE);// + 512);
-
-		let filename = `z10x${x_pos}y${y_pos}.png`;
-		// Create image from tile data
-		let image = await sharp(rawPixels, {
-			raw: {
-				width: CHUNK_SIZE,
-				height: CHUNK_SIZE,
-				channels: 4,
-			},
-		});
-		await image.toFile(path.resolve(this._tilesPath, filename));
-		// console.log("Processed image", filename);
-
-		// Create zoomed in versions
-		// await zoomInLevel({
-		// currentZoomLevel: 10,
-		// targetZoomLevel: 14,
-		// parentX: x_pos,
-		// parentY: y_pos,
-		// CHUNK_SIZE,
-		// tilePath: this._tilesPath,
-		// filename,
-		// });
 	}
 	if (originalStatus === "stopped") {
 		// Stop instance again

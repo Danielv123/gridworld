@@ -38,6 +38,10 @@ export default function RefreshTileDataModal(props) {
 			let inProgress = 0;
 			let promises = [];
 			for (let instance of instanceList) {
+				if (instance.name.toLowerCase().includes("lobby server")) {
+					total -= 1;
+					continue;
+				}
 				// eslint-disable-next-line
 				promises.push(new ThrottledPromise(async (resolve) => {
 					inProgress += 1;
