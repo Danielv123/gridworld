@@ -11,7 +11,6 @@ local function dump_mapview(position_a, position_b)
 	for x = 1, CHUNK_SIZE * CHUNK_SIZE do
 		map_data[x] = string.format("%02x%02x%02x", 0, 0, 0)
 	end
-	local length = 1
 	for _, tile in pairs(tiles) do
 		-- Cache the map_color
 		local map_color = tile.prototype.map_color
@@ -19,7 +18,16 @@ local function dump_mapview(position_a, position_b)
         local position = tile.position
 		local index = (position.x - position_a[1] + 1) + (position.y - position_a[2]) * CHUNK_SIZE
 		map_data[index] = string.format("%02x%02x%02x", map_color.r, map_color.g, map_color.b)
-		length = length + 1
+    end
+    -- Get entities in the area and overlay on map_data
+    local entities = game.surfaces[1].find_entities_filtered { area = { position_a, position_b } }
+	for _, entity in pairs(entities) do
+		local position = entity.position
+		local index = (math.floor(position.x) - position_a[1] + 1) + (math.floor(position.y) - position_a[2]) * CHUNK_SIZE
+        local map_color = entity.prototype.friendly_map_color or entity.prototype.map_color or entity.prototype.enemy_map_color
+		if map_color ~= nil then
+            map_data[index] = string.format("%02x%02x%02x", map_color.r, map_color.g, map_color.b)
+        end
 	end
 	rcon.print(table.concat(map_data, ";"))
 end
