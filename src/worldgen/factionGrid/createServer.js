@@ -9,14 +9,6 @@ const mapFind = require("../../util/mapFind");
 const mapFilter = require("../../util/mapFilter");
 const slaveGetNextFreePort = require("../../util/slaveGetNextFreePort");
 
-const edge_target_position_offets = [
-	{},
-	[0, -1],
-	[0, 1],
-	[1, 0],
-	[-1, 0],
-];
-
 module.exports = async function createServer({
 	plugin,
 	slaveId,
@@ -62,42 +54,6 @@ module.exports = async function createServer({
 		plugin.master.config.get("gridworld.gridworld_seed"),
 		plugin.master.config.get("gridworld.gridworld_map_exchange_string")
 	);
-
-	// Apply edge transports configuration
-	const edges = getEdges({
-		x_size,
-		y_size,
-		x,
-		y,
-		instances: plugin.master.instances,
-	});
-
-	// Find neighboring instances and update edge target instance ID
-	for (const edge of edges) {
-		const target_position = [
-			x + edge_target_position_offets[edge.id][0],
-			y + edge_target_position_offets[edge.id][1],
-		];
-		for (const instance of plugin.master.instances) {
-			if (
-				instance[1].config.get("gridworld.grid_id") === grid_id
-				&& instance[1].config.get("gridworld.grid_x_position") === target_position[0]
-				&& instance[1].config.get("gridworld.grid_y_position") === target_position[1]
-			) {
-				// Update local instance edge configuration
-				edge.target_instance = instance[1].config.get("instance.id");
-				// Update target instance edge configuration
-				const edge_transports_config = instance[1].config.get("edge_transports.internal");
-				edge_transports_config.edges.find(e => e.id === edge.target_edge).target_instance = instanceId;
-				plugin.setInstanceConfigField(edge.target_instance, "edge_transports.internal", edge_transports_config);
-			}
-		}
-	}
-
-	// Set config
-	plugin.setInstanceConfigField(instanceId, "edge_transports.internal", {
-		edges: edges,
-	});
 
 	return {
 		instanceId,

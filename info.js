@@ -137,7 +137,7 @@ module.exports = {
 	],
 
 	messages: {
-		create: new libLink.Request({
+		createFactionGrid: new libLink.Request({
 			type: "gridworld:create",
 			links: ["control-master"],
 			permission: "gridworld.create",
@@ -146,8 +146,6 @@ module.exports = {
 				use_edge_transports: { type: "boolean" },
 				x_size: { type: "integer" },
 				y_size: { type: "integer" },
-				x_count: { type: "integer" },
-				y_count: { type: "integer" },
 				slave: { type: "integer" }, // slaveID to use for instance creation
 			},
 		}),
@@ -203,6 +201,14 @@ module.exports = {
 				south: { type: ["integer", "null"] },
 				east: { type: ["integer", "null"] },
 				west: { type: ["integer", "null"] },
+			},
+		}),
+		updateEdgeTransportEdges: new libLink.Request({
+			type: "gridworld:update_edge_transport_edges",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				instance_id: { type: "integer" },
 			},
 		}),
 		teleportPlayer: new libLink.Request({

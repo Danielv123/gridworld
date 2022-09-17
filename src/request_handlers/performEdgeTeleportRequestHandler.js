@@ -95,7 +95,7 @@ module.exports = async function joinGridworldRequestHandler(message) {
 		}
 
 		const slave = this.master.slaves.get(slaveId);
-		response.connection_address = `${slave.public_address}:${instance_to_connect_to.game_port}`;
+		response.connection_address = `${slave.public_address}:${instance_to_connect_to.game_port || instance_to_connect_to.config.get("factorio.game_port")}`;
 	}
 
 	// Return response to client

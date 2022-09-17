@@ -16,6 +16,7 @@ const playerPositionEventHandler = require("./src/event_handlers/playerPositionE
 const createFactionGridRequestHandler = require("./src/request_handlers/createFactionGridRequestHandler");
 const joinGridworldRequestHandler = require("./src/request_handlers/joinGridworldRequestHandler");
 const performEdgeTeleportRequestHandler = require("./src/request_handlers/performEdgeTeleportRequestHandler");
+const updateEdgeTransportEdgesRequestHandler = require("./src/request_handlers/updateEdgeTransportEdgesRequestHandler");
 
 async function loadDatabase(config, filename, logger) {
 	let itemsPath = path.resolve(config.get("master.database_directory"), filename);
@@ -71,7 +72,9 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 	getMapDataRequestHandler = getMapDataRequestHandler;
 
-	createRequestHandler = createFactionGridRequestHandler;
+	updateEdgeTransportEdgesRequestHandler = updateEdgeTransportEdgesRequestHandler;
+
+	createFactionGridRequestHandler = createFactionGridRequestHandler;
 
 	refreshTileDataRequestHandler = refreshTileDataRequestHandler;
 

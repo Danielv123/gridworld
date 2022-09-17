@@ -6,6 +6,8 @@ const libPlugin = require("@clusterio/lib/plugin");
 const libLuaTools = require("@clusterio/lib/lua_tools");
 const { libLink } = require("@clusterio/lib");
 
+const sleep = require("./src/util/sleep");
+
 class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	async init() {
 		this.pendingTasks = new Set();
@@ -18,11 +20,6 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		});
 		this.instance.server.on("ipc-gridworld:send_player_position", data => {
 			this.sendPlayerPosition(data).catch(err => this.logger.error(
-				`Error handling player teleport:\n${err.stack}`
-			));
-		});
-		this.instance.server.on("ipc-gridworld:start_server", data => {
-			this.startServer(data).catch(err => this.logger.error(
 				`Error handling player teleport:\n${err.stack}`
 			));
 		});
@@ -64,6 +61,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			await this.sendRcon("/sc global.disable_crashsite = true");
 			await this.sendRcon(`/sc gridworld.create_world_limit("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
 			await this.sendRcon(`/sc gridworld.create_spawn("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
+			// Update neighboring nodes for edge_transports
+			await sleep(1000);
+			await this.info.messages.updateEdgeTransportEdges.send(this.instance, {
+				instance_id: this.instance.id,
+			});
 		}
 	}
 
@@ -130,17 +132,6 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			x: data.x,
 			y: data.y,
 		});
-	}
-
-	async startServer(data) {
-		// Allow player to start server by moving to its edge
-		await this.info.messages.startInstance.send(this.instance, {
-			instance_id: data.instance_id,
-			save: null,
-		});
-
-		// Ask player to teleport
-		await this.sendRcon(`/sc gridworld.ask_for_teleport("${data.player_name}")`);
 	}
 
 	async createFaction(data) {

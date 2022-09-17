@@ -8,6 +8,7 @@ module.exports = function getEdges({
 	x,
 	y,
 	instances,
+	grid_id,
 }) {
 	const worldfactor_x = (x - 1) * x_size;
 	const worldfactor_y = (y - 1) * y_size;
@@ -20,7 +21,10 @@ module.exports = function getEdges({
 		surface: 1,
 		direction: 0, // East
 		length: x_size,
-		target_instance: mapFind(instances, instance => instance.x === x && instance.y === y - 1)?.instanceId || 0,
+		target_instance: mapFind(instances, instance => instance.config.get("gridworld.grid_id") === grid_id
+			&& instance.config.get("gridworld.grid_x_position") === x
+			&& instance.config.get("gridworld.grid_y_position") === y - 1
+		)?.config.get("instance.id") || 0,
 		target_edge: 3,
 	});
 	// Southern edge
@@ -30,7 +34,10 @@ module.exports = function getEdges({
 		surface: 1,
 		direction: 4, // West
 		length: x_size,
-		target_instance: mapFind(instances, instance => instance.x === x && instance.y === y + 1)?.instanceId || 0,
+		target_instance: mapFind(instances, instance => instance.config.get("gridworld.grid_id") === grid_id
+			&& instance.config.get("gridworld.grid_x_position") === x
+			&& instance.config.get("gridworld.grid_y_position") === y + 1
+		)?.config.get("instance.id") || 0,
 		target_edge: 1,
 	});
 	// Eastern edge
@@ -40,7 +47,10 @@ module.exports = function getEdges({
 		surface: 1,
 		direction: 2, // South
 		length: y_size,
-		target_instance: mapFind(instances, instance => instance.x === x + 1 && instance.y === y)?.instanceId || 0,
+		target_instance: mapFind(instances, instance => instance.config.get("gridworld.grid_id") === grid_id
+			&& instance.config.get("gridworld.grid_x_position") === x + 1
+			&& instance.config.get("gridworld.grid_y_position") === y
+		)?.config.get("instance.id") || 0,
 		target_edge: 4,
 	});
 	// Western edge
@@ -50,8 +60,11 @@ module.exports = function getEdges({
 		surface: 1,
 		direction: 6, // North
 		length: y_size,
-		target_instance: mapFind(instances, instance => instance.x === x - 1 && instance.y === y)?.instanceId || 0,
+		target_instance: mapFind(instances, instance => instance.config.get("gridworld.grid_id") === grid_id
+			&& instance.config.get("gridworld.grid_x_position") === x - 1
+			&& instance.config.get("gridworld.grid_y_position") === y
+		)?.config.get("instance.id") || 0,
 		target_edge: 2,
 	});
-	return edges;
+	return edges.filter(edge => edge.target_instance !== 0);
 };

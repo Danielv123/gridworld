@@ -1,0 +1,101 @@
+"use strict";
+
+const mapFind = require("../util/mapFind");
+const getEdges = require("../worldgen/getEdges");
+
+const edge_target_position_offets = [
+	{},
+	[-1, 0], // [0, -1],
+	[1, 0], // [0, 1],
+	[0, 1], // [1, 0],
+	[0, -1], // [-1, 0],
+];
+
+module.exports = async function updateEdgeTransportsEdges(message) {
+	// message.data === {
+	// instance_id: instance_id,
+	// }
+
+	const instance = this.master.instances.get(message.data.instance_id);
+	const x = instance.config.get("gridworld.grid_x_position");
+	const y = instance.config.get("gridworld.grid_y_position");
+	const grid_id = instance.config.get("gridworld.grid_id");
+	// Get x_size and y_size from lobby server
+	const lobby_server = mapFind(this.master.instances, i => i.config.get("gridworld.grid_id") === grid_id
+		&& i.config.get("gridworld.is_lobby_server")
+	);
+	const x_size = lobby_server.config.get("gridworld.grid_x_size");
+	const y_size = lobby_server.config.get("gridworld.grid_y_size");
+
+	// Apply edge transports configuration
+	const edges = getEdges({
+		x_size,
+		y_size,
+		x,
+		y,
+		instances: this.master.instances,
+		grid_id,
+	});
+
+	// Find neighboring instances and update edge target instance ID
+	for (const edge of edges) {
+		const target_position = [
+			x + edge_target_position_offets[edge.id][0],
+			y + edge_target_position_offets[edge.id][1],
+		];
+		const target_instance = this.master.instances.get(edge.target_instance);
+		if (
+			target_instance.config.get("gridworld.grid_id") === grid_id
+			&& target_instance.config.get("gridworld.grid_x_position") === target_position[0]
+			&& target_instance.config.get("gridworld.grid_y_position") === target_position[1]
+		) {
+			// Update target instance edge configuration
+			const edge_transports_config = target_instance.config.get("edge_transports.internal");
+			const target_edge = edge_transports_config.edges.find(e => e.id === edge.target_edge);
+			if (target_edge) {
+				target_edge.target_instance = message.data.instance_id;
+				await this.setInstanceConfigField(edge.target_instance, "edge_transports.internal", edge_transports_config);
+				this.logger.info(`Updated edge adjacent instance ${edge.target_instance} for edge ${edge.id}`);
+			} else {
+				// Add new edge
+				const target_x_size = target_instance.config.get("gridworld.grid_x_size");
+				const target_y_size = target_instance.config.get("gridworld.grid_y_size");
+				const target_x = target_instance.config.get("gridworld.grid_x_position");
+				const target_y = target_instance.config.get("gridworld.grid_y_position");
+
+				const worldfactor_x = (target_x - 1) * target_x_size;
+				const worldfactor_y = (target_y - 1) * target_y_size;
+
+				const origins = [
+					[worldfactor_x, worldfactor_y],
+					[target_x_size + worldfactor_x, worldfactor_y],
+					[target_x_size + worldfactor_x, target_y_size + worldfactor_y],
+					[worldfactor_x, target_y_size + worldfactor_y],
+				];
+
+				let length = target_x_size;
+				if (edge.direction % 2 === 0) {
+					length = target_y_size;
+				}
+
+				const new_edge = {
+					id: edge.target_edge,
+					origin: origins[edge.target_edge - 1],
+					surface: 1,
+					direction: (edge.direction + 4) % 8,
+					length,
+					target_instance: message.data.instance_id,
+					target_edge: edge.id,
+				};
+				edge_transports_config.edges.push(new_edge);
+				await this.setInstanceConfigField(edge.target_instance, "edge_transports.internal", edge_transports_config);
+				this.logger.info(`Created new edge on adjacent instance ${edge.target_instance}`);
+			}
+		}
+	}
+
+	// Set config
+	await this.setInstanceConfigField(message.data.instance_id, "edge_transports.internal", {
+		edges: edges,
+	});
+};

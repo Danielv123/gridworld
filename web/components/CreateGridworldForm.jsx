@@ -25,7 +25,7 @@ function NewGridworldForm() {
 	async function onFinish(values) {
 		// console.log("Success:", values);
 		setLoading(true);
-		await info.messages.create.send(control, values);
+		await info.messages.createFactionGrid.send(control, values);
 		setLoading(false);
 		await new Promise(resolve => setTimeout(resolve, 1500));
 		history.push("/gridworld");
@@ -44,8 +44,6 @@ function NewGridworldForm() {
 			use_edge_transports: true,
 			x_size: 512,
 			y_size: 512,
-			x_count: 2,
-			y_count: 2,
 		}}
 		onFinish={onFinish}
 		onFinishFailed={onFinishFailed}
@@ -72,22 +70,8 @@ function NewGridworldForm() {
 			<InputNumber />
 		</Form.Item>
 		<Form.Item
-			name={"x_count"}
-			label="Number of servers on X axis"
-			rules={[{ required: true, type: "number", min: 0, max: 100 }]}
-		>
-			<InputNumber />
-		</Form.Item>
-		<Form.Item
-			name={"y_count"}
-			label="Number of servers on Y axis"
-			rules={[{ required: true, type: "number", min: 0, max: 100 }]}
-		>
-			<InputNumber />
-		</Form.Item>
-		<Form.Item
 			name="slave"
-			label="Slave to create instances on"
+			label="Slave to create lobby instance on"
 			rules={[{ required: true }]}
 		>
 			<Select

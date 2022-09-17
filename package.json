@@ -8,7 +8,7 @@
   "repository": "Danielv123/gridworld",
   "scripts": {
 	"prepare": "webpack-cli --env production",
-	"lint": "eslint \"*.js\" src web",
+	"lint": "eslint \"*.js\" src web --fix",
 	"luacheck": "luacheck module/",
 	"test": "npm run lint && npm run luacheck"
   },

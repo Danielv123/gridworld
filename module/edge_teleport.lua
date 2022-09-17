@@ -23,28 +23,39 @@ end
 
 local function check_player_position()
 	-- Periodically check players currently in the process of syncing
+	local x_size = global.gridworld.x_size
+	local y_size = global.gridworld.y_size
+	local world_x = global.gridworld.world_x
+    local world_y = global.gridworld.world_y
+
+	-- Init hasn't ran yet
+	if not x_size or not y_size or not world_x or not world_y then return nil end
+
+    local x_max = x_size * world_x + world_x
+    local x_min = x_size * world_x
+    local y_max = y_size * world_y + world_y
+	local y_min = y_size * world_y
+
 	for _,player in pairs(game.connected_players) do
 		if out_of_bounds(player.position.x, player.position.y) then
 			if not global.gridworld.players[player.name].has_been_offered_teleport and player.character ~= nil then
-				for _, edge in pairs(global.edge_transports.edges) do
-					-- north=6, east=0, south=2, and west=4
-					-- Check north edge
-					if edge.direction == 0 and edge.origin[2] > player.position.y then
-						player.print("Looking for northbound teleport")
-						perform_edge_teleport(player)
-					-- Check east edge
-					elseif edge.direction == 2 and edge.origin[1] < player.position.x then
-						player.print("Looking for eastbound teleport")
-						perform_edge_teleport(player)
-					-- Check south edge
-					elseif edge.direction == 4 and edge.origin[2] < player.position.y then
-						player.print("Looking for southbound teleport")
-						perform_edge_teleport(player)
-					-- Check west edge
-					elseif edge.direction == 6 and edge.origin[1] > player.position.x then
-						player.print("Looking for westbound teleport")
-						perform_edge_teleport(player)
-					end
+				-- north=6, east=0, south=2, and west=4
+				-- Check north edge
+				if y_min > player.position.y then
+					player.print("Looking for eastbound teleport")
+					perform_edge_teleport(player)
+				-- Check east edge
+				elseif x_min > player.position.x then
+					player.print("Looking for southbound teleport")
+					perform_edge_teleport(player)
+				-- Check south edge
+				elseif y_max < player.position.y then
+					player.print("Looking for ?1 teleport")
+					perform_edge_teleport(player)
+				-- Check west edge
+				elseif x_max < player.position.x then
+					player.print("Looking for ?1 teleport")
+					perform_edge_teleport(player)
 				end
 			end
 		else
