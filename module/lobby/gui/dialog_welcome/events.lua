@@ -5,7 +5,7 @@ local clusterio_api = require("modules/clusterio/api")
 local function on_gui_click(_, action, player)
 	if player == nil then return end
 	if action.action == "join_latest_server" then
-        game.print("Joining server...")
+		game.print("Joining server...")
 		clusterio_api.send_json("gridworld:join_gridworld", {
 			player_name = player.name,
 		})

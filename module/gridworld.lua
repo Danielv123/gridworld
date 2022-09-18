@@ -20,7 +20,7 @@ local populate_neighbor_data = require("populate_neighbor_data")
 local map = require("map/map")
 local lobby = require("lobby")
 local factions = require("factions")
-local show_progress = require("util/gui/show_progress/dialog")
+local util_gui = require("util/gui")
 
 -- Declare globals to make linter happy
 game = game
@@ -45,7 +45,7 @@ gridworld.events[clusterio_api.events.on_server_startup] = function()
 	end
 	if global.gridworld.neighbor_data == nil then
 		global.gridworld.neighbor_data = {}
-    end
+	end
 	if global.gridworld.factions == nil then
 		global.gridworld.factions = {}
 	end
@@ -103,6 +103,7 @@ gridworld.events[defines.events.on_gui_click] = function(event)
 	if action then
 		lobby.gui.on_gui_click(event, action, player)
 		factions.gui.on_gui_click(event, action, player)
+		util_gui.on_gui_click(event, action, player)
 	end
 end
 gridworld.events[defines.events.on_gui_checked_state_changed] = function(event)
@@ -145,6 +146,6 @@ gridworld.register_lobby_server = lobby.register_lobby_server
 gridworld.register_map_data = lobby.register_map_data
 gridworld.sync_faction = factions.sync_faction
 gridworld.open_faction_admin_screen = factions.open_faction_admin_screen
-gridworld.show_progress = show_progress.draw
+gridworld.show_progress = util_gui.dialog_show_progress.draw
 
 return gridworld

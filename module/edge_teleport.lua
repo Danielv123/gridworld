@@ -3,11 +3,11 @@ local out_of_bounds = require("modules/gridworld/util/out_of_bounds")
 
 local function perform_edge_teleport(player)
 	global.gridworld.players[player.name].has_been_offered_teleport = true
-    clusterio_api.send_json("gridworld:perform_edge_teleport", {
-        player_name = player.name,
-        player_x_position = player.position.x,
+	clusterio_api.send_json("gridworld:perform_edge_teleport", {
+		player_name = player.name,
+		player_x_position = player.position.x,
 		player_y_position = player.position.y,
-    })
+	})
 end
 
 local function receive_teleport(player)
@@ -16,7 +16,7 @@ local function receive_teleport(player)
 		player.teleport({
 			x = data.x,
 			y = data.y
-        }, 1) -- last argument is for surface
+		}, 1) -- last argument is for surface
 		global.gridworld.players[player.name].teleport_data = nil
 	end
 end
@@ -26,14 +26,14 @@ local function check_player_position()
 	local x_size = global.gridworld.x_size
 	local y_size = global.gridworld.y_size
 	local world_x = global.gridworld.world_x
-    local world_y = global.gridworld.world_y
+	local world_y = global.gridworld.world_y
 
 	-- Init hasn't ran yet
 	if not x_size or not y_size or not world_x or not world_y then return nil end
 
-    local x_max = x_size * world_x + world_x
-    local x_min = x_size * world_x
-    local y_max = y_size * world_y + world_y
+	local x_max = x_size * world_x + world_x
+	local x_min = x_size * world_x
+	local y_max = y_size * world_y + world_y
 	local y_min = y_size * world_y
 
 	for _,player in pairs(game.connected_players) do
@@ -110,7 +110,7 @@ end
 return {
 	check_player_position = check_player_position,
 	send_teleport_command_on_player_leave = send_teleport_command_on_player_leave,
-    receive_teleport = receive_teleport,
+	receive_teleport = receive_teleport,
 	prepare_teleport_data = prepare_teleport_data,
 	receive_teleport_data = receive_teleport_data,
 	ask_for_teleport = ask_for_teleport,

@@ -1,5 +1,5 @@
 local clusterio_api = require("modules/clusterio/api")
-local show_progress = require("modules/gridworld/util/gui/show_progress/dialog")
+local util_gui = require("modules/gridworld/util/gui")
 
 local function on_gui_click(_, action, player)
 	if player == nil then return end
@@ -10,7 +10,7 @@ local function on_gui_click(_, action, player)
 		if action.action == "save_faction" then
 			-- Open edit dialog
 			player.print("Saving faction...")
-			show_progress.draw(player.name, "Saving faction", "Sending changes to cluster", 1, 3)
+			util_gui.dialog_show_progress.draw(player.name, "Saving faction", "Sending changes to cluster", 1, 3)
 			local faction = global.gridworld.players[player.name].faction_creation
 			clusterio_api.send_json("gridworld:update_faction", {
 				faction_id = faction.faction_id,
