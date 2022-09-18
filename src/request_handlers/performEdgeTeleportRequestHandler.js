@@ -81,11 +81,11 @@ module.exports = async function joinGridworldRequestHandler(message) {
 		// Instance status
 		if (instance_to_connect_to.status !== "running") {
 			try {
-				player.checkPermission("gridworld.map.create_by_exploration");
+				player.checkPermission("gridworld.map.start_by_exploration");
 			} catch (e) {
 				return {
 					ok: false,
-					message: "You do not have permission to create new servers through exploration",
+					message: "You do not have permission to start servers through exploration",
 				};
 			}
 			await libLink.messages.startInstance.send(slaveConnection, {
