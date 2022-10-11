@@ -289,6 +289,17 @@ module.exports = {
 				},
 			},
 		}),
+		factionUpdate: new libLink.Event({
+			type: "gridworld:faction_update",
+			links: ["master-slave", "slave-instance"],
+			broadcastTo: "instance",
+			eventProperties: {
+				faction: {
+					type: "object",
+					properties: factionProperties,
+				},
+			},
+		}),
 		joinGridworld: new libLink.Request({
 			type: "gridworld:join_gridworld",
 			links: ["instance-slave", "slave-master"],

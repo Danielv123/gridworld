@@ -3,6 +3,7 @@
 ]]
 
 local dialog_faction_admin_screen = require("gui/faction_admin_screen/dialog")
+local dialog_faction_server_status = require("gui/faction_server_status/dialog")
 local factions_table = require("gui/components/factions_table/index")
 local faction_edit_screen = require("gui/faction_edit_screen/dialog")
 
@@ -14,6 +15,7 @@ end
 
 return {
 	dialog_faction_admin_screen = dialog_faction_admin_screen,
+	dialog_faction_server_status = dialog_faction_server_status,
 	on_gui_click = function (event, action, player)
 		run_function("on_gui_click", dialog_faction_admin_screen.events, event, action, player)
 		run_function("on_gui_click", factions_table.events, event, action, player)

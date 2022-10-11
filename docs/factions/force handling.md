@@ -9,12 +9,13 @@ Traditionally, non-cooperative multiplayer in factorio has been done using the b
 
 We handle all user management through our own factions code. Forces are used for access control of entities on claimed servers. Rather than creating one force for each faction, we instead only create a force if your faction has a claim on the current server. People from factions without a claim on the current server will be left in the default force.
 
-| force index | force name | usage                                                           |
-| ----------- | ---------- | --------------------------------------------------------------- |
-| 1           | neutral    | unused                                                          |
-| 2           | player     | default force for players without a claim on the current server |
-| 3           | enemy      | default force for enemies                                       |
-| 4           | faction 1  | force for faction 1                                             |
+| force index | force name       | usage                                                                |
+| ----------- | ---------------- | -------------------------------------------------------------------- |
+| 1           | neutral          | unused                                                               |
+| 2           | player           | default force for players without a claim on the current server      |
+| 3           | enemy            | default force for enemies                                            |
+| 4           | faction_claimed  | force for members of the faction that has claimed the current server |
+| 5           | faction_friendly | for players allied to the server owner faction                       |
 
 ## What do we do when a force looses its claim to its area?
 

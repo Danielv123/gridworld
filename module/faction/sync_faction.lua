@@ -1,7 +1,10 @@
-local get_force = require("get_force")
-
 --[[
 	Update faction data on the server
+
+	Force management
+	Factorio has an internal limit of 63 forces, which complicates things as our faction system supports more than that.
+	To work around this, we instead use 2 factions - one neutral and one for the servers owner faction.
+	The neutral faction is used by all players that aren't part of the server owner faction.
 ]]
 
 local function sync_faction(faction_id, faction_data)
@@ -10,28 +13,17 @@ local function sync_faction(faction_id, faction_data)
 	end
 	global.gridworld.factions[faction_id] = game.json_to_table(faction_data)
 
-	-- Create force for the faction
-	local force = game.create_force(faction_id)
-
-	for k,v in pairs(global.gridworld.factions[faction_id].friends) do
-		local friendly_force = get_force(v)
-		if friendly_force ~= nil then
-			force.set_friend(friendly_force, true)
-		end
-	end
-	for k,v in pairs(global.gridworld.factions[faction_id].enemies) do
-		local enemy_force = get_force(v)
-		if enemy_force ~= nil then
-			force.set_enemy(enemy_force, true)
-		end
-	end
-
 	-- Add members to the force
 	for k,v in pairs(global.gridworld.factions[faction_id].members) do
 		local member = game.get_player(v.name)
-		if member ~= nil and v.rank ~= "invited" then
-			member.force = force
-		end
+		if member ~= nil then
+            -- Apply faction settings to player
+
+            -- If server is claimed by the players faction, move player to the faction force
+			if global.gridworld.claiming_faction.claimed and global.gridworld.claiming_faction.faction_id == faction_id then
+				member.force = "faction_claimed"
+			end
+        end
 	end
 end
 

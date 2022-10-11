@@ -178,6 +178,13 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		await this.sendRcon(`/sc gridworld.open_faction_admin_screen("${data.player_name}","${data.faction_id}")`);
 	}
 
+	async factionUpdateEventHandler(message) {
+		if (this.instance.status === "running") {
+			// Update faction in game
+			await this.runTask(this.sendRcon(`/sc gridworld.sync_faction("${message.data.faction.faction_id}",'${libLuaTools.escapeString(JSON.stringify(message.data.faction))}')`));
+		}
+	}
+
 	async joinGridworld(data) {
 		// Show received progress in game
 		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Finding server", "Loading world", 1, 3)`);

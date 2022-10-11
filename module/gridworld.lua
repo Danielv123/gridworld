@@ -21,6 +21,7 @@ local map = require("map/map")
 local lobby = require("lobby")
 local factions = require("factions")
 local util_gui = require("util/gui")
+local setup_forces = require("faction/setup_forces")
 
 -- Declare globals to make linter happy
 game = game
@@ -49,6 +50,18 @@ gridworld.events[clusterio_api.events.on_server_startup] = function()
 	if global.gridworld.factions == nil then
 		global.gridworld.factions = {}
 	end
+	if global.gridworld.claiming_faction == nil then
+		global.gridworld.claiming_faction = {
+			claimed = false,
+			faction_id = nil,
+			claim_start = nil,
+			stored_fp = nil,
+			claim_cost = nil,
+		}
+	end
+
+	-- Fun factions inititalization
+	setup_forces()
 end
 gridworld.events[defines.events.on_player_joined_game] = function(event)
 	local player = game.get_player(event.player_index)
@@ -147,5 +160,11 @@ gridworld.register_map_data = lobby.register_map_data
 gridworld.sync_faction = factions.sync_faction
 gridworld.open_faction_admin_screen = factions.open_faction_admin_screen
 gridworld.show_progress = util_gui.dialog_show_progress.draw
+gridworld.hmi_show_status = function()
+	factions.gui.dialog_faction_server_status.draw(game.get_player("Danielv123"), "pbnwcdal")
+end
+gridworld.hmi_hide_status = function()
+	game.player.gui.left.clear()
+end
 
 return gridworld
