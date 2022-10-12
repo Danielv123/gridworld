@@ -1,4 +1,3 @@
-local clusterio_api = require("modules/clusterio/api")
 local util_gui = require("modules/gridworld/util/gui")
 
 local function on_gui_click(_, action, player)

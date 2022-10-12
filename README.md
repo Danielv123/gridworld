@@ -18,6 +18,8 @@ Run the following commands in the folder Clusterio is installed to:
 
 Substitute clusteriomaster with clusterioslave or clusterioctl if this a dedicated slave or ctl installation respectively.
 
+![Visualization of this repo](./images/diagram.svg)
+
 ## Development setup
 
 Clone the repository in clusterio/external_plugins/
