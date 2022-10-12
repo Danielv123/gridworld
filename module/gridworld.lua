@@ -123,7 +123,8 @@ gridworld.events[defines.events.on_gui_checked_state_changed] = function(event)
 	local player = game.players[event.player_index]
 	local action = gui.read_action(event)
 	if action then
-		lobby.gui.on_gui_checked_state_changed(event, action, player)
+        lobby.gui.on_gui_checked_state_changed(event, action, player)
+		factions.gui.on_gui_checked_state_changed(event, action, player)
 	end
 end
 gridworld.events[defines.events.on_gui_text_changed] = function(event)
@@ -131,6 +132,7 @@ gridworld.events[defines.events.on_gui_text_changed] = function(event)
 	local action = gui.read_action(event)
 	if action then
 		lobby.gui.on_gui_text_changed(event, action, player)
+		factions.gui.on_gui_text_changed(event, action, player)
 	end
 end
 gridworld.on_nth_tick = {}

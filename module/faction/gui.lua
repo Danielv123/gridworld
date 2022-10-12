@@ -19,7 +19,8 @@ return {
 	on_gui_click = function (event, action, player)
 		run_function("on_gui_click", dialog_faction_admin_screen.events, event, action, player)
 		run_function("on_gui_click", factions_table.events, event, action, player)
-		run_function("on_gui_click", faction_edit_screen.events, event, action, player)
+        run_function("on_gui_click", faction_edit_screen.events, event, action, player)
+		run_function("on_gui_click", dialog_faction_server_status.events, event, action, player)
 	end,
 	on_gui_checked_state_changed = function (event, action, player)
 		run_function("on_gui_checked_state_changed", faction_edit_screen.events, event, action, player)
