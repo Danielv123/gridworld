@@ -10,6 +10,17 @@ on:
   workflow_dispatch:
 
 jobs:
+  visualizer:
+    runs-on: ubuntu-latest
+    name: Visualizer
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@master
+    - name: Update diagram
+      uses: githubocto/repo-visualizer@0.7.1
+      with:
+        output_file: "images/diagram.svg"
+        excluded_paths: "dist,node_modules,package-lock.json,.luacheckrc"
   jslint:
     name: Eslint
     runs-on: ubuntu-latest
