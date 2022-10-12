@@ -4,7 +4,10 @@ local function on_gui_click(_, action, player)
 	if player == nil then return end
 	if action.location == "faction_server_status" then
 		if action.action == "close" then
-			game.player.gui.left.clear()
+			player.gui.left.clear()
+        end
+		if action.action == "join_lobby_server" then
+			player.connect_to_server({address = "localhost:10000", name = "Lobby server"}) -- TODO: Use correct lobby address here
 		end
 		if action.action == "claim_sector" then
 			-- Open claim dialog

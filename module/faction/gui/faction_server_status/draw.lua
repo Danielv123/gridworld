@@ -13,7 +13,18 @@ local function draw_faction_server_status(player, faction_id)
 
 	local content = {
 		type = "flow",
-		direction = "vertical",
+        direction = "vertical",
+		{
+			type = "button",
+			caption = "Join lobby server",
+			style = "green_button",
+			actions = {
+				on_click = {
+					location = "faction_server_status",
+					action = "join_lobby_server",
+				},
+			},
+		},
 		{
 			type = "label",
 			caption = "Server name: "..clusterio_api.get_instance_name(),
