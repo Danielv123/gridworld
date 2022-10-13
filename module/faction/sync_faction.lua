@@ -8,6 +8,7 @@
 ]]
 
 local function sync_faction(faction_id, faction_data)
+	log("Syncing faction " .. faction_id)
 	if global.gridworld.factions == nil then
 		global.gridworld.factions = {}
 	end

@@ -262,6 +262,10 @@ module.exports = {
 				},
 			},
 		}),
+		/**
+		 * Send updated faction data to master for propagation throughout the cluster
+		 * Used to edit factions
+		 */
 		updateFaction: new libLink.Request({
 			type: "gridworld:update_faction",
 			links: ["instance-slave", "slave-master"],
@@ -289,6 +293,9 @@ module.exports = {
 				},
 			},
 		}),
+		/**
+		 * Event notifying an instance of changes to a faction
+		 */
 		factionUpdate: new libLink.Event({
 			type: "gridworld:faction_update",
 			links: ["master-slave", "slave-instance"],
@@ -297,6 +304,25 @@ module.exports = {
 				faction: {
 					type: "object",
 					properties: factionProperties,
+				},
+			},
+		}),
+		/**
+		 * Get changed factions
+		 */
+		refreshFactionData: new libLink.Request({
+			type: "gridworld:refresh_faction_data",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			responseProperties: {
+				ok: { type: "boolean" },
+				msg: { type: "string" },
+				factions: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: factionProperties,
+					},
 				},
 			},
 		}),
