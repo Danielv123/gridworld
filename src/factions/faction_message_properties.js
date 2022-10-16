@@ -9,7 +9,7 @@ const factionProperties = {
 			type: "object",
 			properties: {
 				name: { type: "string" },
-				rank: {
+				role: {
 					enum: ["leader", "officer", "member", "invited"],
 				},
 			},

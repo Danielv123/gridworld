@@ -67,8 +67,8 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				instance_id: this.instance.id,
 			});
 			// Refresh faction data
-			const factions = await this.info.messages.refreshFactionData.send(this.instance);
-			for (let faction of factions) {
+			const response = await this.info.messages.refreshFactionData.send(this.instance);
+			for (let faction of response.factions) {
 				await this.runTask(this.sendRcon(`/sc gridworld.sync_faction("${faction.faction_id}",'${libLuaTools.escapeString(JSON.stringify(faction))}')`));
 			}
 		}

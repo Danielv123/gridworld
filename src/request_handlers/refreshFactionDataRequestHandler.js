@@ -13,7 +13,7 @@ module.exports = async function refreshFactionDataRequestHandler(message, reques
 
 	return {
 		ok: true,
-		message: "Faction data refreshed",
+		msg: "Faction data refreshed",
 		factions: updatedFactions,
 	};
 };
