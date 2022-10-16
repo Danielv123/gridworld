@@ -10,6 +10,11 @@ module.exports = async function updateFactionRequestHandler(message, request, li
 		// Propagate changes to all online instances
 		this.broadcastEventToSlaves(this.info.messages.factionUpdate, { faction: faction });
 
+		// Propagate changes to listening web clients
+		for (let sub of this.subscribedControlLinks) {
+			if (sub.faction_list) { this.info.messages.factionUpdate.send(sub.link, { faction: faction }); }
+		}
+
 		return {
 			ok: true,
 			message: "Faction updated",

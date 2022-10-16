@@ -7,7 +7,7 @@ const registerTileServer = require("./src/routes/tileserver");
 
 const getMapDataRequestHandler = require("./src/request_handlers/getMapDataRequestHandler");
 const refreshTileDataRequestHandler = require("./src/request_handlers/refreshTileDataRequestHandler");
-const setPlayerPositionSubscriptionRequestHandler = require("./src/request_handlers/setPlayerPositionSubscriptionRequestHandler");
+const setWebSubscriptionRequestHandler = require("./src/request_handlers/setWebSubscriptionRequestHandler");
 const startInstanceRequestHandler = require("./src/request_handlers/startInstanceRequestHandler");
 const createFactionRequestHandler = require("./src/request_handlers/createFactionRequestHandler");
 const updateFactionRequestHandler = require("./src/request_handlers/updateFactionRequestHandler");
@@ -67,7 +67,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 		registerTileServer(this.master.app, this._tilesPath);
 
-		this.subscribedControlLinks = new Set();
+		this.subscribedControlLinks = [];
 	}
 
 	playerPositionEventHandler = playerPositionEventHandler;
@@ -80,7 +80,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 	refreshTileDataRequestHandler = refreshTileDataRequestHandler;
 
-	setPlayerPositionSubscriptionRequestHandler = setPlayerPositionSubscriptionRequestHandler;
+	setWebSubscriptionRequestHandler = setWebSubscriptionRequestHandler;
 
 	startInstanceRequestHandler = startInstanceRequestHandler;
 
@@ -155,7 +155,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 	onControlConnectionEvent(connection, event) {
 		if (event === "close") {
-			this.subscribedControlLinks.delete(connection);
+			let index = this.subscribedControlLinks.indexOf(sub => sub.link === connection);
+			if (index !== -1) { this.subscribedControlLinks.splice(index, 1); }
 		}
 	}
 

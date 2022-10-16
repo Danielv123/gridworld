@@ -125,6 +125,12 @@ libUsers.definePermission({
 	description: "Allow for existing instances to be started by exploration through edge_teleports",
 	grantByDefault: true,
 });
+libUsers.definePermission({
+	name: "gridworld.faction.delete",
+	title: "Delete faction",
+	description: "Delete *any* faction",
+	grantByDefault: false,
+});
 
 module.exports = {
 	name: "gridworld",
@@ -141,6 +147,8 @@ module.exports = {
 	routes: [
 		"/gridworld",
 		"/gridworld/create",
+		"/gridworld/factions",
+		"/gridworld/factions/:factionId/view",
 	],
 
 	messages: {
@@ -239,12 +247,13 @@ module.exports = {
 				y: { type: "number" },
 			},
 		}),
-		setPlayerPositionSubscription: new libLink.Request({
-			type: "gridworld:set_player_position_subscription",
+		setWebSubscription: new libLink.Request({
+			type: "gridworld:set_web_subscription",
 			links: ["control-master"],
 			permission: "gridworld.overview.view",
 			requestProperties: {
 				player_position: { type: "boolean" },
+				faction_list: { type: "boolean" },
 			},
 		}),
 		startInstance: new libLink.Request({
@@ -305,7 +314,7 @@ module.exports = {
 		 */
 		factionUpdate: new libLink.Event({
 			type: "gridworld:faction_update",
-			links: ["master-slave", "slave-instance"],
+			links: ["master-slave", "slave-instance", "master-control"],
 			broadcastTo: "instance",
 			eventProperties: {
 				faction: {
