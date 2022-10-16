@@ -86,6 +86,13 @@ InstanceConfigGroup.define({
 	type: "number",
 	initial_value: 0,
 });
+InstanceConfigGroup.define({
+	name: "claimed_by_faction",
+	title: "Claimed by faction",
+	description: "Faction that has claimed this server",
+	type: "string",
+	initial_value: "",
+});
 InstanceConfigGroup.finalize();
 
 libUsers.definePermission({
@@ -324,6 +331,20 @@ module.exports = {
 						properties: factionProperties,
 					},
 				},
+			},
+		}),
+		claimServer: new libLink.Request({
+			type: "gridworld:claim_server",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				instance_id: { type: "integer" },
+				player_name: { type: "string" },
+				faction_id: { type: "string" },
+			},
+			responseProperties: {
+				ok: { type: "boolean" },
+				msg: { type: "string" },
 			},
 		}),
 		joinGridworld: new libLink.Request({

@@ -18,6 +18,7 @@ const joinGridworldRequestHandler = require("./src/request_handlers/joinGridworl
 const performEdgeTeleportRequestHandler = require("./src/request_handlers/performEdgeTeleportRequestHandler");
 const updateEdgeTransportEdgesRequestHandler = require("./src/request_handlers/updateEdgeTransportEdgesRequestHandler");
 const refreshFactionDataRequestHandler = require("./src/request_handlers/refreshFactionDataRequestHandler");
+const claimServerRequestHandler = require("./src/request_handlers/claimServerRequestHandler");
 
 async function loadDatabase(config, filename, logger) {
 	let itemsPath = path.resolve(config.get("master.database_directory"), filename);
@@ -94,6 +95,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	performEdgeTeleportRequestHandler = performEdgeTeleportRequestHandler;
 
 	refreshFactionDataRequestHandler = refreshFactionDataRequestHandler;
+
+	claimServerRequestHandler = claimServerRequestHandler;
 
 	async onInstanceStatusChanged(instance) {
 		if (instance.status === "running") {

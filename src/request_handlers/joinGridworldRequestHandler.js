@@ -30,11 +30,11 @@ module.exports = async function joinGridworldRequestHandler(message, request, li
 		const instance_id = instance[1].config.get("instance.id");
 		const instance_stats = player.instanceStats.get(instance_id);
 		if (instance_stats
-			&& Math.max(instance_stats.lastJoinAt.getTime(), instance_stats.lastLeaveAt.getTime()) > (last_visited_instance_time || 0)
+			&& Math.max(instance_stats.lastJoinAt?.getTime() || 0, instance_stats.lastLeaveAt?.getTime() || 0) > (last_visited_instance_time || 0)
 			&& instance[1].config.get("gridworld.is_lobby_server") !== true
 		) {
 			last_visited_instance = instance[1];
-			last_visited_instance_time = Math.max(instance_stats.lastJoinAt.getTime(), instance_stats.lastLeaveAt.getTime());
+			last_visited_instance_time = Math.max(instance_stats.lastJoinAt?.getTime() || 0, instance_stats.lastLeaveAt?.getTime() || 0);
 		}
 	}
 	if (last_visited_instance) {

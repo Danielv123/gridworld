@@ -33,6 +33,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				`Error updating faction:\n${err.stack}`
 			));
 		});
+		this.instance.server.on("ipc-gridworld:claim_server", data => {
+			this.claimServer(data).catch(err => this.logger.error(
+				`Error claiming server:\n${err.stack}`
+			));
+		});
 		this.instance.server.on("ipc-gridworld:join_gridworld", data => {
 			this.joinGridworld(data).catch(err => this.logger.error(
 				`Error joining gridworld:\n${err.stack}`
@@ -181,6 +186,27 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		await new Promise(r => setTimeout(r, 500));
 		// Navigate to updated faction screen
 		await this.sendRcon(`/sc gridworld.open_faction_admin_screen("${data.player_name}","${data.faction_id}")`);
+	}
+
+	async claimServer(data) {
+		// Show received progress in game
+		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Claiming server", "Propagating changes", 2, 3)`);
+		// Update master
+		const status = await this.info.messages.claimServer.send(this.instance, {
+			instance_id: this.instance.config.get("instance.id"),
+			player_name: data.player_name,
+			faction_id: data.faction_id,
+		});
+		if (status.ok) {
+			await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Claiming server", "Finishing", 3, 3)`);
+			await this.sendRcon(`/sc gridworld.claim_server("${data.faction_id}")`);
+			await new Promise(r => setTimeout(r, 500));
+			await this.sendRcon(`/sc game.get_player("${data.player_name}").gui.center.clear()`);
+		} else {
+			await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Claiming server", "Failed", 3, 3)`);
+			await this.sendRcon(`/sc game.get_player("${data.player_name}".print("Failed to claim server: ${status.msg}")`);
+			this.logger.error(`Failed to claim server: ${status.msg}`);
+		}
 	}
 
 	async factionUpdateEventHandler(message) {
