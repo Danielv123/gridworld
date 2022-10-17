@@ -23,6 +23,7 @@ local factions = require("factions")
 local util_gui = require("util/gui")
 local setup_forces = require("faction/setup_forces")
 local claim_server = require("faction/claim_server")
+local unclaim_server = require("faction/unclaim_server")
 local get_player_faction = require("faction/get_player_faction")
 
 -- Declare globals to make linter happy
@@ -171,5 +172,6 @@ gridworld.hmi_hide_status = function()
 	game.player.gui.left.clear()
 end
 gridworld.claim_server = claim_server
+gridworld.unclaim_server = unclaim_server
 
 return gridworld

@@ -38,6 +38,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				`Error claiming server:\n${err.stack}`
 			));
 		});
+		this.instance.server.on("ipc-gridworld:unclaim_server", data => {
+			this.unclaimServer(data).catch(err => this.logger.error(
+				`Error unclaiming server:\n${err.stack}`
+			));
+		});
 		this.instance.server.on("ipc-gridworld:join_gridworld", data => {
 			this.joinGridworld(data).catch(err => this.logger.error(
 				`Error joining gridworld:\n${err.stack}`
@@ -206,6 +211,26 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Claiming server", "Failed", 3, 3)`);
 			await this.sendRcon(`/sc game.get_player("${data.player_name}".print("Failed to claim server: ${status.msg}")`);
 			this.logger.error(`Failed to claim server: ${status.msg}`);
+		}
+	}
+
+	async unclaimServer(data) {
+		// Show received progress in game
+		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Unclaiming server", "Propagating changes", 2, 3)`);
+		// Update master
+		const status = await this.info.messages.unclaimServer.send(this.instance, {
+			instance_id: this.instance.config.get("instance.id"),
+			player_name: data.player_name,
+		});
+		if (status.ok) {
+			await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Unclaiming server", "Finishing", 3, 3)`);
+			await this.sendRcon(`/sc gridworld.unclaim_server("${data.faction_id}")`);
+			await new Promise(r => setTimeout(r, 500));
+			await this.sendRcon(`/sc game.get_player("${data.player_name}").gui.center.clear()`);
+		} else {
+			await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Unclaiming server", "Failed", 3, 3)`);
+			await this.sendRcon(`/sc game.get_player("${data.player_name}".print("Failed to unclaim server: ${status.msg}")`);
+			this.logger.error(`Failed to unclaim server: ${status.msg}`);
 		}
 	}
 

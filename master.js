@@ -19,6 +19,7 @@ const performEdgeTeleportRequestHandler = require("./src/request_handlers/perfor
 const updateEdgeTransportEdgesRequestHandler = require("./src/request_handlers/updateEdgeTransportEdgesRequestHandler");
 const refreshFactionDataRequestHandler = require("./src/request_handlers/refreshFactionDataRequestHandler");
 const claimServerRequestHandler = require("./src/request_handlers/claimServerRequestHandler");
+const unclaimServerRequestHandler = require("./src/request_handlers/unclaimServerRequestHandler");
 
 async function loadDatabase(config, filename, logger) {
 	let itemsPath = path.resolve(config.get("master.database_directory"), filename);
@@ -97,6 +98,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	refreshFactionDataRequestHandler = refreshFactionDataRequestHandler;
 
 	claimServerRequestHandler = claimServerRequestHandler;
+
+	unclaimServerRequestHandler = unclaimServerRequestHandler;
 
 	async onInstanceStatusChanged(instance) {
 		if (instance.status === "running") {

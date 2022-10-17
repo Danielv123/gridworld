@@ -13,10 +13,18 @@ local function on_gui_click(_, action, player)
 		end
 		if action.action == "claim_server" then
 			-- Open claim dialog
-			player.print("Claiming server...")
 			local faction = get_player_faction(player)
 			util_gui.dialog_show_progress.draw(player.name, "Claiming server", "Sending changes to cluster", 1, 3)
 			clusterio_api.send_json("gridworld:claim_server", {
+				faction_id = faction.faction_id,
+				player_name = player.name,
+			})
+        end
+		if action.action == "unclaim_server" then
+			-- Open unclaim dialog
+			local faction = get_player_faction(player)
+			util_gui.dialog_show_progress.draw(player.name, "Unclaiming server", "Sending changes to cluster", 1, 3)
+			clusterio_api.send_json("gridworld:unclaim_server", {
 				faction_id = faction.faction_id,
 				player_name = player.name,
 			})

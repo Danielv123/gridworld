@@ -18,13 +18,13 @@ local function sync_faction(faction_id, faction_data)
 	for k,v in pairs(global.gridworld.factions[faction_id].members) do
 		local member = game.get_player(v.name)
 		if member ~= nil then
-            -- Apply faction settings to player
+			-- Apply faction settings to player
 
-            -- If server is claimed by the players faction, move player to the faction force
+			-- If server is claimed by the players faction, move player to the faction force
 			if global.gridworld.claiming_faction.claimed and global.gridworld.claiming_faction.faction_id == faction_id then
 				member.force = "faction_claimed"
 			end
-        end
+		end
 	end
 end
 

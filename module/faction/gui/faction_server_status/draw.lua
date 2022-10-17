@@ -47,6 +47,19 @@ local function draw_faction_server_status(player, faction_id)
 				type = "label",
 				caption = "Cost per day: " .. 100 .. " fp",
 			})
+			table.insert(content, {
+				type = "button",
+				name = "gridworld_faction_unclaim_server",
+				caption = "Unclaim server",
+				actions = {
+					on_click = {
+						location = "faction_server_status",
+						action = "unclaim_server",
+						faction_id = faction_id,
+						player = player.name,
+					}
+				},
+			})
 		else
 			table.insert(content, {
 				type = "label",

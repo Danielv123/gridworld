@@ -356,6 +356,19 @@ module.exports = {
 				msg: { type: "string" },
 			},
 		}),
+		unclaimServer: new libLink.Request({
+			type: "gridworld:unclaim_server",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				instance_id: { type: "integer" },
+				player_name: { type: "string" },
+			},
+			responseProperties: {
+				ok: { type: "boolean" },
+				msg: { type: "string" },
+			},
+		}),
 		joinGridworld: new libLink.Request({
 			type: "gridworld:join_gridworld",
 			links: ["instance-slave", "slave-master"],
