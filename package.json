@@ -10,7 +10,7 @@
 		"prepare": "webpack-cli --env production && husky install",
 		"lint": "eslint \"*.js\" src web --fix",
 		"luacheck": "luacheck module/",
-		"test": "npm run lint && npm run luacheck"
+		"test": "spaces-to-tabs module/**/*.lua -s 4 && npm run lint && npm run luacheck"
 	},
 	"bugs": {
 		"url": "https://github.com/Danielv123/gridworld/issues"
@@ -39,6 +39,7 @@
 		"react-dom": "^16.13.1",
 		"react-leaflet": "^2.8.0",
 		"react-leaflet-enhanced-marker": "^1.0.21",
+		"spaces-to-tabs": "^0.0.3",
 		"webpack": "^5.36.2",
 		"webpack-cli": "^4.7.0",
 		"webpack-merge": "^5.2.0"

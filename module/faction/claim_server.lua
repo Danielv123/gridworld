@@ -8,7 +8,7 @@ local function claim_server(faction_id)
 	global.gridworld.claiming_faction.claim_cost = 100 -- TODO: Calculate this based on the size of the map
 	global.gridworld.claiming_faction.stored_fp = 1000
 
-    -- Redraw server status and other GUI elements that show the claiming faction
+	-- Redraw server status and other GUI elements that show the claiming faction
 	-- TODO: Only draw for players who have the GUI open
 	for _, player in pairs(game.players) do
 		faction_server_status.draw(player, get_player_faction(player).faction_id)
