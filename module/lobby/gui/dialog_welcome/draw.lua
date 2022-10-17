@@ -34,7 +34,7 @@ local function draw_welcome(player)
 						selected_tab_index = 1,
 					},
 					-- Welcome
-					get_tab_welcome(),
+					get_tab_welcome(player),
 					-- About gridworld
 					get_tab_about(),
 					-- Factions list
