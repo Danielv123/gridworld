@@ -4,7 +4,7 @@ module.exports = async function factionInvitePlayerRequestHandler(message, reque
 	if (faction) {
 		// Check if the player is already in the faction
 		for (let member of faction.members) {
-			if (member.name === message.data.player_name) {
+			if (member.name.toLowerCase() === message.data.player_name.toLowerCase()) {
 				return {
 					ok: false,
 					message: "Player is already in the faction",

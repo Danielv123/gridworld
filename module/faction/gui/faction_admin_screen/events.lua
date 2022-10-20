@@ -3,6 +3,15 @@ local dialog_welcome_draw = require("modules/gridworld/lobby/gui/dialog_welcome/
 local dialog_faction_edit_screen_draw = require("modules/gridworld/faction/gui/faction_edit_screen/draw")
 local invite_player_dialog_draw = require("modules/gridworld/faction/gui/invite_player_dialog/draw")
 
+local function indexOf(array, value)
+    for i, v in ipairs(array) do
+        if v == value then
+            return i
+        end
+    end
+    return nil
+end
+
 local function on_gui_click(_, action, player)
 	if player == nil then return end
 	if action.location == "faction_admin_screen" then
@@ -27,17 +36,23 @@ local function on_gui_click(_, action, player)
         end
 		if action.action == "promote_member" then
             -- Promote one step
-			clusterio_api.send_json("gridworld:faction_promote_player", {
+			local roleTable = {"leader", "officer", "member", "invited"}
+			local role = indexOf(roleTable, action.old_role)
+			clusterio_api.send_json("gridworld:faction_change_member_role", {
 				faction_id = action.faction_id,
-				player_name = action.player,
+                player_name = action.player,
+				role = roleTable[role - 1],
 				requesting_player = player.name,
 			})
 		end
 		if action.action == "demote_member" then
             -- Demote one step
-			clusterio_api.send_json("gridworld:faction_demote_player", {
+			local roleTable = {"leader", "officer", "member", "invited"}
+			local role = indexOf(roleTable, action.old_role)
+			clusterio_api.send_json("gridworld:faction_change_member_role", {
 				faction_id = action.faction_id,
-				player_name = action.player,
+                player_name = action.player,
+				role = roleTable[role + 1],
 				requesting_player = player.name,
 			})
 		end

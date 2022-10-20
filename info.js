@@ -356,6 +356,33 @@ module.exports = {
 				message: { type: "string" },
 			},
 		}),
+		leaveFaction: new libLink.Request({
+			type: "gridworld:leave_faction",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				faction_id: { type: "string" },
+				player_name: { type: "string" },
+			},
+			responseProperties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+			},
+		}),
+		factionChangeMemberRole: new libLink.Request({
+			type: "gridworld:faction_change_member_role",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				faction_id: { type: "string" },
+				player_name: { type: "string" },
+				role: factionProperties.members.items.properties.role,
+			},
+			responseProperties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+			},
+		}),
 		claimServer: new libLink.Request({
 			type: "gridworld:claim_server",
 			links: ["instance-slave", "slave-master"],

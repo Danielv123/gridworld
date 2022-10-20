@@ -2,7 +2,7 @@ local function get_player_faction(player)
 	local factions = global.gridworld.factions
 	for _, v in pairs(factions) do
 		for _, member in pairs(v.members) do
-			if member.name == player.name then
+			if member.name:lower() == player.name:lower() then
 				return v
 			end
 		end

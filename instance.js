@@ -43,14 +43,9 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				`Error kicking player from faction:\n${err.stack}`
 			));
 		});
-		this.instance.server.on("ipc-gridworld:faction_promote_player", data => {
-			this.factionPromotePlayer(data).catch(err => this.logger.error(
-				`Error promoting player in faction:\n${err.stack}`
-			));
-		});
-		this.instance.server.on("ipc-gridworld:faction_demote_player", data => {
-			this.factionDemotePlayer(data).catch(err => this.logger.error(
-				`Error demoting player in faction:\n${err.stack}`
+		this.instance.server.on("ipc-gridworld:faction_change_member_role", data => {
+			this.factionChangeMemberRole(data).catch(err => this.logger.error(
+				`Error changing player role in faction:\n${err.stack}`
 			));
 		});
 		this.instance.server.on("ipc-gridworld:claim_server", data => {
@@ -229,15 +224,26 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	}
 
 	async factionKickPlayer(data) {
-
+		const response = await this.info.messages.leaveFaction.send(this.instance, {
+			faction_id: data.faction_id,
+			player_name: data.player_name,
+		});
+		if (!response.ok) {
+			// Show error message
+			await this.sendRcon(`/sc game.get_player("${data.requesting_player}").print("${response.message}")`);
+		}
 	}
 
-	async factionPromotePlayer(data) {
-
-	}
-
-	async factionDemotePlayer(data) {
-
+	async factionChangeMemberRole(data) {
+		const response = await this.info.messages.factionChangeMemberRole.send(this.instance, {
+			faction_id: data.faction_id,
+			player_name: data.player_name,
+			role: data.role,
+		});
+		if (!response.ok) {
+			// Show error message
+			await this.sendRcon(`/sc game.get_player("${data.requesting_player}").print("${response.message}")`);
+		}
 	}
 
 	async claimServer(data) {

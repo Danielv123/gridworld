@@ -13,7 +13,7 @@ module.exports = async function joinGridworldRequestHandler(message, request, li
 	const player = this.master.userManager.users.get(player_name);
 
 	// Get player faction
-	const faction = mapFind(this.factionsDatastore, f => f.members.find(member => member.name === player_name));
+	const faction = mapFind(this.factionsDatastore, f => f.members.find(member => member.name.toLowerCase() === player_name.toLowerCase()));
 
 	// Get all instances in the current grid
 	const instances = mapFilter(this.master.instances, instance => instance.config.get("gridworld.grid_id") === message.data.grid_id);

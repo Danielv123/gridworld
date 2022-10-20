@@ -118,17 +118,6 @@ local function draw_faction_server_status(player, faction_id)
 						horizontal_align = "right",
 						horizontally_stretchable = true,
 					},
-					-- {
-					-- 	type = "sprite-button",
-					-- 	sprite = "utility/confirm_slot",
-					-- 	style = "tool_button",
-					-- 	actions = {
-					-- 		on_click = {
-					-- 			location = "faction_server_status",
-					-- 			action = "save_faction",
-					-- 		}
-					-- 	},
-					-- },
 					{
 						type = "sprite-button",
 						sprite = "utility/close_white",
