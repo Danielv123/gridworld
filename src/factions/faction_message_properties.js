@@ -12,6 +12,9 @@ const factionProperties = {
 				role: {
 					enum: ["leader", "officer", "member", "invited"],
 				},
+				promotion: {
+					enum: ["leader", "officer", "member", "invited", "null"],
+				},
 			},
 		},
 	},

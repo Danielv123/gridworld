@@ -332,7 +332,7 @@ module.exports = {
 			forwardTo: "master",
 			responseProperties: {
 				ok: { type: "boolean" },
-				msg: { type: "string" },
+				message: { type: "string" },
 				factions: {
 					type: "array",
 					items: {
@@ -340,6 +340,20 @@ module.exports = {
 						properties: factionProperties,
 					},
 				},
+			},
+		}),
+		factionInvitePlayer: new libLink.Request({
+			type: "gridworld:faction_invite_player",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				faction_id: { type: "string" },
+				player_name: { type: "string" },
+				role: { type: "string" },
+			},
+			responseProperties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
 			},
 		}),
 		claimServer: new libLink.Request({
@@ -353,7 +367,7 @@ module.exports = {
 			},
 			responseProperties: {
 				ok: { type: "boolean" },
-				msg: { type: "string" },
+				message: { type: "string" },
 			},
 		}),
 		unclaimServer: new libLink.Request({
@@ -366,7 +380,7 @@ module.exports = {
 			},
 			responseProperties: {
 				ok: { type: "boolean" },
-				msg: { type: "string" },
+				message: { type: "string" },
 			},
 		}),
 		joinGridworld: new libLink.Request({

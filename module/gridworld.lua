@@ -166,7 +166,7 @@ gridworld.sync_faction = factions.sync_faction
 gridworld.open_faction_admin_screen = factions.open_faction_admin_screen
 gridworld.show_progress = util_gui.dialog_show_progress.draw
 gridworld.hmi_show_status = function()
-	factions.gui.dialog_faction_server_status.draw(game.get_player("Danielv123"), get_player_faction(game.get_player("Danielv123")).faction_id)
+	factions.gui.dialog_faction_server_status.draw(game.player, get_player_faction(game.player).faction_id)
 end
 gridworld.hmi_hide_status = function()
 	game.player.gui.left.clear()

@@ -1,6 +1,76 @@
 local gui = require("modules/gridworld/flib/gui")
 local get_faction = require("modules/gridworld/faction/get_faction")
 
+local function get_members_table(faction)
+    local members = {
+		type = "table",
+		name = "gridworld_faction_members_table",
+		column_count = 3,
+		{
+			type = "label",
+			caption = "Name",
+		},
+		{
+			type = "label",
+			caption = "Role",
+		},
+		{
+			type = "label",
+			caption = "Actions",
+		},
+    }
+
+	for _, member in pairs(faction.members) do
+		table.insert(members, {
+			type = "label",
+			caption = member.name,
+		})
+		table.insert(members, {
+			type = "label",
+			caption = member.role,
+		})
+		local buttons = {
+			type = "flow",
+			direction = "horizontal",
+			{
+				type = "button",
+				caption = "Kick",
+				actions = {
+					on_click = {
+						location = "faction_admin_screen",
+						action = "kick_member",
+						player = member.name,
+					}
+				}
+			},
+			{
+				type = "button",
+				caption = "Promote",
+				actions = {
+					on_click = {
+						location = "faction_admin_screen",
+						action = "promote_member",
+						player = member.name,
+					}
+				}
+			},
+			{
+				type = "button",
+				caption = "Demote",
+				actions = {
+					on_click = {
+						location = "faction_admin_screen",
+						action = "demote_member",
+						player = member.name,
+					}
+				}
+			},
+		}
+		table.insert(members, buttons)
+    end
+	return members
+end
+
 local function draw_faction_admin_screen(player, faction_id)
 	if player == nil then player = game.player end
 	if player == nil then return false end
@@ -65,7 +135,7 @@ local function draw_faction_admin_screen(player, faction_id)
 				{
 					type = "tabbed-pane",
 					style_mods = {
-						maximal_width = 750,
+                        maximal_width = 750,
 						height = 500,
 					},
 					elem_mods = {
@@ -78,7 +148,7 @@ local function draw_faction_admin_screen(player, faction_id)
 							type = "flow",
 							direction = "vertical",
 							style_mods = {
-								maximal_height = 450,
+                                maximal_height = 450,
 								natural_height = 450,
 							},
 							{
@@ -105,6 +175,30 @@ local function draw_faction_admin_screen(player, faction_id)
 									single_line = false,
 								},
 							},
+						}
+                    },
+                    -- Members
+					{
+						tab = { type = "tab", caption = "Members" },
+						content = {
+							type = "flow",
+							direction = "vertical",
+							style_mods = {
+								maximal_height = 450,
+								natural_height = 450,
+							},
+							{
+                                type = "button",
+                                caption = "Invite player",
+								actions = {
+									on_click = {
+										location = "faction_admin_screen",
+										action = "invite_player",
+										faction_id = faction_id,
+									}
+								}
+							},
+							get_members_table(faction),
 						}
 					},
 				},

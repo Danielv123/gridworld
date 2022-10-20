@@ -18,6 +18,7 @@ const joinGridworldRequestHandler = require("./src/request_handlers/joinGridworl
 const performEdgeTeleportRequestHandler = require("./src/request_handlers/performEdgeTeleportRequestHandler");
 const updateEdgeTransportEdgesRequestHandler = require("./src/request_handlers/updateEdgeTransportEdgesRequestHandler");
 const refreshFactionDataRequestHandler = require("./src/request_handlers/refreshFactionDataRequestHandler");
+const factionInvitePlayerRequestHandler = require("./src/request_handlers/factionInvitePlayerRequestHandler");
 const claimServerRequestHandler = require("./src/request_handlers/claimServerRequestHandler");
 const unclaimServerRequestHandler = require("./src/request_handlers/unclaimServerRequestHandler");
 
@@ -96,6 +97,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	performEdgeTeleportRequestHandler = performEdgeTeleportRequestHandler;
 
 	refreshFactionDataRequestHandler = refreshFactionDataRequestHandler;
+
+	factionInvitePlayerRequestHandler = factionInvitePlayerRequestHandler;
 
 	claimServerRequestHandler = claimServerRequestHandler;
 

@@ -33,6 +33,26 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				`Error updating faction:\n${err.stack}`
 			));
 		});
+		this.instance.server.on("ipc-gridworld:faction_invite_player", data => {
+			this.factionInvitePlayer(data).catch(err => this.logger.error(
+				`Error inviting player to faction:\n${err.stack}`
+			));
+		});
+		this.instance.server.on("ipc-gridworld:faction_kick_player", data => {
+			this.factionKickPlayer(data).catch(err => this.logger.error(
+				`Error kicking player from faction:\n${err.stack}`
+			));
+		});
+		this.instance.server.on("ipc-gridworld:faction_promote_player", data => {
+			this.factionPromotePlayer(data).catch(err => this.logger.error(
+				`Error promoting player in faction:\n${err.stack}`
+			));
+		});
+		this.instance.server.on("ipc-gridworld:faction_demote_player", data => {
+			this.factionDemotePlayer(data).catch(err => this.logger.error(
+				`Error demoting player in faction:\n${err.stack}`
+			));
+		});
 		this.instance.server.on("ipc-gridworld:claim_server", data => {
 			this.claimServer(data).catch(err => this.logger.error(
 				`Error claiming server:\n${err.stack}`
@@ -193,6 +213,33 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		await this.sendRcon(`/sc gridworld.open_faction_admin_screen("${data.player_name}","${data.faction_id}")`);
 	}
 
+	async factionInvitePlayer(data) {
+		let response = await this.info.messages.factionInvitePlayer.send(this.instance, {
+			faction_id: data.faction_id,
+			player_name: data.player_name,
+			role: data.role,
+		});
+		if (response.ok) {
+			// Close invite player dialog
+			await this.sendRcon(`/sc game.get_player("${data.requesting_player}").gui.center.gridworld_invite_player_dialog.destroy()`);
+		} else {
+			// Show error message
+			await this.sendRcon(`/sc game.get_player("${data.requesting_player}").print("${response.message}")`);
+		}
+	}
+
+	async factionKickPlayer(data) {
+
+	}
+
+	async factionPromotePlayer(data) {
+
+	}
+
+	async factionDemotePlayer(data) {
+
+	}
+
 	async claimServer(data) {
 		// Show received progress in game
 		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Claiming server", "Propagating changes", 2, 3)`);
@@ -209,8 +256,8 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			await this.sendRcon(`/sc game.get_player("${data.player_name}").gui.center.clear()`);
 		} else {
 			await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Claiming server", "Failed", 3, 3)`);
-			await this.sendRcon(`/sc game.get_player("${data.player_name}".print("Failed to claim server: ${status.msg}")`);
-			this.logger.error(`Failed to claim server: ${status.msg}`);
+			await this.sendRcon(`/sc game.get_player("${data.player_name}".print("Failed to claim server: ${status.message}")`);
+			this.logger.error(`Failed to claim server: ${status.message}`);
 		}
 	}
 
@@ -229,8 +276,8 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			await this.sendRcon(`/sc game.get_player("${data.player_name}").gui.center.clear()`);
 		} else {
 			await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Unclaiming server", "Failed", 3, 3)`);
-			await this.sendRcon(`/sc game.get_player("${data.player_name}".print("Failed to unclaim server: ${status.msg}")`);
-			this.logger.error(`Failed to unclaim server: ${status.msg}`);
+			await this.sendRcon(`/sc game.get_player("${data.player_name}".print("Failed to unclaim server: ${status.message}")`);
+			this.logger.error(`Failed to unclaim server: ${status.message}`);
 		}
 	}
 

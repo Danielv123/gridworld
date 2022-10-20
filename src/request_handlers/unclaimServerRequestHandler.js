@@ -10,6 +10,6 @@ module.exports = async function unclaimServerRequestHandler(message) {
 	this.setInstanceConfigField(message.data.instance_id, "gridworld.claimed_by_faction", "-");
 	return {
 		ok: true,
-		msg: "Server unclaimed",
+		message: "Server unclaimed",
 	};
 };
