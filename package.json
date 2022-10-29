@@ -10,7 +10,7 @@
 		"prepare": "webpack-cli --env production && husky install",
 		"lint": "eslint \"*.js\" src web --fix",
 		"luacheck": "luacheck module/",
-		"test": "spaces-to-tabs module/**/*.lua -s 4 && npm run lint && npm run luacheck"
+		"test": "spaces-to-tabs -s 4 module/**.lua module/**/**.lua module/**/**/**.lua module/**/**/**/**.lua module/**/**/**/**/**.lua && npm run lint && npm run luacheck"
 	},
 	"bugs": {
 		"url": "https://github.com/Danielv123/gridworld/issues"

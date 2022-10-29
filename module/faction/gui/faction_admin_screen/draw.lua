@@ -2,7 +2,7 @@ local gui = require("modules/gridworld/flib/gui")
 local get_faction = require("modules/gridworld/faction/get_faction")
 
 local function get_members_table(faction, player)
-    local members = {
+	local members = {
 		type = "table",
 		name = "gridworld_faction_members_table",
 		column_count = 3,
@@ -18,12 +18,12 @@ local function get_members_table(faction, player)
 			type = "label",
 			caption = "Actions",
 		},
-    }
-    local player_role = "member"
+	}
+	local player_role = "member"
 	for _, member in pairs(faction.members) do
 		if member.name:lower() == player.name:lower() then
 			player_role = member.role
-        end
+		end
 	end
 
 	for _, member in pairs(faction.members) do
@@ -37,7 +37,7 @@ local function get_members_table(faction, player)
 		})
 		local buttons = {
 			type = "flow",
-            direction = "horizontal",
+			direction = "horizontal",
 		}
 		if player_role == "leader" or (player_role == "officer" and member.role == "member") then
 			table.insert(buttons, {
@@ -47,11 +47,11 @@ local function get_members_table(faction, player)
 					on_click = {
 						location = "faction_admin_screen",
 						action = "kick_member",
-                        player = member.name,
+						player = member.name,
 						faction_id = faction.faction_id,
 					}
 				}
-            })
+			})
 			if member.role ~= "leader" and member.role ~= "invited" then
 				table.insert(buttons, {
 					type = "button",
@@ -60,7 +60,7 @@ local function get_members_table(faction, player)
 						on_click = {
 							location = "faction_admin_screen",
 							action = "promote_member",
-                            player = member.name,
+							player = member.name,
 							old_role = member.role,
 							faction_id = faction.faction_id,
 						}
@@ -81,7 +81,7 @@ local function get_members_table(faction, player)
 						}
 					}
 				})
-            end
+			end
 		elseif player.name == member.name then
 			table.insert(buttons, {
 				type = "button",
@@ -90,14 +90,14 @@ local function get_members_table(faction, player)
 					on_click = {
 						location = "faction_admin_screen",
 						action = "kick_member",
-                        player = member.name,
+						player = member.name,
 						faction_id = faction.faction_id,
 					}
 				}
 			})
 		end
 		table.insert(members, buttons)
-    end
+	end
 	return members
 end
 
@@ -108,13 +108,13 @@ local function draw_faction_admin_screen(player, faction_id)
 	local faction = get_faction(faction_id)
 
 	local selected_tab_index = 1
-    if player.gui.center["gridworld_faction_admin_screen"] ~= nil then
+	if player.gui.center["gridworld_faction_admin_screen"] ~= nil then
 		selected_tab_index = player.gui.center["gridworld_faction_admin_screen"].content.faction_tabs.selected_tab_index
 		player.gui.center["gridworld_faction_admin_screen"].destroy()
 	end
 	gui.build(player.gui.center, {
 		{
-            type = "frame",
+			type = "frame",
 			name = "gridworld_faction_admin_screen",
 			direction = "vertical",
 			ref = {"window"},
@@ -166,13 +166,13 @@ local function draw_faction_admin_screen(player, faction_id)
 			},
 			-- Content
 			{
-                type = "flow",
+				type = "flow",
 				name = "content",
 				{
-                    type = "tabbed-pane",
+					type = "tabbed-pane",
 					name = "faction_tabs",
 					style_mods = {
-                        maximal_width = 750,
+						maximal_width = 750,
 						height = 500,
 					},
 					-- User customizable front page and statistics
@@ -182,7 +182,7 @@ local function draw_faction_admin_screen(player, faction_id)
 							type = "flow",
 							direction = "vertical",
 							style_mods = {
-                                maximal_height = 450,
+								maximal_height = 450,
 								natural_height = 450,
 							},
 							{
@@ -210,8 +210,8 @@ local function draw_faction_admin_screen(player, faction_id)
 								},
 							},
 						}
-                    },
-                    -- Members
+					},
+					-- Members
 					{
 						tab = { type = "tab", caption = "Members" },
 						content = {
@@ -222,8 +222,8 @@ local function draw_faction_admin_screen(player, faction_id)
 								natural_height = 450,
 							},
 							{
-                                type = "button",
-                                caption = "Invite player",
+								type = "button",
+								caption = "Invite player",
 								actions = {
 									on_click = {
 										location = "faction_admin_screen",
@@ -231,7 +231,7 @@ local function draw_faction_admin_screen(player, faction_id)
 										faction_id = faction_id,
 									}
 								}
-                            },
+							},
 							{
 								type = "button",
 								caption = "Join faction",
@@ -249,7 +249,7 @@ local function draw_faction_admin_screen(player, faction_id)
 				},
 			}
 		}
-    })
+	})
 	player.gui.center["gridworld_faction_admin_screen"].content.faction_tabs.selected_tab_index = selected_tab_index
 end
 -- /c game.player.gui.screen.clear()

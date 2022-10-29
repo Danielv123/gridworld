@@ -5,7 +5,7 @@ local function on_gui_click(_, action, player)
 	if player == nil then return end
 	if action.location == "faction_edit_screen" then
 		if action.action == "return_to_faction_screen" then
-            -- Close dialog
+			-- Close dialog
 			player.gui.center.clear()
 			gridworld.open_faction_admin_screen(player.name, action.faction_id)
 		end
@@ -20,8 +20,8 @@ local function on_gui_click(_, action, player)
 				open = faction.open,
 				about = faction.about,
 				player_name = player.name,
-            })
-            -- Close dialog
+			})
+			-- Close dialog
 			player.gui.center.clear()
 		end
 	end

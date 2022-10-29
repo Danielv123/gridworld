@@ -43,7 +43,7 @@ local function draw_invite_player_dialog(player)
 			},
 			-- Content
 			{
-                type = "flow",
+				type = "flow",
 				name = "content",
 				{
 					type = "table",
@@ -63,8 +63,8 @@ local function draw_invite_player_dialog(player)
 					},
 					{
 						type = "drop-down",
-                        name = "gridworld_invite_player_role",
-                        items = { "Leader", "Officer", "Member" },
+						name = "gridworld_invite_player_role",
+						items = { "Leader", "Officer", "Member" },
 						selected_index = 3,
 						actions = {
 							on_selection_state_changed = {
@@ -72,7 +72,7 @@ local function draw_invite_player_dialog(player)
 								action = "update_role",
 							}
 						},
-                    },
+					},
 					{
 						type = "label",
 						caption = "",
@@ -80,7 +80,7 @@ local function draw_invite_player_dialog(player)
 					{
 						type = "button",
 						name = "gridworld_invite_player_button",
-                        caption = "Invite",
+						caption = "Invite",
 						actions = {
 							on_click = {
 								location = "invite_player_dialog",

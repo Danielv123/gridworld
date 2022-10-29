@@ -19,7 +19,7 @@ local function on_gui_click(_, action, player)
 				faction_id = faction.faction_id,
 				player_name = player.name,
 			})
-        end
+		end
 		if action.action == "unclaim_server" then
 			-- Open unclaim dialog
 			local faction = get_player_faction(player)

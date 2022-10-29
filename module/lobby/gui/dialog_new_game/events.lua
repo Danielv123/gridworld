@@ -11,7 +11,7 @@ local function on_gui_click(_, action, player)
 			name = faction.name,
 			open = faction.open,
 			owner = player.name,
-        })
+		})
 		-- Close window
 		local frame = player.gui.center["gridworld_new_game_dialog"]
 		if frame ~= nil then

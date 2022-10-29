@@ -16,6 +16,6 @@ end
 
 return {
 	draw = draw,
-    events = events,
+	events = events,
 	update = update,
 }
