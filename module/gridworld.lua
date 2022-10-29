@@ -110,6 +110,8 @@ gridworld.events[defines.events.on_built_entity] = function(event)
 				-- it wasn't placed by a player, we can't tell em whats wrong
 				entity.destroy()
 			end
+		else
+			factions.on_built_entity(event)
 		end
 	end
 end

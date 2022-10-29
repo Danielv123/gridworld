@@ -6,7 +6,7 @@ local function unclaim_server(faction_id)
 		game.print("Error: Attempted to unclaim server using the wrong faction")
 	end
 	global.gridworld.claiming_faction.claimed = false
-	global.gridworld.claiming_faction.faction_id = 0
+	global.gridworld.claiming_faction.faction_id = ""
 	global.gridworld.claiming_faction.stored_fp = 0
 
 	-- Redraw server status and other GUI elements that show the claiming faction
