@@ -356,6 +356,19 @@ module.exports = {
 				message: { type: "string" },
 			},
 		}),
+		joinFaction: new libLink.Request({
+			type: "gridworld:join_faction",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				faction_id: { type: "string" },
+				player_name: { type: "string" },
+			},
+			responseProperties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+			},
+		}),
 		leaveFaction: new libLink.Request({
 			type: "gridworld:leave_faction",
 			links: ["instance-slave", "slave-master"],

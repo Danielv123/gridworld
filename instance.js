@@ -38,6 +38,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				`Error inviting player to faction:\n${err.stack}`
 			));
 		});
+		this.instance.server.on("ipc-gridworld:join_faction", data => {
+			this.joinFaction(data).catch(err => this.logger.error(
+				`Error joining faction:\n${err.stack}`
+			));
+		});
 		this.instance.server.on("ipc-gridworld:faction_kick_player", data => {
 			this.factionKickPlayer(data).catch(err => this.logger.error(
 				`Error kicking player from faction:\n${err.stack}`
@@ -220,6 +225,19 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		} else {
 			// Show error message
 			await this.sendRcon(`/sc game.get_player("${data.requesting_player}").print("${response.message}")`);
+		}
+	}
+
+	async joinFaction(data) {
+		let response = await this.info.messages.joinFaction.send(this.instance, {
+			faction_id: data.faction_id,
+			player_name: data.player_name,
+		});
+		if (response.ok) {
+			await this.sendRcon(`/sc game.get_player("${data.player_name}").print("${response.message}")`);
+		} else {
+			// Show error message
+			await this.sendRcon(`/sc game.get_player("${data.player_name}").print("${response.message}")`);
 		}
 	}
 

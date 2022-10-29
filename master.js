@@ -19,6 +19,7 @@ const performEdgeTeleportRequestHandler = require("./src/request_handlers/perfor
 const updateEdgeTransportEdgesRequestHandler = require("./src/request_handlers/updateEdgeTransportEdgesRequestHandler");
 const refreshFactionDataRequestHandler = require("./src/request_handlers/refreshFactionDataRequestHandler");
 const factionInvitePlayerRequestHandler = require("./src/request_handlers/factionInvitePlayerRequestHandler");
+const joinFactionRequestHandler = require("./src/request_handlers/joinFactionRequestHandler");
 const factionChangeMemberRoleRequestHandler = require("./src/request_handlers/factionChangeMemberRoleRequestHandler");
 const leaveFactionRequestHandler = require("./src/request_handlers/leaveFactionRequestHandler");
 const claimServerRequestHandler = require("./src/request_handlers/claimServerRequestHandler");
@@ -101,6 +102,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	refreshFactionDataRequestHandler = refreshFactionDataRequestHandler;
 
 	factionInvitePlayerRequestHandler = factionInvitePlayerRequestHandler;
+
+	joinFactionRequestHandler = joinFactionRequestHandler;
 
 	factionChangeMemberRoleRequestHandler = factionChangeMemberRoleRequestHandler;
 

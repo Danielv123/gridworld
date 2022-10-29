@@ -26,6 +26,13 @@ local function on_gui_click(_, action, player)
             -- Open invite dialog
 			invite_player_dialog_draw(player)
         end
+		if action.action == "join_faction" then
+			-- Join faction
+			clusterio_api.send_json("gridworld:join_faction", {
+				faction_id = action.faction_id,
+				player_name = player.name,
+			})
+		end
 		if action.action == "kick_member" then
             -- Kick the member from the faction - should maybe have a confirmation dialog?
 			clusterio_api.send_json("gridworld:faction_kick_player", {

@@ -231,6 +231,17 @@ local function draw_faction_admin_screen(player, faction_id)
 										faction_id = faction_id,
 									}
 								}
+                            },
+							{
+								type = "button",
+								caption = "Join faction",
+								actions = {
+									on_click = {
+										location = "faction_admin_screen",
+										action = "join_faction",
+										faction_id = faction_id,
+									}
+								}
 							},
 							get_members_table(faction, player),
 						}
