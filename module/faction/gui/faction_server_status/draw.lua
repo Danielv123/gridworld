@@ -95,6 +95,7 @@ local function draw_faction_server_status(player, faction_id)
 	gui.build(player.gui.left, {
 		{
 			type = "frame",
+			name = "gridworld_faction_server_status",
 			direction = "vertical",
 			ref = {"window"},
 			-- Header

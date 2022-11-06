@@ -9,4 +9,9 @@ return {
 	end,
 	gui = gui,
 	on_built_entity = on_built_entity,
+	on_player_joined_game = function(event)
+		local player = game.get_player(event.player_index)
+		if player == nil then return end
+		gui.dialog_faction_server_status.update(player)
+	end,
 }

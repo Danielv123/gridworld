@@ -8,6 +8,7 @@
 ]]
 
 local faction_admin_screen = require("modules/gridworld/faction/gui/faction_admin_screen/dialog")
+local faction_server_status = require("modules/gridworld/faction/gui/faction_server_status/dialog")
 
 local function sync_faction(faction_id, faction_data)
 	log("Syncing faction " .. faction_id)
@@ -29,6 +30,11 @@ local function sync_faction(faction_id, faction_data)
 			if global.gridworld.claiming_faction.claimed and global.gridworld.claiming_faction.faction_id == faction_id then
 				player.force = "faction_claimed"
 			end
+		end
+	end
+	for _, player in pairs(game.players) do
+		if player.connected then
+			faction_server_status.update(player)
 		end
 	end
 end
