@@ -8,6 +8,7 @@ local function draw_new_game_dialog(player)
 	gui.build(player.gui.center, {
 		{
 			type = "frame",
+			name = "gridworld_new_game_dialog",
 			direction = "vertical",
 			ref = {"window"},
 			-- Header

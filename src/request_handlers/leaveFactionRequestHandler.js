@@ -1,11 +1,9 @@
 "use strict";
-module.exports = async function updateFactionRequestHandler(message, request, link) {
+module.exports = async function leaveFactionRequestHandler(message, request, link) {
 	const faction = this.factionsDatastore.get(message.data.faction_id);
 	if (faction) {
-		faction.name = message.data.name;
-		faction.open = message.data.open;
-		faction.about = message.data.about;
-		this.factionsDatastore.set(message.data.faction_id, faction);
+		// Remove the player from the faction
+		faction.members = faction.members.filter(member => member.name.toLowerCase() !== message.data.player_name.toLowerCase());
 
 		// Propagate changes to all online instances
 		this.broadcastEventToSlaves(this.info.messages.factionUpdate, { faction: faction });
@@ -17,8 +15,7 @@ module.exports = async function updateFactionRequestHandler(message, request, li
 
 		return {
 			ok: true,
-			message: "Faction updated",
-			faction: faction,
+			message: `Removed ${message.data.player_name} from faction ${faction.name}`,
 		};
 	}
 	return {

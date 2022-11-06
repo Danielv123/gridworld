@@ -22,6 +22,9 @@ local lobby = require("lobby")
 local factions = require("factions")
 local util_gui = require("util/gui")
 local setup_forces = require("faction/setup_forces")
+local claim_server = require("faction/claim_server")
+local unclaim_server = require("faction/unclaim_server")
+local get_player_faction = require("faction/get_player_faction")
 
 -- Declare globals to make linter happy
 game = game
@@ -107,6 +110,8 @@ gridworld.events[defines.events.on_built_entity] = function(event)
 				-- it wasn't placed by a player, we can't tell em whats wrong
 				entity.destroy()
 			end
+		else
+			factions.on_built_entity(event)
 		end
 	end
 end
@@ -124,6 +129,7 @@ gridworld.events[defines.events.on_gui_checked_state_changed] = function(event)
 	local action = gui.read_action(event)
 	if action then
 		lobby.gui.on_gui_checked_state_changed(event, action, player)
+		factions.gui.on_gui_checked_state_changed(event, action, player)
 	end
 end
 gridworld.events[defines.events.on_gui_text_changed] = function(event)
@@ -131,6 +137,7 @@ gridworld.events[defines.events.on_gui_text_changed] = function(event)
 	local action = gui.read_action(event)
 	if action then
 		lobby.gui.on_gui_text_changed(event, action, player)
+		factions.gui.on_gui_text_changed(event, action, player)
 	end
 end
 gridworld.on_nth_tick = {}
@@ -161,10 +168,12 @@ gridworld.sync_faction = factions.sync_faction
 gridworld.open_faction_admin_screen = factions.open_faction_admin_screen
 gridworld.show_progress = util_gui.dialog_show_progress.draw
 gridworld.hmi_show_status = function()
-	factions.gui.dialog_faction_server_status.draw(game.get_player("Danielv123"), "pbnwcdal")
+	factions.gui.dialog_faction_server_status.draw(game.player, get_player_faction(game.player).faction_id)
 end
 gridworld.hmi_hide_status = function()
 	game.player.gui.left.clear()
 end
+gridworld.claim_server = claim_server
+gridworld.unclaim_server = unclaim_server
 
 return gridworld

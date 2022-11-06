@@ -86,6 +86,13 @@ InstanceConfigGroup.define({
 	type: "number",
 	initial_value: 0,
 });
+InstanceConfigGroup.define({
+	name: "claimed_by_faction",
+	title: "Claimed by faction",
+	description: "Faction that has claimed this server",
+	type: "string",
+	initial_value: "",
+});
 InstanceConfigGroup.finalize();
 
 libUsers.definePermission({
@@ -118,6 +125,12 @@ libUsers.definePermission({
 	description: "Allow for existing instances to be started by exploration through edge_teleports",
 	grantByDefault: true,
 });
+libUsers.definePermission({
+	name: "gridworld.faction.delete",
+	title: "Delete faction",
+	description: "Delete *any* faction",
+	grantByDefault: false,
+});
 
 module.exports = {
 	name: "gridworld",
@@ -134,6 +147,8 @@ module.exports = {
 	routes: [
 		"/gridworld",
 		"/gridworld/create",
+		"/gridworld/factions",
+		"/gridworld/factions/:factionId/view",
 	],
 
 	messages: {
@@ -232,12 +247,13 @@ module.exports = {
 				y: { type: "number" },
 			},
 		}),
-		setPlayerPositionSubscription: new libLink.Request({
-			type: "gridworld:set_player_position_subscription",
+		setWebSubscription: new libLink.Request({
+			type: "gridworld:set_web_subscription",
 			links: ["control-master"],
 			permission: "gridworld.overview.view",
 			requestProperties: {
 				player_position: { type: "boolean" },
+				faction_list: { type: "boolean" },
 			},
 		}),
 		startInstance: new libLink.Request({
@@ -262,6 +278,10 @@ module.exports = {
 				},
 			},
 		}),
+		/**
+		 * Send updated faction data to master for propagation throughout the cluster
+		 * Used to edit factions
+		 */
 		updateFaction: new libLink.Request({
 			type: "gridworld:update_faction",
 			links: ["instance-slave", "slave-master"],
@@ -289,15 +309,118 @@ module.exports = {
 				},
 			},
 		}),
+		/**
+		 * Event notifying an instance of changes to a faction
+		 */
 		factionUpdate: new libLink.Event({
 			type: "gridworld:faction_update",
-			links: ["master-slave", "slave-instance"],
+			links: ["master-slave", "slave-instance", "master-control"],
 			broadcastTo: "instance",
 			eventProperties: {
 				faction: {
 					type: "object",
 					properties: factionProperties,
 				},
+			},
+		}),
+		/**
+		 * Get changed factions
+		 */
+		refreshFactionData: new libLink.Request({
+			type: "gridworld:refresh_faction_data",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			responseProperties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+				factions: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: factionProperties,
+					},
+				},
+			},
+		}),
+		factionInvitePlayer: new libLink.Request({
+			type: "gridworld:faction_invite_player",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				faction_id: { type: "string" },
+				player_name: { type: "string" },
+				role: { type: "string" },
+			},
+			responseProperties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+			},
+		}),
+		joinFaction: new libLink.Request({
+			type: "gridworld:join_faction",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				faction_id: { type: "string" },
+				player_name: { type: "string" },
+			},
+			responseProperties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+			},
+		}),
+		leaveFaction: new libLink.Request({
+			type: "gridworld:leave_faction",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				faction_id: { type: "string" },
+				player_name: { type: "string" },
+			},
+			responseProperties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+			},
+		}),
+		factionChangeMemberRole: new libLink.Request({
+			type: "gridworld:faction_change_member_role",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				faction_id: { type: "string" },
+				player_name: { type: "string" },
+				role: factionProperties.members.items.properties.role,
+			},
+			responseProperties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+			},
+		}),
+		claimServer: new libLink.Request({
+			type: "gridworld:claim_server",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				instance_id: { type: "integer" },
+				player_name: { type: "string" },
+				faction_id: { type: "string" },
+			},
+			responseProperties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+			},
+		}),
+		unclaimServer: new libLink.Request({
+			type: "gridworld:unclaim_server",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			requestProperties: {
+				instance_id: { type: "integer" },
+				player_name: { type: "string" },
+			},
+			responseProperties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
 			},
 		}),
 		joinGridworld: new libLink.Request({

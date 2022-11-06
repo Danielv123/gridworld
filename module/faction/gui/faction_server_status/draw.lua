@@ -7,13 +7,25 @@ local function draw_faction_server_status(player, faction_id)
 	if player == nil then return false end
 
 	local player_faction = get_faction(faction_id)
-    local server_is_claimed = global.gridworld.claiming_faction.claimed
+	local server_is_claimed = global.gridworld.claiming_faction.claimed
 	local claiming_faction = get_faction(global.gridworld.claiming_faction.faction_id)
 	local server_is_claimed_by_player = server_is_claimed and global.gridworld.claiming_faction.faction_id == faction_id
 
 	local content = {
 		type = "flow",
 		direction = "vertical",
+		name = "gridworld_faction_server_status",
+		{
+			type = "button",
+			caption = "Join lobby server",
+			style = "green_button",
+			actions = {
+				on_click = {
+					location = "faction_server_status",
+					action = "join_lobby_server",
+				},
+			},
+		},
 		{
 			type = "label",
 			caption = "Server name: "..clusterio_api.get_instance_name(),
@@ -35,6 +47,19 @@ local function draw_faction_server_status(player, faction_id)
 				type = "label",
 				caption = "Cost per day: " .. 100 .. " fp",
 			})
+			table.insert(content, {
+				type = "button",
+				name = "gridworld_faction_unclaim_server",
+				caption = "Unclaim server",
+				actions = {
+					on_click = {
+						location = "faction_server_status",
+						action = "unclaim_server",
+						faction_id = faction_id,
+						player = player.name,
+					}
+				},
+			})
 		else
 			table.insert(content, {
 				type = "label",
@@ -42,12 +67,13 @@ local function draw_faction_server_status(player, faction_id)
 			})
 		end
 	else
-		-- Server is not claimed, are we part of a faction that can claim it?
+		-- Server is not claimed
+		table.insert(content, {
+			type = "label",
+			caption = "Unclaimed server",
+		})
+		-- are we part of a faction that can claim it?
 		if player_faction ~= nil then
-			table.insert(content, {
-				type = "label",
-				caption = "Unclaimed server",
-			})
 			table.insert(content, {
 				type = "button",
 				name = "gridworld_faction_claim_server",
@@ -61,11 +87,6 @@ local function draw_faction_server_status(player, faction_id)
 					}
 				},
 			})
-		else
-			table.insert(content, {
-				type = "label",
-				caption = "Unclaimed server",
-			})
 		end
 	end
 
@@ -74,6 +95,7 @@ local function draw_faction_server_status(player, faction_id)
 	gui.build(player.gui.left, {
 		{
 			type = "frame",
+			name = "gridworld_faction_server_status",
 			direction = "vertical",
 			ref = {"window"},
 			-- Header
@@ -97,17 +119,6 @@ local function draw_faction_server_status(player, faction_id)
 						horizontal_align = "right",
 						horizontally_stretchable = true,
 					},
-					-- {
-					-- 	type = "sprite-button",
-					-- 	sprite = "utility/confirm_slot",
-					-- 	style = "tool_button",
-					-- 	actions = {
-					-- 		on_click = {
-					-- 			location = "faction_server_status",
-					-- 			action = "save_faction",
-					-- 		}
-					-- 	},
-					-- },
 					{
 						type = "sprite-button",
 						sprite = "utility/close_white",

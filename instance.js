@@ -33,6 +33,36 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				`Error updating faction:\n${err.stack}`
 			));
 		});
+		this.instance.server.on("ipc-gridworld:faction_invite_player", data => {
+			this.factionInvitePlayer(data).catch(err => this.logger.error(
+				`Error inviting player to faction:\n${err.stack}`
+			));
+		});
+		this.instance.server.on("ipc-gridworld:join_faction", data => {
+			this.joinFaction(data).catch(err => this.logger.error(
+				`Error joining faction:\n${err.stack}`
+			));
+		});
+		this.instance.server.on("ipc-gridworld:faction_kick_player", data => {
+			this.factionKickPlayer(data).catch(err => this.logger.error(
+				`Error kicking player from faction:\n${err.stack}`
+			));
+		});
+		this.instance.server.on("ipc-gridworld:faction_change_member_role", data => {
+			this.factionChangeMemberRole(data).catch(err => this.logger.error(
+				`Error changing player role in faction:\n${err.stack}`
+			));
+		});
+		this.instance.server.on("ipc-gridworld:claim_server", data => {
+			this.claimServer(data).catch(err => this.logger.error(
+				`Error claiming server:\n${err.stack}`
+			));
+		});
+		this.instance.server.on("ipc-gridworld:unclaim_server", data => {
+			this.unclaimServer(data).catch(err => this.logger.error(
+				`Error unclaiming server:\n${err.stack}`
+			));
+		});
 		this.instance.server.on("ipc-gridworld:join_gridworld", data => {
 			this.joinGridworld(data).catch(err => this.logger.error(
 				`Error joining gridworld:\n${err.stack}`
@@ -66,6 +96,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			await this.info.messages.updateEdgeTransportEdges.send(this.instance, {
 				instance_id: this.instance.id,
 			});
+			// Refresh faction data
+			const response = await this.info.messages.refreshFactionData.send(this.instance);
+			for (let faction of response.factions) {
+				await this.runTask(this.sendRcon(`/sc gridworld.sync_faction("${faction.faction_id}",'${libLuaTools.escapeString(JSON.stringify(faction))}')`));
+			}
 		}
 	}
 
@@ -176,6 +211,98 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		await new Promise(r => setTimeout(r, 500));
 		// Navigate to updated faction screen
 		await this.sendRcon(`/sc gridworld.open_faction_admin_screen("${data.player_name}","${data.faction_id}")`);
+	}
+
+	async factionInvitePlayer(data) {
+		let response = await this.info.messages.factionInvitePlayer.send(this.instance, {
+			faction_id: data.faction_id,
+			player_name: data.player_name,
+			role: data.role,
+		});
+		if (response.ok) {
+			// Close invite player dialog
+			await this.sendRcon(`/sc game.get_player("${data.requesting_player}").gui.center.gridworld_invite_player_dialog.destroy()`);
+		} else {
+			// Show error message
+			await this.sendRcon(`/sc game.get_player("${data.requesting_player}").print("${response.message}")`);
+		}
+	}
+
+	async joinFaction(data) {
+		let response = await this.info.messages.joinFaction.send(this.instance, {
+			faction_id: data.faction_id,
+			player_name: data.player_name,
+		});
+		if (response.ok) {
+			await this.sendRcon(`/sc game.get_player("${data.player_name}").print("${response.message}")`);
+		} else {
+			// Show error message
+			await this.sendRcon(`/sc game.get_player("${data.player_name}").print("${response.message}")`);
+		}
+	}
+
+	async factionKickPlayer(data) {
+		const response = await this.info.messages.leaveFaction.send(this.instance, {
+			faction_id: data.faction_id,
+			player_name: data.player_name,
+		});
+		if (!response.ok) {
+			// Show error message
+			await this.sendRcon(`/sc game.get_player("${data.requesting_player}").print("${response.message}")`);
+		}
+	}
+
+	async factionChangeMemberRole(data) {
+		const response = await this.info.messages.factionChangeMemberRole.send(this.instance, {
+			faction_id: data.faction_id,
+			player_name: data.player_name,
+			role: data.role,
+		});
+		if (!response.ok) {
+			// Show error message
+			await this.sendRcon(`/sc game.get_player("${data.requesting_player}").print("${response.message}")`);
+		}
+	}
+
+	async claimServer(data) {
+		// Show received progress in game
+		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Claiming server", "Propagating changes", 2, 3)`);
+		// Update master
+		const status = await this.info.messages.claimServer.send(this.instance, {
+			instance_id: this.instance.config.get("instance.id"),
+			player_name: data.player_name,
+			faction_id: data.faction_id,
+		});
+		if (status.ok) {
+			await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Claiming server", "Finishing", 3, 3)`);
+			await this.sendRcon(`/sc gridworld.claim_server("${data.faction_id}")`);
+			await new Promise(r => setTimeout(r, 500));
+			await this.sendRcon(`/sc game.get_player("${data.player_name}").gui.center.clear()`);
+		} else {
+			await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Claiming server", "Failed", 3, 3)`);
+			await this.sendRcon(`/sc game.get_player("${data.player_name}".print("Failed to claim server: ${status.message}")`);
+			this.logger.error(`Failed to claim server: ${status.message}`);
+		}
+	}
+
+	async unclaimServer(data) {
+		// Show received progress in game
+		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Unclaiming server", "Propagating changes", 2, 3)`);
+		// Update master
+		const status = await this.info.messages.unclaimServer.send(this.instance, {
+			instance_id: this.instance.config.get("instance.id"),
+			player_name: data.player_name,
+		});
+		if (status.ok) {
+			await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Unclaiming server", "Finishing", 3, 3)`);
+			await this.sendRcon(`/sc gridworld.unclaim_server("${data.faction_id}")`);
+			await new Promise(r => setTimeout(r, 500));
+			await this.sendRcon(`/sc game.get_player("${data.player_name}").gui.center.clear()`);
+		} else {
+			await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Unclaiming server", "Failed", 3, 3)`);
+			await this.sendRcon(`/sc game.get_player("${data.player_name}".print("Failed to unclaim server: ${status.message}")`);
+			this.logger.error(`Failed to unclaim server: ${status.message}`);
+		}
 	}
 
 	async factionUpdateEventHandler(message) {

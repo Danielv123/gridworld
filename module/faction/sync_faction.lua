@@ -7,7 +7,11 @@
 	The neutral faction is used by all players that aren't part of the server owner faction.
 ]]
 
+local faction_admin_screen = require("modules/gridworld/faction/gui/faction_admin_screen/dialog")
+local faction_server_status = require("modules/gridworld/faction/gui/faction_server_status/dialog")
+
 local function sync_faction(faction_id, faction_data)
+	log("Syncing faction " .. faction_id)
 	if global.gridworld.factions == nil then
 		global.gridworld.factions = {}
 	end
@@ -15,15 +19,23 @@ local function sync_faction(faction_id, faction_data)
 
 	-- Add members to the force
 	for k,v in pairs(global.gridworld.factions[faction_id].members) do
-		local member = game.get_player(v.name)
-		if member ~= nil then
-            -- Apply faction settings to player
+		local player = game.get_player(v.name)
+		if player ~= nil then
+			-- Apply faction settings to player
 
-            -- If server is claimed by the players faction, move player to the faction force
+			-- Update faction related GUIs
+			faction_admin_screen.update(player)
+
+			-- If server is claimed by the players faction, move player to the faction force
 			if global.gridworld.claiming_faction.claimed and global.gridworld.claiming_faction.faction_id == faction_id then
-				member.force = "faction_claimed"
+				player.force = "faction_claimed"
 			end
-        end
+		end
+	end
+	for _, player in pairs(game.players) do
+		if player.connected then
+			faction_server_status.update(player)
+		end
 	end
 end
 

@@ -7,7 +7,7 @@ const registerTileServer = require("./src/routes/tileserver");
 
 const getMapDataRequestHandler = require("./src/request_handlers/getMapDataRequestHandler");
 const refreshTileDataRequestHandler = require("./src/request_handlers/refreshTileDataRequestHandler");
-const setPlayerPositionSubscriptionRequestHandler = require("./src/request_handlers/setPlayerPositionSubscriptionRequestHandler");
+const setWebSubscriptionRequestHandler = require("./src/request_handlers/setWebSubscriptionRequestHandler");
 const startInstanceRequestHandler = require("./src/request_handlers/startInstanceRequestHandler");
 const createFactionRequestHandler = require("./src/request_handlers/createFactionRequestHandler");
 const updateFactionRequestHandler = require("./src/request_handlers/updateFactionRequestHandler");
@@ -17,6 +17,13 @@ const createFactionGridRequestHandler = require("./src/request_handlers/createFa
 const joinGridworldRequestHandler = require("./src/request_handlers/joinGridworldRequestHandler");
 const performEdgeTeleportRequestHandler = require("./src/request_handlers/performEdgeTeleportRequestHandler");
 const updateEdgeTransportEdgesRequestHandler = require("./src/request_handlers/updateEdgeTransportEdgesRequestHandler");
+const refreshFactionDataRequestHandler = require("./src/request_handlers/refreshFactionDataRequestHandler");
+const factionInvitePlayerRequestHandler = require("./src/request_handlers/factionInvitePlayerRequestHandler");
+const joinFactionRequestHandler = require("./src/request_handlers/joinFactionRequestHandler");
+const factionChangeMemberRoleRequestHandler = require("./src/request_handlers/factionChangeMemberRoleRequestHandler");
+const leaveFactionRequestHandler = require("./src/request_handlers/leaveFactionRequestHandler");
+const claimServerRequestHandler = require("./src/request_handlers/claimServerRequestHandler");
+const unclaimServerRequestHandler = require("./src/request_handlers/unclaimServerRequestHandler");
 
 async function loadDatabase(config, filename, logger) {
 	let itemsPath = path.resolve(config.get("master.database_directory"), filename);
@@ -65,7 +72,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 		registerTileServer(this.master.app, this._tilesPath);
 
-		this.subscribedControlLinks = new Set();
+		this.subscribedControlLinks = [];
 	}
 
 	playerPositionEventHandler = playerPositionEventHandler;
@@ -78,7 +85,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 	refreshTileDataRequestHandler = refreshTileDataRequestHandler;
 
-	setPlayerPositionSubscriptionRequestHandler = setPlayerPositionSubscriptionRequestHandler;
+	setWebSubscriptionRequestHandler = setWebSubscriptionRequestHandler;
 
 	startInstanceRequestHandler = startInstanceRequestHandler;
 
@@ -91,6 +98,20 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	joinGridworldRequestHandler = joinGridworldRequestHandler;
 
 	performEdgeTeleportRequestHandler = performEdgeTeleportRequestHandler;
+
+	refreshFactionDataRequestHandler = refreshFactionDataRequestHandler;
+
+	factionInvitePlayerRequestHandler = factionInvitePlayerRequestHandler;
+
+	joinFactionRequestHandler = joinFactionRequestHandler;
+
+	factionChangeMemberRoleRequestHandler = factionChangeMemberRoleRequestHandler;
+
+	leaveFactionRequestHandler = leaveFactionRequestHandler;
+
+	claimServerRequestHandler = claimServerRequestHandler;
+
+	unclaimServerRequestHandler = unclaimServerRequestHandler;
 
 	async onInstanceStatusChanged(instance) {
 		if (instance.status === "running") {
@@ -149,7 +170,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 	onControlConnectionEvent(connection, event) {
 		if (event === "close") {
-			this.subscribedControlLinks.delete(connection);
+			let index = this.subscribedControlLinks.indexOf(sub => sub.link === connection);
+			if (index !== -1) { this.subscribedControlLinks.splice(index, 1); }
 		}
 	}
 

@@ -49,6 +49,7 @@ local function draw_show_progress(player_name, header, text, progress, max_progr
 			-- Content
 			{
 				type = "flow",
+				direction = "vertical",
 				{
 					type = "progressbar",
 					value = progress / max_progress,

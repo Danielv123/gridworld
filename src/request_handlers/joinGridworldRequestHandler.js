@@ -13,7 +13,7 @@ module.exports = async function joinGridworldRequestHandler(message, request, li
 	const player = this.master.userManager.users.get(player_name);
 
 	// Get player faction
-	const faction = mapFind(this.factionsDatastore, f => f.members.find(member => member.name === player_name));
+	const faction = mapFind(this.factionsDatastore, f => f.members.find(member => member.name.toLowerCase() === player_name.toLowerCase()));
 
 	// Get all instances in the current grid
 	const instances = mapFilter(this.master.instances, instance => instance.config.get("gridworld.grid_id") === message.data.grid_id);
@@ -30,11 +30,11 @@ module.exports = async function joinGridworldRequestHandler(message, request, li
 		const instance_id = instance[1].config.get("instance.id");
 		const instance_stats = player.instanceStats.get(instance_id);
 		if (instance_stats
-			&& Math.max(instance_stats.lastJoinAt.getTime(), instance_stats.lastLeaveAt.getTime()) > (last_visited_instance_time || 0)
+			&& Math.max(instance_stats.lastJoinAt?.getTime() || 0, instance_stats.lastLeaveAt?.getTime() || 0) > (last_visited_instance_time || 0)
 			&& instance[1].config.get("gridworld.is_lobby_server") !== true
 		) {
 			last_visited_instance = instance[1];
-			last_visited_instance_time = Math.max(instance_stats.lastJoinAt.getTime(), instance_stats.lastLeaveAt.getTime());
+			last_visited_instance_time = Math.max(instance_stats.lastJoinAt?.getTime() || 0, instance_stats.lastLeaveAt?.getTime() || 0);
 		}
 	}
 	if (last_visited_instance) {

@@ -6,6 +6,8 @@ import info from "../info";
 
 import OverviewPage from "./pages/OverviewPage";
 import CreateGridworldPage from "./pages/CreateGridworldPage";
+import FactionsPage from "./pages/FactionsPage";
+import FactionViewPage from "./pages/FactionViewPage";
 
 export class WebPlugin extends libPlugin.BaseWebPlugin {
 	async init() {
@@ -21,9 +23,23 @@ export class WebPlugin extends libPlugin.BaseWebPlugin {
 				permission: "gridworld.create",
 				content: <CreateGridworldPage />,
 			},
+			{
+				path: "/gridworld/factions",
+				sidebarName: "Factions",
+				content: <FactionsPage />,
+			},
+			{
+				path: "/gridworld/factions/:faction_id/view",
+				content: <FactionViewPage />,
+			},
 		];
 		this.playerPositions = new Map();
-		this.callbacks = [];
+		this.factions = new Map();
+		this.updateHandlers = new Set();
+		this.updateHandlerCounts = {
+			player_position: 0,
+			faction_list: 0,
+		};
 	}
 
 	onMasterConnectionEvent(event) {
@@ -33,31 +49,40 @@ export class WebPlugin extends libPlugin.BaseWebPlugin {
 	}
 
 	async playerPositionEventHandler(message) {
-		this.updatePlayerPosition(message.data);
+		this.updateHandlers.forEach(handler => {
+			if (handler.type === "player_position") {
+				handler.callback(message.data);
+			}
+		});
 	}
 
-	updatePlayerPosition(player) {
-		this.playerPositions.set(player.player_name, player);
-		for (let callback of this.callbacks) {
-			callback();
-		}
+	async factionUpdateEventHandler(message) {
+		this.updateHandlers.forEach(handler => {
+			if (handler.type === "faction_list") {
+				handler.callback(message.data.faction);
+			}
+		});
 	}
 
-	onUpdate(callback) {
-		this.callbacks.push(callback);
-		if (this.callbacks.length) {
+	onUpdate(updateHandler) {
+		this.updateHandlers.add(updateHandler);
+		this.updateHandlerCounts[updateHandler.type] += 1;
+		// Subscribe if the first handler of this type was added
+		if (this.updateHandlerCounts[updateHandler.type] === 1) {
 			this.updateSubscription();
 		}
 	}
 
-	offUpdate(callback) {
-		let index = this.callbacks.lastIndexOf(callback);
-		if (index === -1) {
+	offUpdate(updateHandler) {
+		let is_registered = this.updateHandlers.has(updateHandler);
+		if (!is_registered) {
 			throw new Error("callback is not registered");
 		}
 
-		this.callbacks.splice(index, 1);
-		if (!this.callbacks.length) {
+		this.updateHandlers.delete(updateHandler);
+		this.updateHandlerCounts[updateHandler.type] -= 1;
+		// Unsubscribe if the last handler was removed
+		if (this.updateHandlerCounts[updateHandler.type] === 0) {
 			this.updateSubscription();
 		}
 	}
@@ -67,19 +92,16 @@ export class WebPlugin extends libPlugin.BaseWebPlugin {
 			return;
 		}
 
-		info.messages.setPlayerPositionSubscription.send(
-			this.control, { player_position: Boolean(this.callbacks.length) }
-		).catch(notifyErrorHandler("Error subscribing to player positions"));
+		info.messages.setWebSubscription.send(this.control, {
+			player_position: this.updateHandlerCounts["player_position"] > 0,
+			faction_list: this.updateHandlerCounts["faction_list"] > 0,
+		}).catch(notifyErrorHandler("Error subscribing to event updates"));
 
-		if (this.callbacks.length) {
-			// Get player positions stored on server (not implemented)
-			// info.messages.getStorage.send(this.control).then(
-			// result => {
-			// this.updatePlayerPosition(result.items);
-			// }
-			// ).catch(notifyErrorHandler("Error updating player positions"));
-		} else {
+		if (this.updateHandlerCounts["player_position"] === 0) {
 			this.playerPositions.clear();
+		}
+		if (this.updateHandlerCounts["faction_list"] === 0) {
+			this.factions.length = 0;
 		}
 	}
 }

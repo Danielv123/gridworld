@@ -23,7 +23,7 @@ module.exports = async function joinGridworldRequestHandler(message) {
 
 	// Get player faction
 	// TODO: Sync faction data to destination instance
-	// const faction = mapFind(this.factionsDatastore, f => f.members.find(member => member.name === player_name));
+	// const faction = mapFind(this.factionsDatastore, f => f.members.find(member => member.name.toLowerCase() === player_name.toLowerCase));
 
 	// Get the destination instance
 	const instance_specification = worldPositionToInstance(

@@ -50,7 +50,7 @@ local function draw_factions_table()
 		-- Get player count
 		local playercount = 0
 		for _,v in pairs(faction.members) do
-			if v.rank ~= "invited" then -- Invited but not accepted is not counted as a member
+			if v.role ~= "invited" then -- Invited but not accepted is not counted as a member
 				playercount = playercount + 1
 			end
 		end

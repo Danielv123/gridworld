@@ -1,4 +1,24 @@
-local function get_tab_welcome()
+local get_player_faction = require("modules/gridworld/faction/get_player_faction")
+
+local function get_tab_welcome(player)
+	local new_game_button = {
+		type = "button",
+		caption = "New game",
+		style = "button",
+		actions = {
+			on_click = {
+				action = "open_new_game_dialog",
+			},
+		},
+	}
+
+	-- Check if player is part of a faction
+	local player_faction = get_player_faction(player)
+	if player_faction ~= nil then
+		-- Don't allow the player to create a new game if they are part of a faction
+		new_game_button = {}
+	end
+
 	return {
 		tab = {
 			type = "tab",
@@ -44,16 +64,7 @@ local function get_tab_welcome()
 						},
 					},
 				},
-				{
-					type = "button",
-					caption = "New game",
-					style = "button",
-					actions = {
-						on_click = {
-							action = "open_new_game_dialog",
-						},
-					},
-				},
+				new_game_button,
 			},
 		}
 	}
