@@ -20,6 +20,11 @@ local function on_gui_click(_, action, player)
 		}
 		dialog_new_game_draw(player)
 	end
+	if action.location == "dialog_welcome" then
+		if action.action == "close" then
+			player.gui.center.clear()
+		end
+	end
 end
 
 return {
