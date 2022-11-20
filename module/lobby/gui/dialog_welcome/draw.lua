@@ -2,6 +2,7 @@ local gui = require("modules/gridworld/flib/gui")
 local get_tab_welcome = require("tab_welcome")
 local get_tab_about = require("tab_about")
 local get_tab_factions = require("tab_factions")
+local get_tab_invites = require("tab_invites")
 
 local function draw_welcome(player)
 	local isnt_lobby = not global.gridworld.lobby_server
@@ -61,7 +62,9 @@ local function draw_welcome(player)
 	-- About page
 	table.insert(tabbed_pane, get_tab_about())
 	-- Factions list
-	table.insert(tabbed_pane, get_tab_factions())
+    table.insert(tabbed_pane, get_tab_factions())
+    -- Invites list
+	table.insert(tabbed_pane, get_tab_invites())
 
 	player.gui.center.clear()
 	gui.build(player.gui.center, {
