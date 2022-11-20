@@ -25,6 +25,7 @@ local setup_forces = require("faction/setup_forces")
 local claim_server = require("faction/claim_server")
 local unclaim_server = require("faction/unclaim_server")
 local get_player_faction = require("faction/get_player_faction")
+local gui_events = require("gui/events")
 
 -- Declare globals to make linter happy
 game = game
@@ -76,6 +77,7 @@ gridworld.events[defines.events.on_player_joined_game] = function(event)
 	if not global.gridworld.lobby_server then
 		edge_teleport.receive_teleport(player)
 		player_tracking.send_player_position(player)
+		gui_events.on_player_joined_game(event, nil, player)
 	else
 		lobby.gui.dialog_welcome.draw(player)
 	end
@@ -122,6 +124,7 @@ gridworld.events[defines.events.on_gui_click] = function(event)
 		lobby.gui.on_gui_click(event, action, player)
 		factions.gui.on_gui_click(event, action, player)
 		util_gui.on_gui_click(event, action, player)
+		gui_events.on_gui_click(event, action, player)
 	end
 end
 gridworld.events[defines.events.on_gui_checked_state_changed] = function(event)

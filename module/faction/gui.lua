@@ -2,17 +2,13 @@
 	GUI handlers for the lobby server.
 ]]
 
+local run_function = require("modules/gridworld/util/run_function")
+
 local dialog_faction_admin_screen = require("gui/faction_admin_screen/dialog")
 local dialog_faction_server_status = require("gui/faction_server_status/dialog")
 local factions_table = require("gui/components/factions_table/index")
 local faction_edit_screen = require("gui/faction_edit_screen/dialog")
 local invite_player_dialog = require("gui/invite_player_dialog/dialog")
-
-local run_function = function (key, table, event, action, player)
-	if table[key] ~= nil then
-		table[key](event, action, player)
-	end
-end
 
 return {
 	dialog_faction_admin_screen = dialog_faction_admin_screen,
