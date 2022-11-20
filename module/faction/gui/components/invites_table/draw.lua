@@ -42,14 +42,14 @@ local function draw_invites_table()
 	local factions = global.gridworld.factions
 	for _,faction in pairs(factions) do
 		-- Get player count
-        local playercount = 0
+		local playercount = 0
 		local is_invited = false
 		for _, member in pairs(faction.members) do
 			if member.role ~= "invited" then -- Invited but not accepted is not counted as a member
 				playercount = playercount + 1
-            elseif member.name:lower() == game.player.name:lower() then
+			elseif member.name:lower() == game.player.name:lower() then
 				is_invited = true
-            end
+			end
 		end
 		if is_invited then
 			insert_cell(factions_table, 100, faction.faction_id)
@@ -66,7 +66,7 @@ local function draw_invites_table()
 						faction_id = faction.faction_id,
 					}
 				}
-            })
+			})
 		end
 	end
 
