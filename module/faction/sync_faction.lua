@@ -9,6 +9,7 @@
 
 local faction_admin_screen = require("modules/gridworld/faction/gui/faction_admin_screen/dialog")
 local faction_server_status = require("modules/gridworld/faction/gui/faction_server_status/dialog")
+local set_player_permission_group = require("modules/gridworld/faction/building_restrictions/set_player_permission_group")
 
 local function sync_faction(faction_id, faction_data)
 	log("Syncing faction " .. faction_id)
@@ -34,6 +35,7 @@ local function sync_faction(faction_id, faction_data)
 	end
 	for _, player in pairs(game.players) do
 		if player.connected then
+			set_player_permission_group(player)
 			faction_server_status.update(player)
 		end
 	end

@@ -22,10 +22,12 @@ local lobby = require("lobby")
 local factions = require("factions")
 local util_gui = require("util/gui")
 local setup_forces = require("faction/setup_forces")
+local setup_permission_groups = require("faction/building_restrictions/setup_permission_groups")
 local claim_server = require("faction/claim_server")
 local unclaim_server = require("faction/unclaim_server")
 local get_player_faction = require("faction/get_player_faction")
 local gui_events = require("gui/events")
+local set_player_permission_group = require("faction/building_restrictions/set_player_permission_group")
 
 -- Declare globals to make linter happy
 game = game
@@ -66,6 +68,7 @@ gridworld.events[clusterio_api.events.on_server_startup] = function()
 
 	-- Fun factions inititalization
 	setup_forces()
+	setup_permission_groups()
 end
 gridworld.events[defines.events.on_player_joined_game] = function(event)
 	local player = game.get_player(event.player_index)
@@ -78,6 +81,7 @@ gridworld.events[defines.events.on_player_joined_game] = function(event)
 		edge_teleport.receive_teleport(player)
 		player_tracking.send_player_position(player)
 		gui_events.on_player_joined_game(event, nil, player)
+		set_player_permission_group(player)
 	else
 		lobby.gui.dialog_welcome.draw(player)
 	end
