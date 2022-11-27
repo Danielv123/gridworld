@@ -1,12 +1,14 @@
 local gui = require("modules/gridworld/flib/gui")
 local get_faction = require("modules/gridworld/faction/get_faction")
+local get_player_faction = require("modules/gridworld/faction/get_player_faction")
 local clusterio_api = require("modules/clusterio/api")
 
-local function draw_faction_server_status(player, faction_id)
+local function draw_faction_server_status(player)
 	if player == nil then player = game.player end
 	if player == nil then return false end
 
-	local player_faction = get_faction(faction_id)
+	local player_faction = get_player_faction(player)
+	local faction_id = player_faction.faction_id
 	local server_is_claimed = global.gridworld.claiming_faction.claimed
 	local claiming_faction = get_faction(global.gridworld.claiming_faction.faction_id)
 	local server_is_claimed_by_player = server_is_claimed and global.gridworld.claiming_faction.faction_id == faction_id
