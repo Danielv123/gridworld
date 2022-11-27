@@ -1,4 +1,3 @@
-local get_player_faction = require("modules/gridworld/faction/get_player_faction")
 local faction_server_status = require("modules/gridworld/faction/gui/faction_server_status/dialog")
 
 local function unclaim_server(faction_id)
@@ -12,7 +11,7 @@ local function unclaim_server(faction_id)
 	-- Redraw server status and other GUI elements that show the claiming faction
 	-- TODO: Only draw for players who have the GUI open
 	for _, player in pairs(game.players) do
-		faction_server_status.draw(player, get_player_faction(player).faction_id)
+		faction_server_status.draw(player)
 	end
 end
 

@@ -25,7 +25,6 @@ local setup_forces = require("faction/setup_forces")
 local setup_permission_groups = require("faction/building_restrictions/setup_permission_groups")
 local claim_server = require("faction/claim_server")
 local unclaim_server = require("faction/unclaim_server")
-local get_player_faction = require("faction/get_player_faction")
 local gui_events = require("gui/events")
 local set_player_permission_group = require("faction/building_restrictions/set_player_permission_group")
 
@@ -175,7 +174,7 @@ gridworld.sync_faction = factions.sync_faction
 gridworld.open_faction_admin_screen = factions.open_faction_admin_screen
 gridworld.show_progress = util_gui.dialog_show_progress.draw
 gridworld.hmi_show_status = function()
-	factions.gui.dialog_faction_server_status.draw(game.player, get_player_faction(game.player).faction_id)
+	factions.gui.dialog_faction_server_status.draw(game.player)
 end
 gridworld.hmi_hide_status = function()
 	game.player.gui.left.clear()
