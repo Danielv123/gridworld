@@ -14,8 +14,6 @@ local clusterio_api = require("modules/clusterio/api")
 local out_of_bounds = require("util/out_of_bounds")
 local edge_teleport = require("edge_teleport")
 local player_tracking = require("player_tracking")
-local create_world_limit = require("worldgen/create_world_limit")
-local create_spawn = require("worldgen/create_spawn")
 local populate_neighbor_data = require("populate_neighbor_data")
 local map = require("map/map")
 local lobby = require("lobby")
@@ -27,6 +25,7 @@ local claim_server = require("faction/claim_server")
 local unclaim_server = require("faction/unclaim_server")
 local gui_events = require("gui/events")
 local set_player_permission_group = require("faction/building_restrictions/set_player_permission_group")
+local worldgen = require("worldgen/index")
 
 -- Declare globals to make linter happy
 game = game
@@ -40,8 +39,11 @@ gridworld.events[clusterio_api.events.on_server_startup] = function()
 	if global.gridworld == nil then
 		global.gridworld = {}
 	end
-	if global.gridworld.world_limit_version == nil then
-		global.gridworld.world_limit_version = 0
+	if global.gridworld.world_limit == nil then
+		global.gridworld.world_limit = {}
+	end
+	if global.gridworld.world_limit.version == nil then
+		global.gridworld.world_limit.version = 1
 	end
 	if global.gridworld.spawn_version == nil then
 		global.gridworld.spawn_version = 0
@@ -146,6 +148,16 @@ gridworld.events[defines.events.on_gui_text_changed] = function(event)
 		factions.gui.on_gui_text_changed(event, action, player)
 	end
 end
+gridworld.events[defines.events.on_chunk_generated] = function(event)
+	if not global.gridworld.lobby_server then
+		worldgen.events.on_chunk_generated(event)
+	end
+end
+gridworld.events[defines.events.on_tick] = function(event)
+	if not global.gridworld.lobby_server then
+		worldgen.events.on_tick(event)
+	end
+end
 gridworld.on_nth_tick = {}
 gridworld.on_nth_tick[37] = function()
 	if not global.gridworld.lobby_server then
@@ -161,8 +173,8 @@ gridworld.on_nth_tick[121] = function()
 end
 
 -- Plugin API
-gridworld.create_world_limit = create_world_limit
-gridworld.create_spawn = create_spawn
+gridworld.create_world_limit = worldgen.create_world_limit
+gridworld.create_spawn = worldgen.create_spawn
 gridworld.populate_neighbor_data = populate_neighbor_data
 gridworld.prepare_teleport_data = edge_teleport.prepare_teleport_data
 gridworld.receive_teleport_data = edge_teleport.receive_teleport_data
