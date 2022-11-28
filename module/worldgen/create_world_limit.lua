@@ -1,7 +1,7 @@
 local generation_version = require("modules/gridworld/constants").generation_version
 
 local function create_world_limit(x_size, y_size, world_x, world_y, force)
-	if not force and global.gridworld.world_limit_version >= generation_version then return end
+	if not force and global.gridworld.world_limit.version >= generation_version then return end
 	global.gridworld.x_size = x_size
 	global.gridworld.y_size = y_size
 	global.gridworld.world_x = world_x
