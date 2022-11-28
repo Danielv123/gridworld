@@ -40,6 +40,15 @@ Clone the repository in clusterio/external_plugins/
 	node packages/master/ bootstrap generate-user-token Danielv123 > token.txt
 	node packages/master run --dev --dev-plugin gridworld
 
-Luacheck can be downloaded from https://github.com/mpeterv/luacheck/releases/download/0.23.0/luacheck.exe
+Log into the webui with the token in token.txt and create a new slave token with id `1` then run the following in terminal to setup the slave:
+
+	wget -O factorio.tar.gz https://www.factorio.com/get-download/latest/headless/linux64
+	tar -xf factorio.tar.gz
+	node packages/slave config set slave.id 1
+	node packages/slave config set slave.master_token xxxxxxxxxxxxxxxxxxxxx
+	node packages/slave config set slave.name "Slave 1"
+	node packages/slave config set slave.public_address "localhost"
+  
+Luacheck can be downloaded from https://github.com/mpeterv/luacheck/releases/download/0.23.0/luacheck.exe or `sudo apt install lua-check`
 
 Put it in your `%path%` and run `luacheck ./module`
