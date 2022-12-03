@@ -26,7 +26,11 @@ local function dump_mapview(position_a, position_b)
 		local index = (math.floor(position.x) - position_a[1] + 1) + (math.floor(position.y) - position_a[2]) * CHUNK_SIZE
 		local map_color = entity.prototype.friendly_map_color or entity.prototype.map_color or entity.prototype.enemy_map_color
 		if map_color ~= nil then
-			map_data[index] = string.format("%02x%02x%02x", map_color.r, map_color.g, map_color.b)
+			local is_resource = entity.prototype.collision_mask["resource-layer"]
+			if is_resource and (math.floor(position.x/2) + math.floor(position.y/2)) % 2 == 0 then
+				-- Create checkerboard pattern associated with resources
+				map_data[index] = string.format("%02x%02x%02x", map_color.r, map_color.g, map_color.b)
+			end
 		end
 	end
 	rcon.print(table.concat(map_data, ";"))
