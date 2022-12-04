@@ -10,5 +10,12 @@
 	"settings": {
 		"prettier.useTabs": true,
 		"editor.insertSpaces": false
+	},
+	"extensions": {
+		"recommendations": [
+			"yzhang.markdown-all-in-one",
+			"github.copilot",
+			"yinfei.luahelper"
+		]
 	}
 }

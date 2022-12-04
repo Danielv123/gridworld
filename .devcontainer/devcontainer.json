@@ -23,5 +23,13 @@
 		"git": "latest",
 		"git-lfs": "latest",
 		"github-cli": "latest"
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"yzhang.markdown-all-in-one",
+				"yinfei.luahelper"
+			]
+		}
 	}
 }
