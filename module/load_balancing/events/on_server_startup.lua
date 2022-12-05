@@ -1,3 +1,5 @@
+local update_shutdown_timeout = require("modules/gridworld/load_balancing/methods/update_shutdown_timeout")
+
 local function on_server_startup()
 	-- Set up global table
 	if global.gridworld == nil then
@@ -12,6 +14,7 @@ local function on_server_startup()
 		}
 	else
 		global.gridworld.load_balancing.last_activity_tick = game.tick
+		update_shutdown_timeout()
 	end
 end
 return on_server_startup

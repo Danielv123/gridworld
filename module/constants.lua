@@ -1,3 +1,7 @@
+local custom_events = {
+	on_faction_claimed_server = script.generate_event_name(),
+	on_faction_unclaimed_server = script.generate_event_name(),
+}
 return {
 	generation_version = 2,
 	load_balancing_weights = {
@@ -10,5 +14,6 @@ return {
 		["train-stop"] = 5,
 		pipe = 0.1,
 		reactor = 20,
-	}
+	},
+	custom_events = custom_events,
 }

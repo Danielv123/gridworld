@@ -12,6 +12,7 @@ gridworld = {}
 local gui = require("flib/gui")
 local clusterio_api = require("modules/clusterio/api")
 local out_of_bounds = require("util/out_of_bounds")
+local constants = require("modules/gridworld/constants")
 local edge_teleport = require("edge_teleport")
 local player_tracking = require("player_tracking")
 local populate_neighbor_data = require("populate_neighbor_data")
@@ -217,6 +218,19 @@ gridworld.on_nth_tick[121] = function()
 	if not global.gridworld.lobby_server then
 		-- Update player positions on the map
 		player_tracking.check_player_positions()
+		load_balancing.events.on_nth_tick()
+	end
+end
+
+-- Handle custom events
+gridworld.events[constants.custom_events.on_faction_claimed_server] = function(event)
+	if not global.gridworld.lobby_server then
+		load_balancing.events.custom.on_faction_claimed_server(event)
+	end
+end
+gridworld.events[constants.custom_events.on_faction_unclaimed_server] = function(event)
+	if not global.gridworld.lobby_server then
+		load_balancing.events.custom.on_faction_unclaimed_server(event)
 	end
 end
 

@@ -485,5 +485,14 @@ module.exports = {
 				instance_id: { type: "integer" },
 			},
 		}),
+		setLoadFactor: new libLink.Event({
+			type: "gridworld:set_load_factor",
+			links: ["instance-slave", "slave-master"],
+			forwardTo: "master",
+			eventProperties: {
+				instance_id: { type: "integer" },
+				load_factor: { type: "number" },
+			},
+		}),
 	},
 };

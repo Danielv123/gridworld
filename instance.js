@@ -73,6 +73,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				`Error performing edge teleport:\n${err.stack}`
 			));
 		});
+		this.instance.server.on("ipc-gridworld:load_balancing", data => {
+			this.loadBalancing(data).catch(err => this.logger.error(
+				`Error performing load balancing:\n${err.stack}`
+			));
+		});
 	}
 
 	async onStart() {
@@ -363,6 +368,31 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			await this.sendRcon(`/sc game.print("Failed to teleport: ${response.message}")`);
 			this.logger.error(`Failed to teleport: ${response.message}`);
 		}
+	}
+
+	/**
+	 * Receive data from the load_balancing lua module
+	 * @param {object} data - Data sent by the game
+	 * @param {string} data.action - Requested action from the ingame module
+	 * @param {string} data.load_factor - Estimated load of the instance
+	 */
+	async loadBalancing(data) {
+		switch (data.action) {
+			case "stop_server":
+				// console.log(this, this.instance.plugins, this.instance.server, this.instance.sendSaveListUpdate);
+				await libPlugin.invokeHook(this.instance.plugins, "onStop");
+				await this.instance.server.stop();
+				await this.instance.sendSaveListUpdate();
+				break;
+			default:
+				this.logger.error(`Unknown load balancing action: ${data.action}`);
+				break;
+		}
+		// Send load_factor to master
+		await this.info.messages.setLoadFactor.send(this.instance, {
+			instance_id: this.instance.config.get("instance.id"),
+			load_factor: data.load_factor,
+		});
 	}
 
 	async getTileDataRequestHandler(message) {
