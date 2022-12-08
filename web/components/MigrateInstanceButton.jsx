@@ -1,10 +1,8 @@
 import React from "react";
-import { Tooltip, Progress, Modal, Button } from "antd";
+import { Button } from "antd";
 
-import { ControlContext, PageLayout, useInstanceList, useAccount, notifyErrorHandler } from "@clusterio/web_ui";
-import info from "../../info";
+import { useAccount } from "@clusterio/web_ui";
 import MigrateInstanceModal from "./MigrateInstanceModal";
-import { ProgressPlugin } from "webpack";
 
 export default function MigrateInstanceButton(props) {
 	const account = useAccount();
