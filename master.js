@@ -11,7 +11,7 @@ const setWebSubscriptionRequestHandler = require("./src/request_handlers/setWebS
 const startInstanceRequestHandler = require("./src/request_handlers/startInstanceRequestHandler");
 const createFactionRequestHandler = require("./src/request_handlers/createFactionRequestHandler");
 const updateFactionRequestHandler = require("./src/request_handlers/updateFactionRequestHandler");
-const migrateInstanceCommandRequestHandler = require("./src/instance_migration/migrateInstanceCommandRequestHandler");
+const migrateInstanceRequestHandler = require("./src/instance_migration/migrateInstanceRequestHandler");
 const playerPositionEventHandler = require("./src/event_handlers/playerPositionEventHandler");
 const createFactionGridRequestHandler = require("./src/request_handlers/createFactionGridRequestHandler");
 const joinGridworldRequestHandler = require("./src/request_handlers/joinGridworldRequestHandler");
@@ -94,7 +94,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 	updateFactionRequestHandler = updateFactionRequestHandler;
 
-	migrateInstanceCommandRequestHandler = migrateInstanceCommandRequestHandler;
+	migrateInstanceRequestHandler = migrateInstanceRequestHandler;
 
 	joinGridworldRequestHandler = joinGridworldRequestHandler;
 

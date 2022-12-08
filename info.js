@@ -152,6 +152,7 @@ module.exports = {
 	],
 
 	messages: {
+		migrateInstance: migrateInstanceCommandRequest,
 		createFactionGrid: new libLink.Request({
 			type: "gridworld:create",
 			links: ["control-master"],
