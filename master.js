@@ -11,7 +11,7 @@ const setWebSubscriptionRequestHandler = require("./src/request_handlers/setWebS
 const startInstanceRequestHandler = require("./src/request_handlers/startInstanceRequestHandler");
 const createFactionRequestHandler = require("./src/request_handlers/createFactionRequestHandler");
 const updateFactionRequestHandler = require("./src/request_handlers/updateFactionRequestHandler");
-const migrateInstanceCommandRequestHandler = require("./src/instance_migration/migrateInstanceCommandRequestHandler");
+const migrateInstanceRequestHandler = require("./src/instance_migration/migrateInstanceRequestHandler");
 const playerPositionEventHandler = require("./src/event_handlers/playerPositionEventHandler");
 const createFactionGridRequestHandler = require("./src/request_handlers/createFactionGridRequestHandler");
 const joinGridworldRequestHandler = require("./src/request_handlers/joinGridworldRequestHandler");
@@ -24,6 +24,7 @@ const factionChangeMemberRoleRequestHandler = require("./src/request_handlers/fa
 const leaveFactionRequestHandler = require("./src/request_handlers/leaveFactionRequestHandler");
 const claimServerRequestHandler = require("./src/request_handlers/claimServerRequestHandler");
 const unclaimServerRequestHandler = require("./src/request_handlers/unclaimServerRequestHandler");
+const setLoadFactorEventHandler = require("./src/event_handlers/setLoadFactorEventHandler");
 
 async function loadDatabase(config, filename, logger) {
 	let itemsPath = path.resolve(config.get("master.database_directory"), filename);
@@ -93,7 +94,7 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 	updateFactionRequestHandler = updateFactionRequestHandler;
 
-	migrateInstanceCommandRequestHandler = migrateInstanceCommandRequestHandler;
+	migrateInstanceRequestHandler = migrateInstanceRequestHandler;
 
 	joinGridworldRequestHandler = joinGridworldRequestHandler;
 
@@ -112,6 +113,8 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	claimServerRequestHandler = claimServerRequestHandler;
 
 	unclaimServerRequestHandler = unclaimServerRequestHandler;
+
+	setLoadFactorEventHandler = setLoadFactorEventHandler;
 
 	async onInstanceStatusChanged(instance) {
 		if (instance.status === "running") {

@@ -35,9 +35,9 @@ async function createProxyStream(app) {
 }
 
 
-module.exports = async function migrateInstanceCommandRequestHandler(message, request) {
+module.exports = async function migrateInstanceRequestHandler(message, request) {
 	let { instance_id, slave_id } = message.data;
-	let instance = this._master.instances.get(instance_id);
+	let instance = this.master.instances.get(instance_id);
 	if (!instance) {
 		throw new libErrors.RequestError(`Instance with ID ${instance_id} does not exist`);
 	}
@@ -47,22 +47,22 @@ module.exports = async function migrateInstanceCommandRequestHandler(message, re
 	}
 
 	let originSlaveId = instance.config.get("instance.assigned_slave");
-	let originSlave = this._master.slaves.get(originSlaveId);
+	let originSlave = this.master.slaves.get(originSlaveId);
 	if (!originSlave) {
 		throw new libErrors.RequestError(`Slave with ID ${originSlaveId} does not exist`);
 	}
 
-	const originSlaveConnection = this._master.wsServer.slaveConnections.get(originSlaveId);
+	const originSlaveConnection = this.master.wsServer.slaveConnections.get(originSlaveId);
 	if (!originSlaveConnection) {
 		throw new libErrors.RequestError(`Origin slave with ID ${originSlaveId} is not online`);
 	}
 
-	let destinationSlave = this._master.slaves.get(slave_id);
+	let destinationSlave = this.master.slaves.get(slave_id);
 	if (!destinationSlave) {
 		throw new libErrors.RequestError(`Slave with ID ${slave_id} does not exist`);
 	}
 
-	const destinationSlaveConnection = this._master.wsServer.slaveConnections.get(slave_id);
+	const destinationSlaveConnection = this.master.wsServer.slaveConnections.get(slave_id);
 	if (!destinationSlaveConnection) {
 		throw new libErrors.RequestError(`Destination slave with ID ${slave_id} is not online`);
 	}
@@ -89,7 +89,7 @@ module.exports = async function migrateInstanceCommandRequestHandler(message, re
 
 	const preparedUploads = await Promise.all(saves.map(async save => {
 		const filename = save.name;
-		let stream = await createProxyStream(this._master.app);
+		let stream = await createProxyStream(this.master.app);
 		stream.filename = filename;
 
 		let ready = new Promise((resolve, reject) => {
@@ -101,7 +101,7 @@ module.exports = async function migrateInstanceCommandRequestHandler(message, re
 		ready.catch(() => { });
 
 		// Send start upload message to slave
-		await this._master.forwardRequestToInstance(libLink.messages.pushSave, {
+		await this.master.forwardRequestToInstance(libLink.messages.pushSave, {
 			instance_id,
 			stream_id: stream.id,
 			save: filename,

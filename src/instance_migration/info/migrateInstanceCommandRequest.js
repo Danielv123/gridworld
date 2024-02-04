@@ -2,9 +2,9 @@
 const { libLink } = require("@clusterio/lib");
 
 const migrateInstanceCommand = new libLink.Request({
-	type: "migrate_instance",
+	type: "gridworld:migrate_instance",
 	links: ["control-master"],
-	permission: "core.instance.migrate",
+	permission: "gridworld.migrate_instance",
 	requestProperties: {
 		"instance_id": { type: "integer" },
 		"slave_id": { type: "integer" },

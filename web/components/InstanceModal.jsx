@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Button, Descriptions, Space, Popconfirm, Typography, Tabs } from "antd";
 import DeleteOutlined from "@ant-design/icons/DeleteOutlined";
 
 import {
+	ControlContext,
 	useInstance,
 	useSlave,
 	useAccount,
@@ -13,8 +14,12 @@ import {
 	LogConsole,
 	InstanceConfigTree,
 } from "@clusterio/web_ui";
+import { libLink } from "@clusterio/lib";
+
+import MigrateInstanceButton from "./MigrateInstanceButton";
 
 function InstanceModal(props) {
+	let control = useContext(ControlContext);
 	let [instance] = useInstance(props.instance_id);
 	let [slave] = useSlave(instance["assigned_slave"]);
 	let account = useAccount();
@@ -31,6 +36,7 @@ function InstanceModal(props) {
 						account.hasAnyPermission("core.instance.start", "core.instance.stop")
 						&& <StartStopInstanceButton instance={instance} />
 					}
+					{account.hasPermission("gridworld.migrate_instance") && <MigrateInstanceButton instanceId={instance.id} />}
 					{account.hasPermission("core.instance.delete") && <Popconfirm
 						title="Permanently delete instance and server saves?"
 						okText="Delete"

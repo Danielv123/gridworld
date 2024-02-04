@@ -12,6 +12,7 @@ gridworld = {}
 local gui = require("flib/gui")
 local clusterio_api = require("modules/clusterio/api")
 local out_of_bounds = require("util/out_of_bounds")
+local constants = require("modules/gridworld/constants")
 local edge_teleport = require("edge_teleport")
 local player_tracking = require("player_tracking")
 local populate_neighbor_data = require("populate_neighbor_data")
@@ -26,6 +27,7 @@ local unclaim_server = require("faction/unclaim_server")
 local gui_events = require("gui/events")
 local set_player_permission_group = require("faction/building_restrictions/set_player_permission_group")
 local worldgen = require("worldgen/index")
+local load_balancing = require("load_balancing/load_balancing")
 
 -- Declare globals to make linter happy
 game = game
@@ -70,6 +72,9 @@ gridworld.events[clusterio_api.events.on_server_startup] = function()
 	-- Fun factions inititalization
 	setup_forces()
 	setup_permission_groups()
+
+	-- Load balancing
+	load_balancing.events.on_server_startup()
 end
 gridworld.events[defines.events.on_player_joined_game] = function(event)
 	local player = game.get_player(event.player_index)
@@ -83,6 +88,7 @@ gridworld.events[defines.events.on_player_joined_game] = function(event)
 		player_tracking.send_player_position(player)
 		gui_events.on_player_joined_game(event, nil, player)
 		set_player_permission_group(player)
+		load_balancing.events.on_player_joined_game(event, player)
 	else
 		lobby.gui.dialog_welcome.draw(player)
 	end
@@ -93,6 +99,7 @@ gridworld.events[defines.events.on_player_left_game] = function(event)
 	if teleport_destination ~= nil then
 		edge_teleport.send_teleport_command_on_player_leave(player.name, teleport_destination.instance_id, teleport_destination.x, teleport_destination.y)
 	end
+	load_balancing.events.on_player_left_game(event, player)
 end
 gridworld.events[defines.events.on_built_entity] = function(event)
 	if not global.gridworld.lobby_server then
@@ -119,7 +126,49 @@ gridworld.events[defines.events.on_built_entity] = function(event)
 			end
 		else
 			factions.on_built_entity(event)
+			if entity.valid then
+				load_balancing.events.on_built_entity(event, entity)
+			end
 		end
+	end
+end
+gridworld.events[defines.events.on_entity_cloned] = function(event)
+	if not global.gridworld.lobby_server then
+		local entity = event.destination
+		if entity.valid then
+			load_balancing.events.on_entity_cloned(event, entity)
+		end
+	end
+end
+gridworld.events[defines.events.on_robot_built_entity] = function(event)
+	if not global.gridworld.lobby_server then
+		local entity = event.created_entity
+		if entity.valid then
+			load_balancing.events.on_robot_built_entity(event, entity)
+		end
+	end
+end
+gridworld.events[defines.events.script_raised_built] = function(event)
+	if not global.gridworld.lobby_server then
+		local entity = event.entity
+		if entity.valid then
+			load_balancing.events.script_raised_built(event, entity)
+		end
+	end
+end
+gridworld.events[defines.events.script_raised_revive] = function(event)
+	if not global.gridworld.lobby_server then
+		local entity = event.entity
+		if entity.valid then
+			load_balancing.events.script_raised_revive(event, entity)
+		end
+	end
+end
+gridworld.events[defines.events.on_entity_destroyed] = function(event)
+	if not global.gridworld.lobby_server then
+		-- This event is triggered after the entity is gone, so we can't use it to get the entity
+		-- Instead, use the registration_number stored previously.
+		load_balancing.events.on_entity_destroyed(event)
 	end
 end
 gridworld.events[defines.events.on_gui_click] = function(event)
@@ -169,6 +218,19 @@ gridworld.on_nth_tick[121] = function()
 	if not global.gridworld.lobby_server then
 		-- Update player positions on the map
 		player_tracking.check_player_positions()
+		load_balancing.events.on_nth_tick()
+	end
+end
+
+-- Handle custom events
+gridworld.events[constants.custom_events.on_faction_claimed_server] = function(event)
+	if not global.gridworld.lobby_server then
+		load_balancing.events.custom.on_faction_claimed_server(event)
+	end
+end
+gridworld.events[constants.custom_events.on_faction_unclaimed_server] = function(event)
+	if not global.gridworld.lobby_server then
+		load_balancing.events.custom.on_faction_unclaimed_server(event)
 	end
 end
 
