@@ -8,13 +8,13 @@
 		// Use ubuntu-22.04 or ubuntu-18.04 on local arm64/Apple Silicon.
 		"args": { "VARIANT": "ubuntu-22.04" }
 	},
-	"workspaceMount": "source=${localWorkspaceFolder},target=/factorioClusterio/external_plugins/gridworld,type=bind",
-	"workspaceFolder": "/factorioClusterio",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/clusterio/external_plugins/gridworld,type=bind",
+	"workspaceFolder": "/clusterio",
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [8080],
-	// sudo mv /workspaces/gridworld /factorioClusterio/external_plugins/
+	// sudo mv /workspaces/gridworld /clusterio/external_plugins/
 	// Use 'postCreateCommand' to run commands after the container is created. wget -O factorio.tar.xz https://www.factorio.com/get-download/latest/headless/linux64 && tar -xf factorio.tar.xz && rm factorio.tar.xz
-	"postCreateCommand": "mv /workspaces/gridworld/ /workspaces/gridworld2 && cp -r /factorioClusterio/ /workspaces/gridworld && sudo rm -rf /factorioClusterio && mv /workspaces/gridworld2/ /workspaces/gridworld/external_plugins/gridworld && cd /workspaces/gridworld && git pull && pnpm install && wget -O factorio.tar.xz https://www.factorio.com/get-download/latest/headless/linux64 && tar -xf factorio.tar.xz && rm factorio.tar.xz",
+	"postCreateCommand": "mv /workspaces/gridworld/ /workspaces/gridworld2 && cp -r /clusterio/ /workspaces/gridworld && sudo rm -rf /clusterio && mv /workspaces/gridworld2/ /workspaces/gridworld/external_plugins/gridworld && cd /workspaces/gridworld && git pull && pnpm install && wget -O factorio.tar.xz https://www.factorio.com/get-download/latest/headless/linux64 && tar -xf factorio.tar.xz && rm factorio.tar.xz",
 
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
@@ -28,7 +28,8 @@
 		"vscode": {
 			"extensions": [
 				"yzhang.markdown-all-in-one",
-				"yinfei.luahelper"
+				"yinfei.luahelper",
+				"dbaeumer.vscode-eslint"
 			]
 		}
 	}

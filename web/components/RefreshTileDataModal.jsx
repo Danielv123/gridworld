@@ -4,6 +4,7 @@ import { Progress, Modal, InputNumber } from "antd";
 import { ControlContext, useInstanceList, notifyErrorHandler } from "@clusterio/web_ui";
 import info from "../../info";
 import ThrottledPromise from "../lib/ThrottledPromise";
+import messages from "../../messages";
 
 export default function RefreshTileDataModal(props) {
 	const control = useContext(ControlContext);
@@ -47,7 +48,7 @@ export default function RefreshTileDataModal(props) {
 					inProgress += 1;
 					setPercent((completed + inProgress) / total * 100);
 					try {
-						await info.messages.refreshTileData.send(control, { instance_id: instance.id });
+						await control.send(new messages.RefreshTileData({ instance_id: instance.id }));
 					} catch (e) {
 						notifyErrorHandler(e);
 					}

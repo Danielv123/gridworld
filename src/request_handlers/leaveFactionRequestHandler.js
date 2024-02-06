@@ -1,4 +1,7 @@
 "use strict";
+
+const messages = require("../../messages");
+
 module.exports = async function leaveFactionRequestHandler(message, request, link) {
 	const faction = this.factionsDatastore.get(message.data.faction_id);
 	if (faction) {
@@ -6,11 +9,13 @@ module.exports = async function leaveFactionRequestHandler(message, request, lin
 		faction.members = faction.members.filter(member => member.name.toLowerCase() !== message.data.player_name.toLowerCase());
 
 		// Propagate changes to all online instances
-		this.broadcastEventToSlaves(this.info.messages.factionUpdate, { faction: faction });
+		this.controller.sendTo("allInstances", new messages.FactionUpdate({ faction: faction }));
 
 		// Propagate changes to listening web clients
 		for (let sub of this.subscribedControlLinks) {
-			if (sub.faction_list) { this.info.messages.factionUpdate.send(sub.link, { faction: faction }); }
+			if (sub.faction_list) {
+				sub.link.send(new messages.FactionUpdate({ faction: faction }));
+			}
 		}
 
 		return {

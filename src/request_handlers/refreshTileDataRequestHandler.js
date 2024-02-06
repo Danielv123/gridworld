@@ -2,36 +2,37 @@
 const path = require("path");
 const sharp = require("sharp");
 
-const { libLink } = require("@clusterio/lib");
-const libErrors = require("@clusterio/lib/errors");
+const lib = require("@clusterio/lib");
 
 const { zoomOutLevel } = require("./../tileZoomFunctions");
-const info = require("./../../info");
+const info = require("./../../index");
+const messages = require("../../messages");
 
 module.exports = async function refreshTileDataRequestHandler(message) {
-	let instance = this.master.instances.get(message.data.instance_id);
+	const instanceId = message.data.instance_id;
+	let instance = this.controller.instances.get(message.data.instance_id);
 	if (!instance) {
-		throw new libErrors.RequestError(`Instance with ID ${message.data.instance_id} does not exist`);
+		throw new lib.RequestError(`Instance with ID ${message.data.instance_id} does not exist`);
 	}
 
-	let slaveId = instance.config.get("instance.assigned_slave");
-	if (!slaveId) {
-		throw new libErrors.RequestError("Instance is not assigned to a slave");
+	let hostId = instance.config.get("instance.assigned_host");
+	if (!hostId) {
+		throw new lib.RequestError("Instance is not assigned to a host");
 	}
 
-	let slaveConnection = this.master.wsServer.slaveConnections.get(slaveId);
-	if (!slaveConnection) {
-		throw new libErrors.RequestError("Instance is assigned to a slave that is not connected");
+	let hostConnection = this.controller.wsServer.hostConnections.get(hostId);
+	if (!hostConnection) {
+		throw new lib.RequestError("Instance is assigned to a host that is not connected");
 	}
 
 	// If the instance is stopped, temporarily start it.
 	let originalStatus = instance.status;
 	if (instance.status === "stopped") {
 		// Start instance
-		await libLink.messages.startInstance.send(slaveConnection, {
-			instance_id: message.data.instance_id,
-			save: null,
-		});
+		await this.controller.sendTo(
+			{ instanceId },
+			new lib.InstanceStartRequest({ save: null })
+		);
 	}
 
 	// Get bounds
@@ -62,13 +63,11 @@ module.exports = async function refreshTileDataRequestHandler(message) {
 	for (let i = 0; i < chunks.length; i++) {
 		let chunk = chunks[i];
 
-		let data = await info.messages.getTileData.send(slaveConnection, {
-			instance_id: message.data.instance_id,
-			...chunk,
-		});
+		// Get data from instance
+		let data = await hostConnection.sendTo({ instanceId }, new messages.GetTileData(chunk));
 
 		if (data.tile_data[0].includes("Cannot execute command")) {
-			this.logger.warn(`Getting tile data failed for instance ${message.data.instance_id} at ${chunk.position_a} to ${chunk.position_b} with error: ${data.tile_data[0]}`);
+			this.logger.warn(`Getting tile data failed for instance ${instanceId} at ${chunk.position_a} to ${chunk.position_b} with error: ${data.tile_data[0]}`);
 		} else {
 			// Create raw array of pixels
 			let rawPixels = Uint8Array.from(
@@ -93,9 +92,11 @@ module.exports = async function refreshTileDataRequestHandler(message) {
 	}
 	if (originalStatus === "stopped") {
 		// Stop instance again
-		await libLink.messages.stopInstance.send(slaveConnection, {
-			instance_id: message.data.instance_id,
-		});
+		await this.controller.sendTo(
+			{ instanceId },
+			new lib.InstanceStopRequest()
+		);
+		await hostConnection.sendTo({ instanceId }, new lib.InstanceStopRequest());
 	}
 	// Create zoomed out tiles
 	for (let i = 0; i < chunks.length; i++) {

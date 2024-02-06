@@ -3,7 +3,7 @@ const { libConfig, libPlugin, libErrors } = require("@clusterio/lib");
 
 module.exports = async function createInstance(plugin, name, x, y, x_size, y_size, grid_id, game_port) {
 	plugin.logger.info("Creating instance", name);
-	let instanceConfig = new libConfig.InstanceConfig("master");
+	let instanceConfig = new libConfig.InstanceConfig("controller");
 	await instanceConfig.init();
 	instanceConfig.set("instance.name", name);
 	instanceConfig.set("gridworld.grid_id", grid_id);
@@ -16,7 +16,7 @@ module.exports = async function createInstance(plugin, name, x, y, x_size, y_siz
 	}
 
 	let instanceId = instanceConfig.get("instance.id");
-	if (plugin.master.instances.has(instanceId)) {
+	if (plugin.controller.instances.has(instanceId)) {
 		throw new libErrors.RequestError(`Instance with ID ${instanceId} already exists`);
 	}
 
@@ -24,8 +24,8 @@ module.exports = async function createInstance(plugin, name, x, y, x_size, y_siz
 	let settings = {
 		...instanceConfig.get("factorio.settings"),
 
-		"name": `${plugin.master.config.get("master.name")} - ${name}`,
-		"description": `Clusterio instance for ${plugin.master.config.get("master.name")}`,
+		"name": `${plugin.controller.config.get("controller.name")} - ${name}`,
+		"description": `Clusterio instance for ${plugin.controller.config.get("controller.name")}`,
 		"tags": ["clusterio"],
 		"max_players": 0,
 		"visibility": { "public": true, "lan": true },
@@ -47,8 +47,8 @@ module.exports = async function createInstance(plugin, name, x, y, x_size, y_siz
 	instanceConfig.set("factorio.settings", settings);
 
 	let instance = { config: instanceConfig, status: "unassigned" };
-	plugin.master.instances.set(instanceId, instance);
-	await libPlugin.invokeHook(plugin.master.plugins, "onInstanceStatusChanged", instance, null);
-	plugin.master.addInstanceHooks(instance);
+	plugin.controller.instances.set(instanceId, instance);
+	await libPlugin.invokeHook(plugin.controller.plugins, "onInstanceStatusChanged", instance, null);
+	plugin.controller.addInstanceHooks(instance);
 	return instanceConfig.get("instance.id");
 };

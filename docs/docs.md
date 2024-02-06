@@ -22,7 +22,7 @@ Far fetched goals:
 The current version of the plugin has the following flow:
 
 1. Installation
-1. User clicks "create new gridworld" and enters their preferred grid cell size and the slave used to host the lobby server
+1. User clicks "create new gridworld" and enters their preferred grid cell size and the host used to host the lobby server
 1. User clicks "create gridworld"
 1. The plugin creates a lobby server with a new grid_id
 the web map
@@ -45,16 +45,16 @@ Clone the repository in clusterio/external_plugins/ and run the following:
 	node packages/ctl plugin add ./external_plugins/gridworld
 	pnpm install @clusterio/plugin-edge_transports -w
 	pnpm install @hornwitser/server_select -w
-	node packages/master/ bootstrap create-admin Danielv123
-	node packages/master plugin add @clusterio/plugin-edge_transports
-	node packages/master plugin add @hornwitser/server_select
-	node packages/master plugin add ./plugins/global_chat
-	node packages/master plugin add ./plugins/inventory_sync
-	node packages/master plugin add ./plugins/player_auth
-	node packages/master plugin add ./plugins/research_sync
-	node packages/master plugin add ./plugins/statistics_exporter
-	node packages/master/ bootstrap generate-user-token Danielv123 > token.txt
-	node packages/master run --dev --dev-plugin gridworld
+	node packages/controller/ bootstrap create-admin Danielv123
+	node packages/controller plugin add @clusterio/plugin-edge_transports
+	node packages/controller plugin add @hornwitser/server_select
+	node packages/controller plugin add ./plugins/global_chat
+	node packages/controller plugin add ./plugins/inventory_sync
+	node packages/controller plugin add ./plugins/player_auth
+	node packages/controller plugin add ./plugins/research_sync
+	node packages/controller plugin add ./plugins/statistics_exporter
+	node packages/controller/ bootstrap generate-user-token Danielv123 > token.txt
+	node packages/controller run --dev --dev-plugin gridworld
 
 Luacheck can be downloaded from https://github.com/mpeterv/luacheck/releases/download/0.23.0/luacheck.exe
 

@@ -1,11 +1,11 @@
 # Generate server
 
-The server generation is a multi-step process executed by the master. It is expected to run frequently while players are using the cluster so reliability and speed is important.
+The server generation is a multi-step process executed by the controller. It is expected to run frequently while players are using the cluster so reliability and speed is important.
 
 The server generation function takes care of the following:
 
 1. Create a new instance
-2. Assign to a slave with free capacity
+2. Assign to a host with free capacity
 3. Create a new save
 4. Apply gridworld configuration options
 5. Apply edge transports configuration

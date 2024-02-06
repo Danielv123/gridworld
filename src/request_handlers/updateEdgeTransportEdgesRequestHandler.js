@@ -16,12 +16,12 @@ module.exports = async function updateEdgeTransportsEdges(message) {
 	// instance_id: instance_id,
 	// }
 
-	const instance = this.master.instances.get(message.data.instance_id);
+	const instance = this.controller.instances.get(message.data.instance_id);
 	const x = instance.config.get("gridworld.grid_x_position");
 	const y = instance.config.get("gridworld.grid_y_position");
 	const grid_id = instance.config.get("gridworld.grid_id");
 	// Get x_size and y_size from lobby server
-	const lobby_server = mapFind(this.master.instances, i => i.config.get("gridworld.grid_id") === grid_id
+	const lobby_server = mapFind(this.controller.instances, i => i.config.get("gridworld.grid_id") === grid_id
 		&& i.config.get("gridworld.is_lobby_server")
 	);
 	const x_size = lobby_server.config.get("gridworld.grid_x_size");
@@ -33,7 +33,7 @@ module.exports = async function updateEdgeTransportsEdges(message) {
 		y_size,
 		x,
 		y,
-		instances: this.master.instances,
+		instances: this.controller.instances,
 		grid_id,
 	});
 
@@ -43,7 +43,7 @@ module.exports = async function updateEdgeTransportsEdges(message) {
 			x + edge_target_position_offets[edge.id][0],
 			y + edge_target_position_offets[edge.id][1],
 		];
-		const target_instance = this.master.instances.get(edge.target_instance);
+		const target_instance = this.controller.instances.get(edge.target_instance);
 		if (
 			target_instance.config.get("gridworld.grid_id") === grid_id
 			&& target_instance.config.get("gridworld.grid_x_position") === target_position[0]

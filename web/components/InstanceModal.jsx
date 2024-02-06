@@ -5,7 +5,7 @@ import DeleteOutlined from "@ant-design/icons/DeleteOutlined";
 import {
 	ControlContext,
 	useInstance,
-	useSlave,
+	useHost,
 	useAccount,
 	InstanceStatusTag,
 	StartStopInstanceButton,
@@ -14,14 +14,14 @@ import {
 	LogConsole,
 	InstanceConfigTree,
 } from "@clusterio/web_ui";
-import { libLink } from "@clusterio/lib";
+import lib from "@clusterio/lib";
 
 import MigrateInstanceButton from "./MigrateInstanceButton";
 
 function InstanceModal(props) {
 	let control = useContext(ControlContext);
 	let [instance] = useInstance(props.instance_id);
-	let [slave] = useSlave(instance["assigned_slave"]);
+	let [host] = useHost(instance["assigned_host"]);
 	let account = useAccount();
 
 	return <>
@@ -43,8 +43,8 @@ function InstanceModal(props) {
 						placement="bottomRight"
 						okButtonProps={{ danger: true }}
 						onConfirm={() => {
-							libLink.messages.deleteInstance.send(
-								control, { instance_id: instanceId }
+							control.send(
+								new lib.InstanceDeleteRequest({ instanceId })
 							).then(() => {
 								history.push("/instances");
 							}).catch(notifyErrorHandler("Error deleting instance"));
@@ -59,10 +59,10 @@ function InstanceModal(props) {
 					</Popconfirm>}
 				</Space>}
 			>
-				<Descriptions.Item label="Slave">
-					{!instance.assigned_slave
+				<Descriptions.Item label="Host">
+					{!instance.assigned_host
 						? <em>Unassigned</em>
-						: slave["name"] || instance["assigned_slave"]
+						: host["name"] || instance["assigned_host"]
 					}
 				</Descriptions.Item>
 				{instance["status"] && <Descriptions.Item label="Status">

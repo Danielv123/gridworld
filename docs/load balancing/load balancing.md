@@ -10,7 +10,7 @@ Servers claimed by a faction stays online for 48 hours after the last player fro
 
 ## Load balancing active instances
 
-While gridworld spreads newly created instances across available nodes, that is not enough to ensure even load. As servers are started and stopping by the algorithm and people build factories on some instances but not others, the load will become uneven. To solve this problem gridworld has a load balancing algorithm that determines instances in need of migration. Once the imbalance reaches a certain threshold servers with no players online will be migrated to a new slave.
+While gridworld spreads newly created instances across available nodes, that is not enough to ensure even load. As servers are started and stopping by the algorithm and people build factories on some instances but not others, the load will become uneven. To solve this problem gridworld has a load balancing algorithm that determines instances in need of migration. Once the imbalance reaches a certain threshold servers with no players online will be migrated to a new host.
 
 ## Algorithm
 

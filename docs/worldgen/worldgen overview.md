@@ -5,7 +5,7 @@ When creating a new gridworld, only a lobby server is generated. The game worlds
 ## Event flow (user perspective)
 
 An user joins the gridworld lobby and creates a new faction, then joins the game.
-Pressing the join game button sends a message to the master. It tries to determine the spawn point for the user.
+Pressing the join game button sends a message to the controller. It tries to determine the spawn point for the user.
 
 1. If the user has spawned in before it will use the last known spawn point.
 1. If the user hasn't spawned in before it will use the default spawn point of the faction.

@@ -1,42 +1,50 @@
 "use strict";
-const { libLink, libErrors } = require("@clusterio/lib");
+const lib = require("@clusterio/lib");
 
-module.exports = async function assignInstance(plugin, instance_id, slave_id) {
+module.exports = async function assignInstance(plugin, instanceId, hostId) {
 	// Code lifted from ControlConnection.js assignInstanceCommandRequestHandler()
-	let instance = plugin.master.instances.get(instance_id);
+	let instance = plugin.controller.getRequestInstance(instanceId);
 	if (!instance) {
-		throw new libErrors.RequestError(`Instance with ID ${instance_id} does not exist`);
+		throw new libErrors.RequestError(`Instance with ID ${instanceId} does not exist`);
 	}
 
-	// Check if target slave is connected
-	let newSlaveConnection;
-	if (slave_id !== null) {
-		newSlaveConnection = plugin.master.wsServer.slaveConnections.get(slave_id);
-		if (!newSlaveConnection) {
-			// The case of the slave not getting the assign instance message
+	// Check if target host is connected
+	let newHostConnection;
+	if (hostId !== undefined) {
+		newHostConnection = plugin.controller.wsServer.hostConnections.get(hostId);
+		if (!newHostConnection) {
+			// The case of the host not getting the assign instance message
 			// still have to be handled, so it's not a requirement that the
-			// target slave be connected to the master while doing the
+			// target host be connected to the controller while doing the
 			// assignment, but it is IMHO a better user experience if this
 			// is the case.
-			throw new libErrors.RequestError("Target slave is not connected to the master server");
+			throw new lib.RequestError("Target host is not connected to the controller");
 		}
 	}
 
-	// Unassign from currently assigned slave if it is connected.
-	let currentAssignedSlave = instance.config.get("instance.assigned_slave");
-	if (currentAssignedSlave !== null && slave_id !== currentAssignedSlave) {
-		let oldSlaveConnection = plugin.master.wsServer.slaveConnections.get(currentAssignedSlave);
-		if (oldSlaveConnection && !oldSlaveConnection.connector.closing) {
-			await libLink.messages.unassignInstance.send(oldSlaveConnection, { instance_id });
+	// Unassign from currently assigned host if it is connected.
+	let currentAssignedHost = instance.config.get("instance.assigned_host");
+	if (currentAssignedHost !== null && hostId !== currentAssignedHost) {
+		let oldHostConnection = plugin.controller.wsServer.hostConnections.get(currentAssignedHost);
+		if (oldHostConnection && !oldHostConnection.connector.closing) {
+			await oldHostConnection.send(new lib.InstanceUnassignInternalRequest(instanceId));
 		}
 	}
+
+	// Remove saves recorded from currently assigned host if any
+	// this.clearSavesOfInstance(instanceId); // Not sure if we want this, wasn't in pre v14 code.
+	// If we do need it, we might as well use plugin.controller.instanceAssign(instanceId, hostId);
 
 	// Assign to target
-	instance.config.set("instance.assigned_slave", slave_id);
-	if (slave_id !== null) {
-		await libLink.messages.assignInstance.send(newSlaveConnection, {
-			instance_id,
-			serialized_config: instance.config.serialize("slave"),
-		});
+	instance.config.set("instance.assigned_host", hostId ?? null);
+	// "fieldChanged" event handler will set this.instancesDirty
+	if (hostId !== undefined && newHostConnection) {
+		await newHostConnection.send(
+			new lib.InstanceAssignInternalRequest(instanceId, instance.config.toRemote("host"))
+		);
+	} else {
+		instance.status = "unassigned";
+		instance.updatedAtMs = Date.now();
+		plugin.controller.instanceDetailsUpdated([instance]);
 	}
 };

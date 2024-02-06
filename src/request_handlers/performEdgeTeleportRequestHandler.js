@@ -1,5 +1,5 @@
 "use strict";
-const { libLink } = require("@clusterio/lib");
+const lib = require("@clusterio/lib");
 const mapFilter = require("../util/mapFilter");
 const mapFind = require("../util/mapFind");
 
@@ -18,8 +18,8 @@ const worldPositionToInstance = require("../worldgen/util/worldPositionToInstanc
 module.exports = async function joinGridworldRequestHandler(message) {
 	const player_name = message.data.player_name;
 
-	// Get player profile from master
-	const player = this.master.userManager.users.get(player_name);
+	// Get player profile from controller
+	const player = this.controller.userManager.users.get(player_name);
 
 	// Get player faction
 	// TODO: Sync faction data to destination instance
@@ -30,7 +30,7 @@ module.exports = async function joinGridworldRequestHandler(message) {
 		message.data.player_x_position,
 		message.data.player_y_position,
 		message.data.grid_id,
-		this.master.instances
+		this.controller.instances
 	);
 
 	let instance_to_connect_to = null;
@@ -56,7 +56,7 @@ module.exports = async function joinGridworldRequestHandler(message) {
 			y: instance_specification.grid_y_position,
 			grid_id: message.data.grid_id,
 		})).instanceId;
-		const instance = this.master.instances.get(instance_id);
+		const instance = this.controller.instances.get(instance_id);
 
 		response.ok = true;
 		response.message = "Created new instance";
@@ -76,8 +76,8 @@ module.exports = async function joinGridworldRequestHandler(message) {
 
 	// Ensure the instance we are connecting to is started
 	if (instance_to_connect_to) {
-		const slaveId = instance_to_connect_to.config.get("instance.assigned_slave");
-		let slaveConnection = this.master.wsServer.slaveConnections.get(slaveId);
+		const hostId = instance_to_connect_to.config.get("instance.assigned_host");
+		let hostConnection = this.controller.wsServer.hostConnections.get(hostId);
 		// Instance status
 		if (instance_to_connect_to.status !== "running") {
 			try {
@@ -88,14 +88,15 @@ module.exports = async function joinGridworldRequestHandler(message) {
 					message: "You do not have permission to start servers through exploration",
 				};
 			}
-			await libLink.messages.startInstance.send(slaveConnection, {
-				instance_id: instance_to_connect_to.config.get("instance.id"),
-				save: null,
-			});
+			// Start the instance
+			await this.controller.sendTo(
+				{ instanceId: instance_to_connect_to.config.get("instance.id") },
+				new lib.InstanceStartRequest({ save: null })
+			);
 		}
 
-		const slave = this.master.slaves.get(slaveId);
-		response.connection_address = `${slave.public_address}:${instance_to_connect_to.game_port || instance_to_connect_to.config.get("factorio.game_port")}`;
+		const host = this.controller.hosts.get(hostId);
+		response.connection_address = `${host.public_address}:${instance_to_connect_to.game_port || instance_to_connect_to.config.get("factorio.game_port")}`;
 	}
 
 	// Return response to client

@@ -7,16 +7,16 @@ This page describes the internal workings of the server creation and linking sys
 |                Message                |      Link       | Description                                                                                                    |
 | :-----------------------------------: | :-------------: | :------------------------------------------------------------------------------------------------------------- |
 |    `ipc-gridworld:join_gridworld`     | module-instance | Join gridworld in last location                                                                                |
-|      `gridworld:join_gridworld`       | instance-master | Forward message to master to determine join location, respond with connection details after server is prepared |
-|     `gridworld:sync_faction_data`     | master-instance | Forward message to instance to sync faction data                                                               |
-| `gridworld:sync_player_data_for_join` | master-instance | Sync player data to the instance and open the server for a specific player connecting                          |
+|      `gridworld:join_gridworld`       | instance-controller | Forward message to controller to determine join location, respond with connection details after server is prepared |
+|     `gridworld:sync_faction_data`     | controller-instance | Forward message to instance to sync faction data                                                               |
+| `gridworld:sync_player_data_for_join` | controller-instance | Sync player data to the instance and open the server for a specific player connecting                          |
 |      `/sc gridworld.join_server`      | instance-module | Prompt for server connection                                                                                   |
 
 ### Instance join_gridworld IPC handler
 
-Forward request to master using gridworld:join_gridworld message. Once we get the connection details in the response from the master we use `/sc gridworld.join_server()` to prompt the user to connect to the prepared server.
+Forward request to controller using gridworld:join_gridworld message. Once we get the connection details in the response from the controller we use `/sc gridworld.join_server()` to prompt the user to connect to the prepared server.
 
-### Master join_gridworld request handler
+### Controller join_gridworld request handler
 
 Get current player location in gridworld by looking up the player profile. If the player does not have a disconnect location, use the default spawn point for the faction.
 

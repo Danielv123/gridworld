@@ -3,11 +3,11 @@ const { libConfig, libPlugin, libErrors } = require("@clusterio/lib");
 const assignInstance = require("./assignInstance");
 const createSave = require("./createSave");
 
-module.exports = async function createLobbyServer(plugin, slaveId, x_size, y_size) {
+module.exports = async function createLobbyServer(plugin, hostId, x_size, y_size) {
 	// Create instance
 	plugin.logger.info("Creating lobby server");
 	const name = "Gridworld lobby server";
-	let instanceConfig = new libConfig.InstanceConfig("master");
+	let instanceConfig = new libConfig.InstanceConfig("controller");
 	await instanceConfig.init();
 	instanceConfig.set("instance.name", name);
 	instanceConfig.set("instance.auto_start", true);
@@ -18,7 +18,7 @@ module.exports = async function createLobbyServer(plugin, slaveId, x_size, y_siz
 	instanceConfig.set("factorio.game_port", 10000);
 
 	let instanceId = instanceConfig.get("instance.id");
-	if (plugin.master.instances.has(instanceId)) {
+	if (plugin.controller.instances.has(instanceId)) {
 		throw new libErrors.RequestError(`Instance with ID ${instanceId} already exists`);
 	}
 
@@ -26,8 +26,8 @@ module.exports = async function createLobbyServer(plugin, slaveId, x_size, y_siz
 	let settings = {
 		...instanceConfig.get("factorio.settings"),
 
-		"name": `${plugin.master.config.get("master.name")} - ${name}`,
-		"description": `Clusterio instance for ${plugin.master.config.get("master.name")}`,
+		"name": `${plugin.controller.config.get("controller.name")} - ${name}`,
+		"description": `Clusterio instance for ${plugin.controller.config.get("controller.name")}`,
 		"tags": ["clusterio", "gridworld"],
 		"max_players": 0,
 		"visibility": { "public": true, "lan": true },
@@ -49,19 +49,19 @@ module.exports = async function createLobbyServer(plugin, slaveId, x_size, y_siz
 	instanceConfig.set("factorio.settings", settings);
 
 	let instance = { config: instanceConfig, status: "unassigned" };
-	plugin.master.instances.set(instanceId, instance);
-	await libPlugin.invokeHook(plugin.master.plugins, "onInstanceStatusChanged", instance, null);
-	plugin.master.addInstanceHooks(instance);
+	plugin.controller.instances.set(instanceId, instance);
+	await libPlugin.invokeHook(plugin.controller.plugins, "onInstanceStatusChanged", instance, null);
+	plugin.controller.addInstanceHooks(instance);
 	const instance_id = instanceConfig.get("instance.id");
-	// Assign instance to a slave (using first slave as a placeholder)
-	await assignInstance(plugin, instance_id, slaveId);
+	// Assign instance to a host (using first host as a placeholder)
+	await assignInstance(plugin, instance_id, hostId);
 
 	// Create map
 	await createSave(
 		plugin,
 		instance_id,
-		plugin.master.config.get("gridworld.gridworld_seed"),
-		plugin.master.config.get("gridworld.gridworld_map_exchange_string")
+		plugin.controller.config.get("gridworld.gridworld_seed"),
+		plugin.controller.config.get("gridworld.gridworld_map_exchange_string")
 	);
 	return instance;
 };

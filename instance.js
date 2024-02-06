@@ -2,13 +2,14 @@
  * @module
  */
 "use strict";
-const libPlugin = require("@clusterio/lib/plugin");
-const libLuaTools = require("@clusterio/lib/lua_tools");
-const { libLink } = require("@clusterio/lib");
+const lib = require("@clusterio/lib");
+// eslint-disable-next-line node/no-extraneous-require
+const { BaseInstancePlugin } = require("@clusterio/host");
 
 const sleep = require("./src/util/sleep");
+const messages = require("./messages");
 
-class InstancePlugin extends libPlugin.BaseInstancePlugin {
+class InstancePlugin extends BaseInstancePlugin {
 	async init() {
 		this.pendingTasks = new Set();
 		this.disconnecting = false;
@@ -78,6 +79,12 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				`Error performing load balancing:\n${err.stack}`
 			));
 		});
+
+		// Register message handlers
+		this.instance.handle(messages.PopulateNeighborData, this.populateNeighborDataRequestHandler.bind(this));
+		this.instance.handle(messages.TeleportPlayer, this.teleportPlayerRequestHandler.bind(this));
+		this.instance.handle(messages.FactionUpdate, this.factionUpdateEventHandler.bind(this));
+		this.instance.handle(messages.GetTileData, this.getTileDataRequestHandler.bind(this));
 	}
 
 	async onStart() {
@@ -90,7 +97,7 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		if (this.instance.config.get("gridworld.is_lobby_server")) {
 			await this.sendRcon("/sc gridworld.register_lobby_server(true)");
 			// Get gridworld data
-			const { map_data } = await this.info.messages.getMapData.send(this.instance);
+			const { map_data } = await this.instance.sendTo("controller", new messages.GetMapData());
 			await this.sendRcon(`/sc gridworld.register_map_data('${JSON.stringify(map_data)}')`);
 		} else {
 			await this.sendRcon("/sc global.disable_crashsite = true");
@@ -98,13 +105,13 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			await this.sendRcon(`/sc gridworld.create_spawn("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
 			// Update neighboring nodes for edge_transports
 			await sleep(1000);
-			await this.info.messages.updateEdgeTransportEdges.send(this.instance, {
+			await this.instance.sendTo("controller", new messages.UpdateEdgeTransportEdges({
 				instance_id: this.instance.id,
-			});
+			}));
 			// Refresh faction data
-			const response = await this.info.messages.refreshFactionData.send(this.instance);
+			const response = await this.instance.sendTo("controller", new messages.RefreshFactionData());
 			for (let faction of response.factions) {
-				await this.runTask(this.sendRcon(`/sc gridworld.sync_faction("${faction.faction_id}",'${libLuaTools.escapeString(JSON.stringify(faction))}')`));
+				await this.runTask(this.sendRcon(`/sc gridworld.sync_faction("${faction.faction_id}",'${lib.escapeString(JSON.stringify(faction))}')`));
 			}
 		}
 	}
@@ -114,7 +121,7 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		await Promise.all(this.pendingTasks);
 	}
 
-	onMasterConnectionEvent(event) {
+	onControllerConnectionEvent(event) {
 		if (event === "drop" || event === "close") {
 			this.sendRcon("/sc gridworld.populate_neighbor_data(nil, nil, nil, nil)").catch(
 				err => this.logger(`Error deactivating neighbors:\n${err.stack}`)
@@ -122,11 +129,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		}
 	}
 
-	onPrepareMasterDisconnect() {
+	onPrepareControllerDisconnect() {
 		this.disconnecting = true;
 	}
 
-	onMasterConnectionEvent(event) {
+	onControllerConnectionEvent(event) {
 		if (event === "connect") {
 			this.disconnecting = false;
 		}
@@ -149,12 +156,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	}
 
 	async teleportPlayer(data) {
-		await this.info.messages.teleportPlayer.send(this.instance, {
-			instance_id: data.instance_id,
+		await this.instance.sendTo({ instanceId: data.instance_id }, new messages.TeleportPlayer({
 			player_name: data.player_name,
 			x: data.x,
 			y: data.y,
-		});
+		}));
 	}
 
 	async teleportPlayerRequestHandler(message) {
@@ -162,20 +168,20 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 			return;
 		}
 
-		await this.runTask(this.sendRcon(`/sc gridworld.receive_teleport_data("${libLuaTools.escapeString(JSON.stringify(message.data))}")`));
+		await this.runTask(this.sendRcon(`/sc gridworld.receive_teleport_data("${lib.escapeString(JSON.stringify(message.data))}")`));
 	}
 
 	async sendPlayerPosition(data) {
-		await this.info.messages.playerPosition.send(this.instance, {
+		await this.instance.sendTo("controller", new messages.PlayerPosition({
 			player_name: data.player_name,
 			instance_id: data.instance_id,
 			x: data.x,
 			y: data.y,
-		});
+		}));
 	}
 
 	async createFaction(data) {
-		const status = await this.info.messages.createFaction.send(this.instance, {
+		const status = await this.instance.sendTo("controller", new messages.CreateFactionGrid({
 			faction_id: data.faction_id,
 			name: data.name,
 			open: data.open,
@@ -191,10 +197,10 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				description: `${data.name} was started by ${data.owner} on ${new Date().toISOString()}`,
 				rules: "The faction leader has not set any rules",
 			},
-		});
+		}));
 		if (status.ok) {
 			// Sync faction with lobby world
-			await this.sendRcon(`/sc gridworld.sync_faction("${data.faction_id}","${libLuaTools.escapeString(JSON.stringify(status.faction))}")`);
+			await this.sendRcon(`/sc gridworld.sync_faction("${data.faction_id}","${lib.escapeString(JSON.stringify(status.faction))}")`);
 			// Open faction admin screen for owner
 			await this.sendRcon(`/sc gridworld.open_faction_admin_screen("${data.owner}","${data.faction_id}")`);
 		}
@@ -204,13 +210,13 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		// Show received progress in game
 		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Saving faction", "Propagating changes", 2, 3)`);
 
-		// Update master server
-		const status = await this.info.messages.updateFaction.send(this.instance, {
+		// Update controller server
+		const status = await this.instance.sendTo("controller", new messages.UpdateFaction({
 			faction_id: data.faction_id,
 			name: data.name,
 			open: data.open,
 			about: data.about,
-		});
+		}));
 		// Show completed progress in game
 		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Saving faction", "Finishing", 3, 3)`);
 		await new Promise(r => setTimeout(r, 500));
@@ -219,11 +225,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	}
 
 	async factionInvitePlayer(data) {
-		let response = await this.info.messages.factionInvitePlayer.send(this.instance, {
+		let response = await this.instance.sendTo("controller", new messages.FactionInvitePlayer({
 			faction_id: data.faction_id,
 			player_name: data.player_name,
 			role: data.role,
-		});
+		}));
 		if (response.ok) {
 			// Close invite player dialog
 			await this.sendRcon(`/sc game.get_player("${data.requesting_player}").gui.center.gridworld_invite_player_dialog.destroy()`);
@@ -234,10 +240,10 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	}
 
 	async joinFaction(data) {
-		let response = await this.info.messages.joinFaction.send(this.instance, {
+		let response = await this.instance.sendTo("controller", new messages.JoinFaction({
 			faction_id: data.faction_id,
 			player_name: data.player_name,
-		});
+		}));
 		if (response.ok) {
 			await this.sendRcon(`/sc game.get_player("${data.player_name}").print("${response.message}")`);
 		} else {
@@ -247,10 +253,10 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	}
 
 	async factionKickPlayer(data) {
-		const response = await this.info.messages.leaveFaction.send(this.instance, {
+		const response = await this.instance.sendTo("controller", new messages.LeaveFaction({
 			faction_id: data.faction_id,
 			player_name: data.player_name,
-		});
+		}));
 		if (!response.ok) {
 			// Show error message
 			await this.sendRcon(`/sc game.get_player("${data.requesting_player}").print("${response.message}")`);
@@ -258,11 +264,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	}
 
 	async factionChangeMemberRole(data) {
-		const response = await this.info.messages.factionChangeMemberRole.send(this.instance, {
+		const response = await this.instance.sendTo("controller", new messages.FactionChangeMemberRole({
 			faction_id: data.faction_id,
 			player_name: data.player_name,
 			role: data.role,
-		});
+		}));
 		if (!response.ok) {
 			// Show error message
 			await this.sendRcon(`/sc game.get_player("${data.requesting_player}").print("${response.message}")`);
@@ -272,12 +278,12 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	async claimServer(data) {
 		// Show received progress in game
 		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Claiming server", "Propagating changes", 2, 3)`);
-		// Update master
-		const status = await this.info.messages.claimServer.send(this.instance, {
+		// Update controller
+		const status = await this.instance.sendTo("controller", new messages.ClaimServer({
 			instance_id: this.instance.config.get("instance.id"),
 			player_name: data.player_name,
 			faction_id: data.faction_id,
-		});
+		}));
 		if (status.ok) {
 			await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Claiming server", "Finishing", 3, 3)`);
 			await this.sendRcon(`/sc gridworld.claim_server("${data.faction_id}")`);
@@ -293,11 +299,11 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	async unclaimServer(data) {
 		// Show received progress in game
 		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Unclaiming server", "Propagating changes", 2, 3)`);
-		// Update master
-		const status = await this.info.messages.unclaimServer.send(this.instance, {
+		// Update controller
+		const status = await this.instance.sendTo("controller", new messages.UnclaimServer({
 			instance_id: this.instance.config.get("instance.id"),
 			player_name: data.player_name,
-		});
+		}));
 		if (status.ok) {
 			await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Unclaiming server", "Finishing", 3, 3)`);
 			await this.sendRcon(`/sc gridworld.unclaim_server("${data.faction_id}")`);
@@ -313,7 +319,7 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	async factionUpdateEventHandler(message) {
 		if (this.instance.status === "running") {
 			// Update faction in game
-			await this.runTask(this.sendRcon(`/sc gridworld.sync_faction("${message.data.faction.faction_id}",'${libLuaTools.escapeString(JSON.stringify(message.data.faction))}')`));
+			await this.runTask(this.sendRcon(`/sc gridworld.sync_faction("${message.data.faction.faction_id}",'${lib.escapeString(JSON.stringify(message.data.faction))}')`));
 		}
 	}
 
@@ -321,10 +327,10 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		// Show received progress in game
 		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Finding server", "Loading world", 1, 3)`);
 
-		let response = await this.info.messages.joinGridworld.send(this.instance, {
+		let response = await this.instance.sendTo("controller", new messages.JoinGridworld({
 			player_name: data.player_name,
 			grid_id: this.instance.config.get("gridworld.grid_id"),
-		});
+		}));
 
 		// Show completed progress in game
 		await this.sendRcon(`/sc gridworld.show_progress("${data.player_name}", "Joining gridworld", "${response.message}", 3, 3)`);
@@ -344,12 +350,12 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 	 * @param {number} data.player_y_position - Y position of the player
 	 */
 	async performEdgeTeleport(data) {
-		const response = await this.info.messages.performEdgeTeleport.send(this.instance, {
+		const response = await this.instance.sendTo("controller", new messages.PerformEdgeTeleport({
 			player_name: data.player_name,
 			player_x_position: data.player_x_position,
 			player_y_position: data.player_y_position,
 			grid_id: this.instance.config.get("gridworld.grid_id"),
-		});
+		}));
 
 		if (response.ok) {
 			// Prepare server in case the player accepts the teleport
@@ -380,7 +386,7 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 		switch (data.action) {
 			case "stop_server":
 				// console.log(this, this.instance.plugins, this.instance.server, this.instance.sendSaveListUpdate);
-				await libPlugin.invokeHook(this.instance.plugins, "onStop");
+				await lib.invokeHook(this.instance.plugins, "onStop");
 				await this.instance.server.stop();
 				await this.instance.sendSaveListUpdate();
 				break;
@@ -388,16 +394,16 @@ class InstancePlugin extends libPlugin.BaseInstancePlugin {
 				this.logger.error(`Unknown load balancing action: ${data.action}`);
 				break;
 		}
-		// Send load_factor to master
-		await this.info.messages.setLoadFactor.send(this.instance, {
+		// Send load_factor to controller
+		await this.instance.sendTo("controller", new messages.SetLoadFactor({
 			instance_id: this.instance.config.get("instance.id"),
 			load_factor: data.load_factor,
-		});
+		}));
 	}
 
 	async getTileDataRequestHandler(message) {
 		if (this.instance.status !== "running") {
-			throw new libErrors.RequestError(`Instance with ID ${message.data.instance_id} is not running ${this.instance.status}`);
+			throw new lib.RequestError(`Instance with ID ${message.data.instance_id} is not running ${this.instance.status}`);
 		}
 		let { position_a, position_b } = message.data;
 		let response = await this.sendRcon(`/sc gridworld.dump_mapview({${position_a}}, {${position_b}})`);

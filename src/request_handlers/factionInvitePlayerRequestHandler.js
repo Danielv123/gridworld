@@ -20,11 +20,13 @@ module.exports = async function factionInvitePlayerRequestHandler(message, reque
 		});
 
 		// Propagate changes to all online instances
-		this.broadcastEventToSlaves(this.info.messages.factionUpdate, { faction: faction });
+		this.controller.sendTo("allInstances", new messages.FactionUpdate({ faction: faction }));
 
 		// Propagate changes to listening web clients
 		for (let sub of this.subscribedControlLinks) {
-			if (sub.faction_list) { this.info.messages.factionUpdate.send(sub.link, { faction: faction }); }
+			if (sub.faction_list) {
+				sub.link.send(new messages.FactionUpdate({ faction: faction }));
+			}
 		}
 
 		return {
