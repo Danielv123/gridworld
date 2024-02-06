@@ -327,7 +327,9 @@ module.exports = {
 		"node/no-extraneous-import": "error",
 		"node/no-extraneous-require": "error",
 		"node/no-missing-import": "error",
-		"node/no-missing-require": "error",
+		"node/no-missing-require": ["error", {
+			"allowModules": ["@clusterio/controller", "@clusterio/host"],
+		}],
 		"node/no-mixed-requires": "error",
 		"node/no-new-require": "error",
 		"node/no-path-concat": "error",
