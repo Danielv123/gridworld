@@ -1,16 +1,15 @@
 import React, { useContext } from "react";
-import { useHistory } from "react-router-dom";
-import { Button, PageHeader, Popconfirm, Table } from "antd";
+import { useNavigate } from "react-router-dom";
+import { Button, Popconfirm, Table } from "antd";
 import DeleteOutlined from "@ant-design/icons/DeleteOutlined";
 
 import "../index.css";
-import { libLink } from "@clusterio/lib";
-import { ControlContext, PageLayout, useAccount, notifyErrorHandler } from "@clusterio/web_ui";
+import { ControlContext, PageLayout, PageHeader, useAccount } from "@clusterio/web_ui";
 import useFactionList from "../providers/useFactionList";
 
 function FactionsPage() {
 	const control = useContext(ControlContext);
-	const history = useHistory();
+	const navigate = useNavigate();
 	const factions = useFactionList(control);
 	let account = useAccount();
 
@@ -58,7 +57,7 @@ function FactionsPage() {
 			rowKey="faction_id"
 			onRow={faction => ({
 				onClick: event => {
-					history.push(`/gridworld/factions/${faction.faction_id}/view`);
+					navigate(`/gridworld/factions/${faction.faction_id}/view`);
 				},
 			})}
 		/>

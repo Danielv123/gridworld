@@ -1,12 +1,12 @@
 import React, { useEffect, useContext, useState } from "react";
-import { ControlContext, useInstanceList } from "@clusterio/web_ui";
+import { ControlContext, useInstances } from "@clusterio/web_ui";
 
 import messages from "../../messages";
 
-const { logger } = libLogging;
+const { logger } = require("@clusterio/lib");
 
 export function useMapData(id) {
-	let [instances] = useInstanceList();
+	let [instances] = useInstances();
 	let control = useContext(ControlContext);
 	let [mapData, setMapData] = useState({ loading: true });
 

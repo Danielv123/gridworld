@@ -1,4 +1,5 @@
 "use strict";
+const { plainJson } = require("@clusterio/lib");
 const factionProperties = require("./src/factions/faction_message_properties");
 
 const pluginName = "gridworld";
@@ -10,9 +11,6 @@ module.exports = {
 		static dst = "controller";
 		static plugin = pluginName;
 		static permission = "gridworld.create";
-		constructor(data) {
-			this.data = data;
-		}
 		static jsonSchema = {
 			type: "object",
 			properties: {
@@ -23,6 +21,16 @@ module.exports = {
 				host: { type: "integer" }, // hostID to use for instance creation
 			},
 		};
+		constructor(json) {
+			this.name_prefix = json.name_prefix;
+			this.use_edge_transports = json.use_edge_transports;
+			this.x_size = json.x_size;
+			this.y_size = json.y_size;
+			this.host = json.host;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
 	},
 	GetMapData: class GetMapData {
 		static type = "request";
@@ -30,41 +38,39 @@ module.exports = {
 		static dst = "controller";
 		static plugin = pluginName;
 		static permission = "gridworld.overview.view";
-		static Response = {
-			jsonSchema: {
-				type: "object",
-				properties: {
-					map_data: {
-						type: "array",
-						items: {
-							type: "object",
-							additionalProperties: false,
-							properties: {
-								instance_id: { type: "integer" },
-								center: { type: "array", items: { type: "number" } },
-								bounds: {
+		static Response = plainJson({
+			type: "object",
+			properties: {
+				map_data: {
+					type: "array",
+					items: {
+						type: "object",
+						additionalProperties: false,
+						properties: {
+							instance_id: { type: "integer" },
+							center: { type: "array", items: { type: "number" } },
+							bounds: {
+								type: "array",
+								items: {
 									type: "array",
-									items: {
-										type: "array",
-										items: { type: "number" },
-									},
+									items: { type: "number" },
 								},
-								edges: {
-									type: "array",
-									items: {
-										type: "object",
-										properties: {
-											id: { type: "integer" },
-											origin: {
-												type: "array",
-												items: { type: "integer" },
-											},
-											surface: { type: "integer" },
-											direction: { type: "integer" },
-											length: { type: "integer" },
-											target_instance: { type: "integer" },
-											target_edge: { type: "integer" },
+							},
+							edges: {
+								type: "array",
+								items: {
+									type: "object",
+									properties: {
+										id: { type: "integer" },
+										origin: {
+											type: "array",
+											items: { type: "integer" },
 										},
+										surface: { type: "integer" },
+										direction: { type: "integer" },
+										length: { type: "integer" },
+										target_instance: { type: "integer" },
+										target_edge: { type: "integer" },
 									},
 								},
 							},
@@ -72,10 +78,7 @@ module.exports = {
 					},
 				},
 			},
-			fromJson(data) {
-				return data;
-			},
-		};
+		});
 	},
 	PopulateNeighborData: class PopulateNeighborData {
 		static type = "request";
@@ -91,6 +94,15 @@ module.exports = {
 				west: { type: ["integer", "null"] },
 			},
 		};
+		constructor(json) {
+			this.north = json.north;
+			this.south = json.south;
+			this.east = json.east;
+			this.west = json.west;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
 	},
 	UpdateEdgeTransportEdges: class UpdateEdgeTransportEdges {
 		static type = "request";
@@ -103,6 +115,12 @@ module.exports = {
 				instance_id: { type: "integer" },
 			},
 		};
+		constructor(json) {
+			this.instance_id = json.instance_id;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
 	},
 	TeleportPlayer: class TeleportPlayer {
 		static type = "request";
@@ -117,6 +135,14 @@ module.exports = {
 				y: { type: "number" },
 			},
 		};
+		constructor(json) {
+			this.player_name = json.player_name;
+			this.x = json.x;
+			this.y = json.y;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
 	},
 	PlayerPosition: class PlayerPosition {
 		static type = "event";
@@ -132,6 +158,15 @@ module.exports = {
 				y: { type: "number" },
 			},
 		};
+		constructor(json) {
+			this.player_name = json.player_name;
+			this.instance_id = json.instance_id;
+			this.x = json.x;
+			this.y = json.y;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
 	},
 	SetWebSubscription: class SetWebSubscription {
 		static type = "request";
@@ -146,6 +181,15 @@ module.exports = {
 				faction_list: { type: "boolean" },
 			},
 		};
+		constructor(json) {
+			this.data = json;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
+		toJSON() {
+			return this.data;
+		}
 	},
 	CreateFaction: class CreateFaction {
 		static type = "request";
@@ -156,18 +200,25 @@ module.exports = {
 			type: "object",
 			properties: factionProperties,
 		};
-		static Response = {
-			jsonSchema: {
-				type: "object",
-				properties: {
-					ok: { type: "boolean" },
-					faction: {
-						type: "object",
-						properties: factionProperties,
-					},
+		constructor(json) {
+			// eslint-disable-next-line guard-for-in
+			for (let key in factionProperties) {
+				this[key] = json[key];
+			}
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
+		static Response = plainJson({
+			type: "object",
+			properties: {
+				ok: { type: "boolean" },
+				faction: {
+					type: "object",
+					properties: factionProperties,
 				},
 			},
-		};
+		});
 	},
 	// Send updated faction data to controller for propagation. Used to edit factions
 	UpdateFaction: class UpdateFaction {
@@ -191,20 +242,27 @@ module.exports = {
 				},
 			},
 		};
-		static Response = {
-			jsonSchema: {
-				type: "object",
-				required: ["ok", "message"],
-				properties: {
-					ok: { type: "boolean" },
-					message: { type: "string" },
-					faction: {
-						type: "object",
-						properties: factionProperties,
-					},
+		constructor(json) {
+			this.faction_id = json.faction_id;
+			this.name = json.name;
+			this.open = json.open;
+			this.about = json.about;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
+		static Response = plainJson({
+			type: "object",
+			required: ["ok", "message"],
+			properties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+				faction: {
+					type: "object",
+					properties: factionProperties,
 				},
 			},
-		};
+		});
 	},
 	// Event notifying an instance of changes to a faction
 	FactionUpdate: class FactionUpdate {
@@ -221,6 +279,12 @@ module.exports = {
 				},
 			},
 		};
+		constructor(json) {
+			this.faction = json.faction;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
 	},
 	// Get changed factions
 	RefreshFactionData: class RefreshFactionData {
@@ -228,22 +292,20 @@ module.exports = {
 		static src = "instance";
 		static dst = "controller";
 		static plugin = pluginName;
-		static Response = {
-			jsonSchema: {
-				type: "object",
-				properties: {
-					ok: { type: "boolean" },
-					message: { type: "string" },
-					factions: {
-						type: "array",
-						items: {
-							type: "object",
-							properties: factionProperties,
-						},
+		static Response = plainJson({
+			type: "object",
+			properties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+				factions: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: factionProperties,
 					},
 				},
 			},
-		};
+		});
 	},
 	FactionInvitePlayer: class FactionInvitePlayer {
 		static type = "request";
@@ -258,15 +320,21 @@ module.exports = {
 				role: { type: "string" },
 			},
 		};
-		static Response = {
-			jsonSchema: {
-				type: "object",
-				properties: {
-					ok: { type: "boolean" },
-					message: { type: "string" },
-				},
+		constructor(json) {
+			this.faction_id = json.faction_id;
+			this.player_name = json.player_name;
+			this.role = json.role;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
+		static Response = plainJson({
+			type: "object",
+			properties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
 			},
-		};
+		});
 	},
 	JoinFaction: class JoinFaction {
 		static type = "request";
@@ -280,15 +348,20 @@ module.exports = {
 				player_name: { type: "string" },
 			},
 		};
-		static Response = {
-			jsonSchema: {
-				type: "object",
-				properties: {
-					ok: { type: "boolean" },
-					message: { type: "string" },
-				},
+		constructor(json) {
+			this.faction_id = json.faction_id;
+			this.player_name = json.player_name;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
+		static Response = plainJson({
+			type: "object",
+			properties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
 			},
-		};
+		});
 	},
 	LeaveFaction: class LeaveFaction {
 		static type = "request";
@@ -302,15 +375,20 @@ module.exports = {
 				player_name: { type: "string" },
 			},
 		};
-		static Response = {
-			jsonSchema: {
-				type: "object",
-				properties: {
-					ok: { type: "boolean" },
-					message: { type: "string" },
-				},
+		constructor(json) {
+			this.faction_id = json.faction_id;
+			this.player_name = json.player_name;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
+		static Response = plainJson({
+			type: "object",
+			properties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
 			},
-		};
+		});
 	},
 	FactionChangeMemberRole: class FactionChangeMemberRole {
 		static type = "request";
@@ -325,15 +403,21 @@ module.exports = {
 				role: factionProperties.members.items.properties.role,
 			},
 		};
-		static Response = {
-			jsonSchema: {
-				type: "object",
-				properties: {
-					ok: { type: "boolean" },
-					message: { type: "string" },
-				},
+		constructor(json) {
+			this.faction_id = json.faction_id;
+			this.player_name = json.player_name;
+			this.role = json.role;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
+		static Response = plainJson({
+			type: "object",
+			properties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
 			},
-		};
+		});
 	},
 	ClaimServer: class ClaimServer {
 		static type = "request";
@@ -348,15 +432,21 @@ module.exports = {
 				faction_id: { type: "string" },
 			},
 		};
-		static Response = {
-			jsonSchema: {
-				type: "object",
-				properties: {
-					ok: { type: "boolean" },
-					message: { type: "string" },
-				},
+		constructor(json) {
+			this.instance_id = json.instance_id;
+			this.player_name = json.player_name;
+			this.faction_id = json.faction_id;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
+		static Response = plainJson({
+			type: "object",
+			properties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
 			},
-		};
+		});
 	},
 	UnclaimServer: class UnclaimServer {
 		static type = "request";
@@ -370,15 +460,20 @@ module.exports = {
 				player_name: { type: "string" },
 			},
 		};
-		static Response = {
-			jsonSchema: {
-				type: "object",
-				properties: {
-					ok: { type: "boolean" },
-					message: { type: "string" },
-				},
+		constructor(json) {
+			this.instance_id = json.instance_id;
+			this.player_name = json.player_name;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
+		static Response = plainJson({
+			type: "object",
+			properties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
 			},
-		};
+		});
 	},
 	JoinGridworld: class JoinGridworld {
 		static type = "request";
@@ -392,18 +487,23 @@ module.exports = {
 				grid_id: { type: "integer" },
 			},
 		};
-		static Response = {
-			jsonSchema: {
-				type: "object",
-				properties: {
-					ok: { type: "boolean" },
-					message: { type: "string" },
-					connection_address: { type: "string" },
-					server_name: { type: "string" },
-					server_description: { type: "string" },
-				},
+		constructor(json) {
+			this.player_name = json.player_name;
+			this.grid_id = json.grid_id;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
+		static Response = plainJson({
+			type: "object",
+			properties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+				connection_address: { type: "string" },
+				server_name: { type: "string" },
+				server_description: { type: "string" },
 			},
-		};
+		});
 	},
 	PerformEdgeTeleport: class PerformEdgeTeleport {
 		static type = "request";
@@ -419,19 +519,26 @@ module.exports = {
 				grid_id: { type: "integer" },
 			},
 		};
-		static Response = {
-			jsonSchema: {
-				type: "object",
-				properties: {
-					ok: { type: "boolean" },
-					message: { type: "string" },
-					connection_address: { type: "string" },
-					server_name: { type: "string" },
-					server_description: { type: "string" },
-					instance_id: { type: "integer" },
-				},
+		constructor(json) {
+			this.player_name = json.player_name;
+			this.player_x_position = json.player_x_position;
+			this.player_y_position = json.player_y_position;
+			this.grid_id = json.grid_id;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
+		static Response = plainJson({
+			type: "object",
+			properties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+				connection_address: { type: "string" },
+				server_name: { type: "string" },
+				server_description: { type: "string" },
+				instance_id: { type: "integer" },
 			},
-		};
+		});
 	},
 	GetTileData: class GetTileData {
 		static type = "request";
@@ -446,6 +553,14 @@ module.exports = {
 				position_b: { type: "array", items: { type: "number" } },
 			},
 		};
+		constructor(json) {
+			this.instance_id = json.instance_id;
+			this.position_a = json.position_a;
+			this.position_b = json.position_b;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
 	},
 	RefreshTileData: class RefreshTileData {
 		static type = "request";
@@ -459,6 +574,12 @@ module.exports = {
 				instance_id: { type: "integer" },
 			},
 		};
+		constructor(json) {
+			this.instance_id = json.instance_id;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
 	},
 	SetLoadFactor: class SetLoadFactor {
 		static type = "event";
@@ -472,5 +593,12 @@ module.exports = {
 				load_factor: { type: "number" },
 			},
 		};
+		constructor(json) {
+			this.instance_id = json.instance_id;
+			this.load_factor = json.load_factor;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
 	},
 };

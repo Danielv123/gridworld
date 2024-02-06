@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 
-import { ControlContext, useHostList } from "@clusterio/web_ui";
+import { ControlContext, useHosts } from "@clusterio/web_ui";
 
 import "../index.css";
 import { Form, Input, Button, Select, InputNumber, Checkbox } from "antd";
@@ -17,10 +17,10 @@ const tailLayout = {
 };
 
 function NewGridworldForm() {
-	let history = useHistory();
+	let navigate = useNavigate();
 	let control = useContext(ControlContext);
 	let [loading, setLoading] = useState();
-	let [hostList] = useHostList();
+	let [hostList] = useHosts();
 
 	async function onFinish(values) {
 		// console.log("Success:", values);
@@ -28,7 +28,7 @@ function NewGridworldForm() {
 		await control.send(new messages.CreateFactionGrid(values));
 		setLoading(false);
 		await new Promise(resolve => setTimeout(resolve, 1500));
-		history.push("/gridworld");
+		navigate("/gridworld");
 	};
 
 	function onFinishFailed(errorInfo) {
@@ -77,7 +77,7 @@ function NewGridworldForm() {
 			<Select
 				placeholder="Select host"
 			>
-				{hostList.map(host => <Option key={host.id} value={host.id}>{host.name}</Option>)}
+				{hostList.map?.(host => <Option key={host.id} value={host.id}>{host.name}</Option>)}
 			</Select>
 		</Form.Item>
 

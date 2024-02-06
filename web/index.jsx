@@ -1,7 +1,6 @@
 import React from "react";
 
-import { libPlugin } from "@clusterio/lib";
-import { notifyErrorHandler } from "@clusterio/web_ui";
+import { BaseWebPlugin, notifyErrorHandler } from "@clusterio/web_ui";
 
 import OverviewPage from "./pages/OverviewPage";
 import CreateGridworldPage from "./pages/CreateGridworldPage";
@@ -9,7 +8,7 @@ import FactionsPage from "./pages/FactionsPage";
 import FactionViewPage from "./pages/FactionViewPage";
 import messages from "../messages";
 
-export class WebPlugin extends libPlugin.BaseWebPlugin {
+export class WebPlugin extends BaseWebPlugin {
 	async init() {
 		this.pages = [
 			{

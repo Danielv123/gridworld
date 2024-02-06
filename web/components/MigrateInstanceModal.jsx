@@ -1,14 +1,14 @@
 import React, { useContext, useState } from "react";
 import { Modal, Form, Select } from "antd";
 
-import { ControlContext, useInstance, useHostList } from "@clusterio/web_ui";
+import { ControlContext, useInstance, useHosts } from "@clusterio/web_ui";
 
 import MigrateInstanceRequest from "../../src/instance_migration/info/MigrateInstanceRequest";
 
 export default function MigrateInstanceModal(props) {
 	const control = useContext(ControlContext);
 	let [isWorking, setWorking] = useState(false);
-	let [hostList] = useHostList();
+	let [hostList] = useHosts();
 	let [instance] = useInstance(props.instanceId);
 	let [form] = Form.useForm();
 
@@ -19,7 +19,7 @@ export default function MigrateInstanceModal(props) {
 
 	return <Modal
 		title="Migrate instance"
-		visible={props.visible}
+		open={props.visible}
 		onCancel={() => {
 			if (isWorking) {
 				document.location = document.location;

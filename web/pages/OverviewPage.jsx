@@ -1,19 +1,19 @@
 import React, { useContext } from "react";
-import { useHistory } from "react-router-dom";
-import { Button, PageHeader, Popconfirm } from "antd";
+import { useNavigate } from "react-router-dom";
+import { Button, Popconfirm } from "antd";
 import GithubOutlined from "@ant-design/icons/GithubOutlined";
 import DeleteOutlined from "@ant-design/icons/DeleteOutlined";
 
 import lib from "@clusterio/lib";
-import { ControlContext, PageLayout, useInstanceList, useAccount, notifyErrorHandler } from "@clusterio/web_ui";
+import { ControlContext, PageLayout, PageHeader, useInstances, useAccount, notifyErrorHandler } from "@clusterio/web_ui";
 import "../index.css";
 import GridVisualizer from "../components/GridVisualizer";
 import RefreshTileDataButton from "../components/RefreshTileDataButton";
 
 function OverviewPage() {
 	const control = useContext(ControlContext);
-	const history = useHistory();
-	let [instanceList] = useInstanceList();
+	const navigate = useNavigate();
+	let [instanceList] = useInstances();
 	let account = useAccount();
 
 	return <PageLayout nav={[{ name: "Gridworld" }]}>
@@ -25,7 +25,7 @@ function OverviewPage() {
 				<Button
 					key="1"
 					// href="/gridworld/create"
-					onClick={() => history.push("/gridworld/create")}
+					onClick={() => navigate("/gridworld/create")}
 					type="primary"
 				>Create new gridworld</Button>,
 				account.hasPermission("core.instance.delete")

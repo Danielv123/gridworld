@@ -1,13 +1,13 @@
 import React, { useContext, useState } from "react";
 import { Progress, Modal, InputNumber } from "antd";
 
-import { ControlContext, useInstanceList, notifyErrorHandler } from "@clusterio/web_ui";
+import { ControlContext, useInstances, notifyErrorHandler } from "@clusterio/web_ui";
 import ThrottledPromise from "../lib/ThrottledPromise";
 import messages from "../../messages";
 
 export default function RefreshTileDataModal(props) {
 	const control = useContext(ControlContext);
-	let [instanceList] = useInstanceList();
+	let [instanceList] = useInstances();
 	let [isWorking, setWorking] = useState(false);
 	let [percent, setPercent] = useState(0); // Completed + in progress
 	let [success, setSuccess] = useState(0); // Completed
@@ -22,7 +22,7 @@ export default function RefreshTileDataModal(props) {
 
 	return <Modal
 		title="Refresh tiles"
-		visible={props.visible}
+		open={props.visible}
 		onCancel={() => {
 			if (isWorking) {
 				document.location = document.location;

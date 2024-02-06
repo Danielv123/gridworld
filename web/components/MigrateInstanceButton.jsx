@@ -16,7 +16,7 @@ export default function MigrateInstanceButton(props) {
 		</Button> : "",
 		<MigrateInstanceModal
 			key="modal"
-			visible={modal}
+			open={modal}
 			hideModal={() => showModal(false)}
 			instanceId={props.instanceId}
 		/>,

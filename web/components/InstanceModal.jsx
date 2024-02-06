@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { Button, Descriptions, Space, Popconfirm, Typography, Tabs } from "antd";
 import DeleteOutlined from "@ant-design/icons/DeleteOutlined";
+import { useNavigate } from "react-router-dom";
 
 import {
 	ControlContext,
@@ -14,15 +15,16 @@ import {
 	LogConsole,
 	InstanceConfigTree,
 } from "@clusterio/web_ui";
-import lib from "@clusterio/lib";
+import * as lib from "@clusterio/lib";
 
 import MigrateInstanceButton from "./MigrateInstanceButton";
 
 function InstanceModal(props) {
 	let control = useContext(ControlContext);
 	let [instance] = useInstance(props.instance_id);
-	let [host] = useHost(instance["assigned_host"]);
+	let [host] = useHost(instance?.["assigned_host"]);
 	let account = useAccount();
+	let navigate = useNavigate();
 
 	return <>
 		{props.instance_id && <>
@@ -44,9 +46,9 @@ function InstanceModal(props) {
 						okButtonProps={{ danger: true }}
 						onConfirm={() => {
 							control.send(
-								new lib.InstanceDeleteRequest({ instanceId })
+								new lib.InstanceDeleteRequest(instanceId)
 							).then(() => {
-								history.push("/instances");
+								navigate("/instances");
 							}).catch(notifyErrorHandler("Error deleting instance"));
 						}}
 					>

@@ -16,7 +16,7 @@ export default function RefreshTileDataButton() {
 		</Button> : "",
 		<RefreshTileDataModal
 			key="modal"
-			visible={modal}
+			open={modal}
 			hideModal={() => showModal(false)}
 		/>,
 	];

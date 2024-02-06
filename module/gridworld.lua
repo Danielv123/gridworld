@@ -29,12 +29,6 @@ local set_player_permission_group = require("faction/building_restrictions/set_p
 local worldgen = require("worldgen/index")
 local load_balancing = require("load_balancing/load_balancing")
 
--- Declare globals to make linter happy
-game = game
-global = global
--- defines = defines
-log = log
-
 gridworld.events = {}
 gridworld.events[clusterio_api.events.on_server_startup] = function()
 	-- Set up global table

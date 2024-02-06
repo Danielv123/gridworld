@@ -24,15 +24,22 @@ Substitute clusteriocontroller with clusteriohost or clusterioctl if this a dedi
 
 Clone the repository in clusterio/external_plugins/
 
-	cd clusterio
+	git clone https://github.com/clusterio/clusterio
+	cd clusterio/external_plugins
+	git clone https://github.com/Danielv123/gridworld
+	git clone https://github.com/clusterio/edge_transports
+	cd ..
 	pnpm install
-	node packages/create --dev # Interactive
+
+Interactive:
+
+	node packages/create --dev
+
 	node packages/ctl plugin add ./external_plugins/gridworld
-	pnpm install @clusterio/plugin-edge_transports -w
+	node packages/ctl plugin add ./external_plugins/edge_transports
 	pnpm install @hornwitser/server_select -w
-	node packages/controller bootstrap create-ctl-config Danielv123
 	node packages/controller bootstrap create-admin Danielv123
-	node packages/controller plugin add @clusterio/plugin-edge_transports
+	node packages/controller bootstrap create-ctl-config Danielv123
 	node packages/controller plugin add @hornwitser/server_select
 	node packages/controller plugin add ./plugins/global_chat
 	node packages/controller plugin add ./plugins/inventory_sync
@@ -51,8 +58,6 @@ Log into the webui with the token in token.txt and create a new host token with 
 	node packages/host config set host.name "Host 1"
 	node packages/host config set host.public_address "localhost"
   
-Luacheck can be downloaded from https://github.com/mpeterv/luacheck/releases/download/0.23.0/luacheck.exe or `sudo apt install lua-check`
+Luacheck can be downloaded from https://github.com/mpeterv/luacheck/releases/download/0.23.0/luacheck.exe or `sudo apt install lua-check` or `brew install luacheck`
 
 Put it in your `%path%` and run `luacheck ./module`
-
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJ1c2VyIiwidXNlciI6IkRhbmllbHYxMjMiLCJpYXQiOjE3MDcwNjYwNDR9.g9iiIDvhX8GrEWGQQYig_smOdf212dmst6HKg9LKU3g

@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Row, Col } from "antd";
-import { Map, Polyline, Rectangle, Tooltip, TileLayer, SVGOverlay, Marker, Popup, Circle } from "react-leaflet";
+import { MapContainer, Polyline, Rectangle, Tooltip, TileLayer, SVGOverlay, Marker, Popup, Circle } from "react-leaflet";
 
 import { ControlContext, useInstance, statusColors } from "@clusterio/web_ui";
 import { useMapData } from "../model/mapData";
@@ -37,7 +37,7 @@ export default function GridVisualizer(props) {
 
 			<Row>
 				<Col lg={24} xl={12}>
-					{mapData.map_data?.length ? <Map
+					{mapData.map_data?.length ? <MapContainer
 						scrollWheelZoom={true}
 						style={{ width: "100%", height: "700px", backgroundColor: "#141414" }}
 						attributionControl={false}
@@ -78,7 +78,7 @@ export default function GridVisualizer(props) {
 						</div>
 						)}
 						{playerPositions.map(player => <PlayerRender player={player} key={player[1].player_name} />)}
-					</Map> : ""}
+					</MapContainer> : ""}
 				</Col>
 				<Col xs={24} sm={12} style={{ paddingLeft: "10px" }}>
 					<InstanceModal instance_id={activeInstance} />

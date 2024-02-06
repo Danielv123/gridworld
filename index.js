@@ -61,44 +61,44 @@ module.exports = {
 				type: "number",
 				title: "Server position on X axis",
 				description: "Server position index along the X axis in the gridworld",
-				initial_value: 1000,
+				initialValue: 1000,
 			},
 			"gridworld.grid_y_position": {
 				type: "number",
 				title: "Server position on Y axis",
 				description: "Server position index along the Y axis in the gridworld",
-				initial_value: 1000,
+				initialValue: 1000,
 			},
 			"gridworld.grid_x_size": {
 				type: "number",
 				title: "Server size on X axis",
 				description: "Server size along the X axis",
-				initial_value: 512,
+				initialValue: 512,
 			},
 			"gridworld.grid_y_size": {
 				type: "number",
 				title: "Server size on Y axis",
 				description: "Server size along the Y axis",
-				initial_value: 512,
+				initialValue: 512,
 			},
 			"gridworld.is_lobby_server": {
 				type: "boolean",
 				title: "Server is a lobby server",
 				description: "Make this instance act as a lobby server for a gridworld",
-				initial_value: false,
+				initialValue: false,
 			},
 			"gridworld.grid_id": {
 				type: "number",
 				title: "Grid ID",
 				description:
           "Grid identifier - used to run multiple gridworlds on the same cluster",
-				initial_value: 0,
+				initialValue: 0,
 			},
 			"gridworld.claimed_by_faction": {
 				type: "string",
 				title: "Claimed by faction",
 				description: "Faction that has claimed this server",
-				initial_value: "",
+				initialValue: "",
 			},
 		},
 
@@ -108,20 +108,20 @@ module.exports = {
 				type: "number",
 				title: "Autosave Interval",
 				description: "Interval the gridworld data is autosaved at in seconds.",
-				initial_value: 600, // 10 minutes
+				initialValue: 600, // 10 minutes
 			},
 			"gridworld.gridworld_seed": {
 				type: "number",
 				title: "Gridworld seed",
 				description: "Seed for servers created using gridworld generator",
-				initial_value: 999,
+				initialValue: 999,
 			},
 			"gridworld.gridworld_map_exchange_string": {
 				type: "string",
 				title: "Gridworld map exchange string",
 				description:
           "Map exchange string for servers created using gridworld generator",
-				initial_value:
+				initialValue:
           // eslint-disable-next-line max-len
           ">>>eNpjZGBk0GIAgwZ7EOZgSc5PzIHwDjiAMFdyfkFBapFuflEqsjBnclFpSqpufiaq4tS81NxK3aTEYqhiiMkcmUX5eegmsBaX5OehipQUpaYWw5wCwtylRYl5maW5EL0H7OGqGb+qrnZoaJFjAOH/9QwK//+DMJD1AGgjCDMwNoBVMwLFYIA1OSczLY2BQcERiJ1A0owMjNUi69wfVk0BMsFAzwHK+AAVOZAEE/GEMfwccEqpwBgmSOYYg8FnJAbE0hKQ/RBVHA4IBkSyBSTJyNj7duuC78cu2DH+Wfnxkm9Sgj2joavIuw9G6+yAkuwgfzLBiVkzQWAnzCsMMDMf2EOlbtoznj0DAm/sGVlBOkRAhIMFkDjgzczAKMAHZC3oARIKMgwwp9nBjBFxYEwDg28wnzyGMS7bo/sDGBA2IMPlQMQJEAG2EO4yRgjTod+B0UEeJiuJUALUb8SA7IYUhA9Pwqw9jGQ/mkMwIwLZH2giKg5YooELZGEKnHjBDHcNMDwvsMN4DvMdGJlBDJCqL0AxCA8kAzMKQgs4gIObmQEBPtgzuMX47gAAJhSjWw==<<<",
 			},
@@ -129,7 +129,7 @@ module.exports = {
 				type: "string",
 				title: "Tiles directory",
 				description: "Folder to store map tiles relative to database",
-				initial_value: "tiles",
+				initialValue: "tiles",
 			},
 		},
 

@@ -1,8 +1,8 @@
 import React, { useEffect, useContext, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Alert, Descriptions, Spin, Table, PageHeader } from "antd";
+import { Alert, Descriptions, Spin, Table } from "antd";
 
-import { ControlContext, PageLayout } from "@clusterio/web_ui";
+import { ControlContext, PageLayout, PageHeader } from "@clusterio/web_ui";
 import useFactionList from "../providers/useFactionList";
 
 export default function FactionViewPage() {
