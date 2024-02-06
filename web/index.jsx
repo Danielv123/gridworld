@@ -1,8 +1,7 @@
 import React from "react";
 
 import { libPlugin } from "@clusterio/lib";
-import { notifyErrorHandler, useItemMetadata, useLocale, PageLayout, ControlContext } from "@clusterio/web_ui";
-import info from "../info";
+import { notifyErrorHandler } from "@clusterio/web_ui";
 
 import OverviewPage from "./pages/OverviewPage";
 import CreateGridworldPage from "./pages/CreateGridworldPage";

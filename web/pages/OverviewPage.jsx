@@ -8,7 +8,6 @@ import lib from "@clusterio/lib";
 import { ControlContext, PageLayout, useInstanceList, useAccount, notifyErrorHandler } from "@clusterio/web_ui";
 import "../index.css";
 import GridVisualizer from "../components/GridVisualizer";
-import info from "../../info";
 import RefreshTileDataButton from "../components/RefreshTileDataButton";
 
 function OverviewPage() {

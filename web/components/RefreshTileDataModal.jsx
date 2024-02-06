@@ -2,7 +2,6 @@ import React, { useContext, useState } from "react";
 import { Progress, Modal, InputNumber } from "antd";
 
 import { ControlContext, useInstanceList, notifyErrorHandler } from "@clusterio/web_ui";
-import info from "../../info";
 import ThrottledPromise from "../lib/ThrottledPromise";
 import messages from "../../messages";
 

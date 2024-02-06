@@ -2,7 +2,6 @@ import React, { useContext, useState } from "react";
 import { useHistory } from "react-router";
 
 import { ControlContext, useHostList } from "@clusterio/web_ui";
-import info from "../../info";
 
 import "../index.css";
 import { Form, Input, Button, Select, InputNumber, Checkbox } from "antd";
