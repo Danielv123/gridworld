@@ -45,8 +45,8 @@ function InstanceModal(props) {
 						placement="bottomRight"
 						okButtonProps={{ danger: true }}
 						onConfirm={() => {
-							control.send(
-								new lib.InstanceDeleteRequest(instanceId)
+							control.sendTo("controller",
+								new lib.InstanceDeleteRequest(instance.id)
 							).then(() => {
 								navigate("/instances");
 							}).catch(notifyErrorHandler("Error deleting instance"));

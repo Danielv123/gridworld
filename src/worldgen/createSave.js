@@ -12,10 +12,10 @@ module.exports = async function createSave(plugin, instance_id, seed_orig, mapEx
 	});
 
 	let hostConnection = plugin.controller.wsServer.hostConnections.get(host_id);
-	return await hostConnection.sendTo({ instanceId: instance_id }, new lib.InstanceCreateSaveRequest({
-		name: "Gridworld",
+	return await hostConnection.sendTo({ instanceId: instance_id }, new lib.InstanceCreateSaveRequest(
+		"Gridworld",
 		seed,
-		mapGenSettings: mapGenSettings,
-		mapSettings: mapSettings,
-	}));
+		mapGenSettings,
+		mapSettings,
+	));
 };

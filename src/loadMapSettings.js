@@ -1,7 +1,7 @@
 "use strict";
 const fs = require("fs-extra");
 
-const { libFactorio } = require("@clusterio/lib");
+const lib = require("@clusterio/lib");
 
 /**
  * Loads map settings from a factorio format
@@ -17,7 +17,7 @@ async function loadMapSettings(args) {
 	let mapGenSettings = null;
 	let mapSettings = null;
 	if (args.mapExchangeString) {
-		let parsed = libFactorio.readMapExchangeString(args.mapExchangeString);
+		let parsed = lib.readMapExchangeString(args.mapExchangeString);
 		mapGenSettings = parsed.map_gen_settings;
 		mapSettings = parsed.map_settings;
 	}

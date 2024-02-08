@@ -1,14 +1,13 @@
 "use strict";
-const { libConfig, libPlugin, libErrors } = require("@clusterio/lib");
+const lib = require("@clusterio/lib");
 const assignInstance = require("./assignInstance");
 const createSave = require("./createSave");
 
 module.exports = async function createLobbyServer(plugin, hostId, x_size, y_size) {
 	// Create instance
-	plugin.logger.info("Creating lobby server");
+	lib.logger.info("Creating lobby server");
 	const name = "Gridworld lobby server";
-	let instanceConfig = new libConfig.InstanceConfig("controller");
-	await instanceConfig.init();
+	let instanceConfig = new lib.InstanceConfig("controller");
 	instanceConfig.set("instance.name", name);
 	instanceConfig.set("instance.auto_start", true);
 	instanceConfig.set("gridworld.is_lobby_server", true);
@@ -19,7 +18,7 @@ module.exports = async function createLobbyServer(plugin, hostId, x_size, y_size
 
 	let instanceId = instanceConfig.get("instance.id");
 	if (plugin.controller.instances.has(instanceId)) {
-		throw new libErrors.RequestError(`Instance with ID ${instanceId} already exists`);
+		throw new lib.RequestError(`Instance with ID ${instanceId} already exists`);
 	}
 
 	// Add common settings for the Factorio server
@@ -50,7 +49,7 @@ module.exports = async function createLobbyServer(plugin, hostId, x_size, y_size
 
 	let instance = { config: instanceConfig, status: "unassigned" };
 	plugin.controller.instances.set(instanceId, instance);
-	await libPlugin.invokeHook(plugin.controller.plugins, "onInstanceStatusChanged", instance, null);
+	await lib.invokeHook(plugin.controller.plugins, "onInstanceStatusChanged", instance, null);
 	plugin.controller.addInstanceHooks(instance);
 	const instance_id = instanceConfig.get("instance.id");
 	// Assign instance to a host (using first host as a placeholder)

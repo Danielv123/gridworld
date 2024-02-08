@@ -20,10 +20,9 @@ function NewGridworldForm() {
 	let navigate = useNavigate();
 	let control = useContext(ControlContext);
 	let [loading, setLoading] = useState();
-	let [hostList] = useHosts();
+	let [hosts] = useHosts();
 
 	async function onFinish(values) {
-		// console.log("Success:", values);
 		setLoading(true);
 		await control.send(new messages.CreateFactionGrid(values));
 		setLoading(false);
@@ -77,7 +76,7 @@ function NewGridworldForm() {
 			<Select
 				placeholder="Select host"
 			>
-				{hostList.map?.(host => <Option key={host.id} value={host.id}>{host.name}</Option>)}
+				{[...hosts?.keys()].map(key => hosts.get(key)).map?.(host => <Option key={host.id} value={host.id}>{host.name}</Option>)}
 			</Select>
 		</Form.Item>
 

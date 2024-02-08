@@ -21,15 +21,14 @@ module.exports = {
 				host: { type: "integer" }, // hostID to use for instance creation
 			},
 		};
-		constructor(json) {
-			this.name_prefix = json.name_prefix;
-			this.use_edge_transports = json.use_edge_transports;
-			this.x_size = json.x_size;
-			this.y_size = json.y_size;
-			this.host = json.host;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 	},
 	GetMapData: class GetMapData {
@@ -94,14 +93,14 @@ module.exports = {
 				west: { type: ["integer", "null"] },
 			},
 		};
-		constructor(json) {
-			this.north = json.north;
-			this.south = json.south;
-			this.east = json.east;
-			this.west = json.west;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 	},
 	UpdateEdgeTransportEdges: class UpdateEdgeTransportEdges {
@@ -115,11 +114,14 @@ module.exports = {
 				instance_id: { type: "integer" },
 			},
 		};
-		constructor(json) {
-			this.instance_id = json.instance_id;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 	},
 	TeleportPlayer: class TeleportPlayer {
@@ -135,13 +137,14 @@ module.exports = {
 				y: { type: "number" },
 			},
 		};
-		constructor(json) {
-			this.player_name = json.player_name;
-			this.x = json.x;
-			this.y = json.y;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 	},
 	PlayerPosition: class PlayerPosition {
@@ -181,8 +184,8 @@ module.exports = {
 				faction_list: { type: "boolean" },
 			},
 		};
-		constructor(json) {
-			this.data = json;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
@@ -200,14 +203,14 @@ module.exports = {
 			type: "object",
 			properties: factionProperties,
 		};
-		constructor(json) {
-			// eslint-disable-next-line guard-for-in
-			for (let key in factionProperties) {
-				this[key] = json[key];
-			}
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 		static Response = plainJson({
 			type: "object",
@@ -242,14 +245,14 @@ module.exports = {
 				},
 			},
 		};
-		constructor(json) {
-			this.faction_id = json.faction_id;
-			this.name = json.name;
-			this.open = json.open;
-			this.about = json.about;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 		static Response = plainJson({
 			type: "object",
@@ -279,11 +282,14 @@ module.exports = {
 				},
 			},
 		};
-		constructor(json) {
-			this.faction = json.faction;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 	},
 	// Get changed factions
@@ -320,13 +326,14 @@ module.exports = {
 				role: { type: "string" },
 			},
 		};
-		constructor(json) {
-			this.faction_id = json.faction_id;
-			this.player_name = json.player_name;
-			this.role = json.role;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 		static Response = plainJson({
 			type: "object",
@@ -348,12 +355,14 @@ module.exports = {
 				player_name: { type: "string" },
 			},
 		};
-		constructor(json) {
-			this.faction_id = json.faction_id;
-			this.player_name = json.player_name;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 		static Response = plainJson({
 			type: "object",
@@ -375,12 +384,14 @@ module.exports = {
 				player_name: { type: "string" },
 			},
 		};
-		constructor(json) {
-			this.faction_id = json.faction_id;
-			this.player_name = json.player_name;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 		static Response = plainJson({
 			type: "object",
@@ -403,13 +414,14 @@ module.exports = {
 				role: factionProperties.members.items.properties.role,
 			},
 		};
-		constructor(json) {
-			this.faction_id = json.faction_id;
-			this.player_name = json.player_name;
-			this.role = json.role;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 		static Response = plainJson({
 			type: "object",
@@ -432,13 +444,14 @@ module.exports = {
 				faction_id: { type: "string" },
 			},
 		};
-		constructor(json) {
-			this.instance_id = json.instance_id;
-			this.player_name = json.player_name;
-			this.faction_id = json.faction_id;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 		static Response = plainJson({
 			type: "object",
@@ -460,12 +473,14 @@ module.exports = {
 				player_name: { type: "string" },
 			},
 		};
-		constructor(json) {
-			this.instance_id = json.instance_id;
-			this.player_name = json.player_name;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 		static Response = plainJson({
 			type: "object",
@@ -487,12 +502,14 @@ module.exports = {
 				grid_id: { type: "integer" },
 			},
 		};
-		constructor(json) {
-			this.player_name = json.player_name;
-			this.grid_id = json.grid_id;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 		static Response = plainJson({
 			type: "object",
@@ -519,14 +536,14 @@ module.exports = {
 				grid_id: { type: "integer" },
 			},
 		};
-		constructor(json) {
-			this.player_name = json.player_name;
-			this.player_x_position = json.player_x_position;
-			this.player_y_position = json.player_y_position;
-			this.grid_id = json.grid_id;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 		static Response = plainJson({
 			type: "object",
@@ -553,13 +570,14 @@ module.exports = {
 				position_b: { type: "array", items: { type: "number" } },
 			},
 		};
-		constructor(json) {
-			this.instance_id = json.instance_id;
-			this.position_a = json.position_a;
-			this.position_b = json.position_b;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 	},
 	RefreshTileData: class RefreshTileData {
@@ -574,11 +592,14 @@ module.exports = {
 				instance_id: { type: "integer" },
 			},
 		};
-		constructor(json) {
-			this.instance_id = json.instance_id;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 	},
 	SetLoadFactor: class SetLoadFactor {
@@ -593,12 +614,14 @@ module.exports = {
 				load_factor: { type: "number" },
 			},
 		};
-		constructor(json) {
-			this.instance_id = json.instance_id;
-			this.load_factor = json.load_factor;
+		constructor(data) {
+			this.data = data;
 		}
 		static fromJSON(json) {
 			return new this(json);
+		}
+		toJSON() {
+			return this.data;
 		}
 	},
 };

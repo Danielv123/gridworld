@@ -4,7 +4,7 @@ import { Button, Popconfirm } from "antd";
 import GithubOutlined from "@ant-design/icons/GithubOutlined";
 import DeleteOutlined from "@ant-design/icons/DeleteOutlined";
 
-import lib from "@clusterio/lib";
+import * as lib from "@clusterio/lib";
 import { ControlContext, PageLayout, PageHeader, useInstances, useAccount, notifyErrorHandler } from "@clusterio/web_ui";
 import "../index.css";
 import GridVisualizer from "../components/GridVisualizer";
@@ -37,7 +37,7 @@ function OverviewPage() {
 					okButtonProps={{ danger: true }}
 					onConfirm={async () => {
 						instanceList.forEach(instance => {
-							control.send(new lib.InstanceDeleteRequest({ instanceId: instance.id }))
+							control.send(new lib.InstanceDeleteRequest(instance.id))
 								.catch(notifyErrorHandler("Error deleting instance"));
 						});
 					}}

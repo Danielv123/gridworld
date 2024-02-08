@@ -102,7 +102,9 @@ function PlayerRender(props) {
 
 function InstanceRender(props) {
 	const [instance] = useInstance(props.instance.instance_id);
-
+	if (instance === undefined) {
+		return "";
+	}
 	return <Rectangle
 		bounds={getBounds(props.instance.bounds.map(position => [
 			-1 * position[1] / scaleFactor,
