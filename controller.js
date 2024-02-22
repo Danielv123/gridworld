@@ -36,9 +36,11 @@ async function loadDatabase(config, filename, logger) {
 	let itemsPath = path.resolve(config.get("controller.database_directory"), filename);
 	logger.verbose(`Loading ${itemsPath}`);
 	try {
-		let content = await fs.readFile(itemsPath);
+		let content = await fs.readFile(itemsPath, "utf-8");
+		if (content.length === 0) {
+			return new Map();
+		}
 		return new Map(JSON.parse(content));
-
 	} catch (err) {
 		if (err.code === "ENOENT") {
 			logger.verbose("Creating new gridworld database");
@@ -150,10 +152,10 @@ class ControllerPlugin extends BaseControllerPlugin {
 		if (hostId) {
 			let connection = this.controller.wsServer.hostConnections.get(hostId);
 			if (connection) {
-				await connection.send(new lib.InstanceAssignInternalRequest({
-					instanceId: instance_id,
-					config: instance.config.toRemote("host"),
-				}));
+				await connection.send(new lib.InstanceAssignInternalRequest(
+					instance.config.get("instance.id"),
+					instance.config.toRemote("host"),
+				));
 			}
 		}
 	}
