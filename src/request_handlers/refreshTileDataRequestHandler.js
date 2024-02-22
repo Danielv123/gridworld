@@ -31,7 +31,7 @@ module.exports = async function refreshTileDataRequestHandler(message) {
 		// Start instance
 		await this.controller.sendTo(
 			{ instanceId },
-			new lib.InstanceStartRequest({ save: null })
+			new lib.InstanceStartRequest()
 		);
 	}
 

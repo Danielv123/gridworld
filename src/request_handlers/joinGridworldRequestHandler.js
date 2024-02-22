@@ -86,7 +86,7 @@ module.exports = async function joinGridworldRequestHandler(message, request, li
 		if (instance_to_connect_to.status !== "running") {
 			await this.controller.sendTo(
 				{ instanceId: instance_to_connect_to.config.get("instance.id") },
-				new lib.InstanceStartRequest({ save: null })
+				new lib.InstanceStartRequest()
 			);
 		}
 

@@ -33,7 +33,7 @@ module.exports = {
 	},
 	GetMapData: class GetMapData {
 		static type = "request";
-		static src = "control";
+		static src = ["control", "instance"];
 		static dst = "controller";
 		static plugin = pluginName;
 		static permission = "gridworld.overview.view";

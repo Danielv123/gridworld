@@ -70,9 +70,7 @@ module.exports = async function migrateInstanceRequestHandler(message, request) 
 	// If the instance is running, stop it first
 	const originalStatus = instance.status;
 	if (instance.status === "running") {
-		this.controller.sendTo({ instanceId: instance_id }, new lib.InstanceStopRequest({
-			instance_id: instance_id,
-		}));
+		this.controller.sendTo({ instanceId: instance_id }, new lib.InstanceStopRequest());
 	}
 
 	// Get savefiles from origin host
@@ -118,18 +116,18 @@ module.exports = async function migrateInstanceRequestHandler(message, request) 
 	try {
 		// Assign instance to destination host
 		instance.config.set("instance.assigned_host", host_id);
-		await destinationHostConnection.send(new lib.InstanceAssignInternalRequest({
-			instanceId: instance_id,
-			config: instance.config.toRemote("host"),
-		}));
+		await destinationHostConnection.send(new lib.InstanceAssignInternalRequest(
+			instance_id,
+			instance.config.toRemote("host"),
+		));
 	} catch (e) {
 		// Reassign instance to origin host
 		instance.config.set("instance.assigned_host", originHostId);
 
-		await originHostConnection.send(new lib.InstanceAssignInternalRequest({
-			instanceId: instance_id,
-			config: instance.config.toRemote("host"),
-		}));
+		await originHostConnection.send(new lib.InstanceAssignInternalRequest(
+			instance_id,
+			instance.config.toRemote("host"),
+		));
 
 		throw e;
 	}
@@ -140,11 +138,11 @@ module.exports = async function migrateInstanceRequestHandler(message, request) 
 			logger.info(`Transferring ${preparedUpload.filename}`);
 
 			// Make the other host download the file
-			await destinationHostConnection.send(new lib.InstancePullSaveRequest({
+			await destinationHostConnection.send(new lib.InstancePullSaveRequest(
 				instance_id,
 				stream_id,
-				name: filename,
-			}));
+				filename,
+			));
 		}
 	} catch (e) {
 		// Unassign instance from destination host
@@ -152,19 +150,17 @@ module.exports = async function migrateInstanceRequestHandler(message, request) 
 
 		// Assign instance to origin host
 		instance.config.set("instance.assigned_host", originHostId);
-		await originHostConnection.send(new lib.InstanceAssignInternalRequest({
-			instanceId: instance_id,
-			config: instance.config.toRemote("host"),
-		}));
+		await originHostConnection.send(new lib.InstanceAssignInternalRequest(
+			instance_id,
+			instance.config.toRemote("host"),
+		));
 
 		throw e;
 	}
 
 	// Restart the instance if we stopped it
 	if (originalStatus === "running") {
-		await this.controller.sendTo({ instanceId: instance_id }, new lib.InstanceStartRequest({
-			save: null,
-		}));
+		await this.controller.sendTo({ instanceId: instance_id }, new lib.InstanceStartRequest());
 	}
 
 	// Clean up the leftover files
