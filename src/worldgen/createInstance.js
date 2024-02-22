@@ -1,4 +1,5 @@
 "use strict";
+const { InstanceInfo } = require("@clusterio/controller");
 const lib = require("@clusterio/lib");
 
 module.exports = async function createInstance(plugin, name, x, y, x_size, y_size, grid_id, game_port) {
@@ -45,7 +46,7 @@ module.exports = async function createInstance(plugin, name, x, y, x_size, y_siz
 	};
 	instanceConfig.set("factorio.settings", settings);
 
-	let instance = { config: instanceConfig, status: "unassigned" };
+	const instance = new InstanceInfo(instanceConfig, "unassigned", undefined, Date.now());
 	plugin.controller.instances.set(instanceId, instance);
 	await lib.invokeHook(plugin.controller.plugins, "onInstanceStatusChanged", instance, null);
 	plugin.controller.addInstanceHooks(instance);

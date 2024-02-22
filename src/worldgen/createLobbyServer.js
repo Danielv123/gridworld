@@ -2,6 +2,7 @@
 const lib = require("@clusterio/lib");
 const assignInstance = require("./assignInstance");
 const createSave = require("./createSave");
+const { InstanceInfo } = require("@clusterio/controller");
 
 module.exports = async function createLobbyServer(plugin, hostId, x_size, y_size) {
 	// Create instance
@@ -15,7 +16,7 @@ module.exports = async function createLobbyServer(plugin, hostId, x_size, y_size
 	instanceConfig.set("gridworld.grid_x_size", x_size);
 	instanceConfig.set("gridworld.grid_y_size", y_size);
 	instanceConfig.set("factorio.game_port", 10000);
-
+	lib.logger.info("Created config");
 	let instanceId = instanceConfig.get("instance.id");
 	if (plugin.controller.instances.has(instanceId)) {
 		throw new lib.RequestError(`Instance with ID ${instanceId} already exists`);
@@ -47,7 +48,7 @@ module.exports = async function createLobbyServer(plugin, hostId, x_size, y_size
 	};
 	instanceConfig.set("factorio.settings", settings);
 
-	let instance = { config: instanceConfig, status: "unassigned" };
+	const instance = new InstanceInfo(instanceConfig, "unassigned", undefined, Date.now());
 	plugin.controller.instances.set(instanceId, instance);
 	await lib.invokeHook(plugin.controller.plugins, "onInstanceStatusChanged", instance, null);
 	plugin.controller.addInstanceHooks(instance);

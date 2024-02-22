@@ -26,8 +26,8 @@ module.exports = async function createServer({
 	// Find host with free capacity
 	if (hostId === undefined) {
 		// Get hosts with gridworld installed
-		const hosts = mapFilter(plugin.controller.hosts, host => host.plugins.gridworld === packagejson.version);
-		const outdatedHosts = mapFilter(plugin.controller.hosts, host => host.plugins.gridworld !== packagejson.version);
+		const hosts = mapFilter(plugin.controller.hosts, host => host.plugins.get("gridworld") === packagejson.version);
+		const outdatedHosts = mapFilter(plugin.controller.hosts, host => host.plugins.get("gridworld") !== packagejson.version);
 		if (outdatedHosts.length > 0) {
 			plugin.logger.warn(`Found ${outdatedHosts.length} hosts with outdated gridworld plugin, please update them: ${outdatedHosts.map(host => host.name).join(", ")}`);
 		}
