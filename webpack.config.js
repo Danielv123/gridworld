@@ -15,7 +15,6 @@ module.exports = (env = {}) => merge(common(env), {
 		new webpack.container.ModuleFederationPlugin({
 			name: "gridworld",
 			library: { type: "var", name: "plugin_gridworld" },
-			filename: "remoteEntry.js",
 			exposes: {
 				"./": "./index.js",
 				"./package.json": "./package.json",
