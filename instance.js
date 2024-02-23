@@ -11,6 +11,10 @@ const messages = require("./messages");
 
 class InstancePlugin extends BaseInstancePlugin {
 	async init() {
+		if (!this.instance.config.get("factorio.enable_save_patching")) {
+			throw new Error("gridworld plugin requires save patching.");
+		}
+
 		this.pendingTasks = new Set();
 		this.disconnecting = false;
 
@@ -21,7 +25,7 @@ class InstancePlugin extends BaseInstancePlugin {
 		});
 		this.instance.server.on("ipc-gridworld:send_player_position", data => {
 			this.sendPlayerPosition(data).catch(err => this.logger.error(
-				`Error handling player teleport:\n${err.stack}`
+				`Error handling sending player position:\n${err.stack}`
 			));
 		});
 		this.instance.server.on("ipc-gridworld:create_faction", data => {
