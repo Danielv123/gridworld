@@ -1,8 +1,8 @@
 "use strict";
-const { libUsers } = require("@clusterio/lib");
+const lib = require("@clusterio/lib");
 
-libUsers.definePermission({
+lib.definePermission({
 	name: "gridworld.migrate_instance",
 	title: "Migrate instance",
-	description: "Migrate an instance to another slave. Uses stop, start, and assign internally.",
+	description: "Migrate an instance to another host. Uses stop, start, and assign internally.",
 });

@@ -77,7 +77,7 @@ local function send_teleport_command_on_player_leave(player_name, instance_id, x
 	global.gridworld.players[player_name].teleport_data = nil
 end
 --[[
-	Called when the master has determined which instance the player should be offered a teleport to.
+	Called when the controller has determined which instance the player should be offered a teleport to.
 	Data is forwarded to the correct instance once the player leaves this server
 ]]
 local function prepare_teleport_data(json)

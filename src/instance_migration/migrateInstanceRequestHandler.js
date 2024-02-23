@@ -3,11 +3,11 @@ const crypto = require("crypto");
 const events = require("events");
 const util = require("util");
 
-const { libLink, libErrors } = require("@clusterio/lib");
-const { logger } = require("@clusterio/lib/logging");
+const lib = require("@clusterio/lib");
+const messages = require("../../messages");
 
 
-// Somehow require routes from packages/master/src/routes
+// Somehow require routes from packages/controller/src/routes
 
 async function createProxyStream(app) {
 	let asyncRandomBytes = util.promisify(crypto.randomBytes);
@@ -21,7 +21,7 @@ async function createProxyStream(app) {
 		events: new events.EventEmitter(),
 		timeout: setTimeout(() => {
 			stream.events.emit("timeout");
-		}, app.locals.master.config.get("master.proxy_stream_timeout") * 1000),
+		}, app.locals.controller.config.get("controller.proxy_stream_timeout") * 1000),
 	};
 	stream.events.on("close", () => {
 		clearTimeout(stream.timeout);
@@ -36,76 +36,71 @@ async function createProxyStream(app) {
 
 
 module.exports = async function migrateInstanceRequestHandler(message, request) {
-	let { instance_id, slave_id } = message.data;
-	let instance = this.master.instances.get(instance_id);
+	let { instance_id, host_id } = message.data;
+	let instance = this.controller.instances.get(instance_id);
 	if (!instance) {
-		throw new libErrors.RequestError(`Instance with ID ${instance_id} does not exist`);
+		throw new lib.RequestError(`Instance with ID ${instance_id} does not exist`);
 	}
 
-	if (instance.config.get("instance.assigned_slave") === null) {
-		throw new libErrors.RequestError(`Instance with ID ${instance_id} is not assigned to a slave`);
+	if (instance.config.get("instance.assigned_host") === null) {
+		throw new lib.RequestError(`Instance with ID ${instance_id} is not assigned to a host`);
 	}
 
-	let originSlaveId = instance.config.get("instance.assigned_slave");
-	let originSlave = this.master.slaves.get(originSlaveId);
-	if (!originSlave) {
-		throw new libErrors.RequestError(`Slave with ID ${originSlaveId} does not exist`);
+	let originHostId = instance.config.get("instance.assigned_host");
+	let originHost = this.controller.hosts.get(originHostId);
+	if (!originHost) {
+		throw new lib.RequestError(`Host with ID ${originHostId} does not exist`);
 	}
 
-	const originSlaveConnection = this.master.wsServer.slaveConnections.get(originSlaveId);
-	if (!originSlaveConnection) {
-		throw new libErrors.RequestError(`Origin slave with ID ${originSlaveId} is not online`);
+	const originHostConnection = this.controller.wsServer.hostConnections.get(originHostId);
+	if (!originHostConnection) {
+		throw new lib.RequestError(`Origin host with ID ${originHostId} is not online`);
 	}
 
-	let destinationSlave = this.master.slaves.get(slave_id);
-	if (!destinationSlave) {
-		throw new libErrors.RequestError(`Slave with ID ${slave_id} does not exist`);
+	let destinationHost = this.controller.hosts.get(host_id);
+	if (!destinationHost) {
+		throw new lib.RequestError(`Host with ID ${host_id} does not exist`);
 	}
 
-	const destinationSlaveConnection = this.master.wsServer.slaveConnections.get(slave_id);
-	if (!destinationSlaveConnection) {
-		throw new libErrors.RequestError(`Destination slave with ID ${slave_id} is not online`);
+	const destinationHostConnection = this.controller.wsServer.hostConnections.get(host_id);
+	if (!destinationHostConnection) {
+		throw new lib.RequestError(`Destination host with ID ${host_id} is not online`);
 	}
 
 	// If the instance is running, stop it first
 	const originalStatus = instance.status;
 	if (instance.status === "running") {
-		await libLink.messages.stopInstance.send(originSlaveConnection, {
-			instance_id: instance_id,
-		});
+		this.controller.sendTo({ instanceId: instance_id }, new lib.InstanceStopRequest());
 	}
 
-	// Get savefiles from origin slave
-	const saves = (await libLink.messages.listSaves.send(originSlaveConnection, {
-		instance_id: instance_id,
-	})).list;
+	// Get savefiles from origin host
+	// TODO-migrate: I don't think this can be sent from host, check Controller.ts
+	const saves = (await this.controller.sendTo({ instanceId: instance_id }, new lib.InstanceSaveDetailsListRequest())).list;
 
-	// Delete any remnants of the instance on the destination slave
+	// Delete any remnants of the instance on the destination host
 	try {
-		await libLink.messages.deleteInstance.send(destinationSlaveConnection, {
-			instance_id: instance_id,
-		});
-	} catch (e) {}
+		await destinationHostConnection.send(new lib.InstanceDeleteInternalRequest(instance_id));
+	} catch (e) { }
 
 	const preparedUploads = await Promise.all(saves.map(async save => {
 		const filename = save.name;
-		let stream = await createProxyStream(this.master.app);
+		let stream = await createProxyStream(this.controller.app);
 		stream.filename = filename;
 
 		let ready = new Promise((resolve, reject) => {
 			stream.events.on("source", resolve);
 			stream.events.on("timeout", () => reject(
-				new libErrors.RequestError("Timed out establishing stream from slave")
+				new lib.RequestError("Timed out establishing stream from host")
 			));
 		});
 		ready.catch(() => { });
 
-		// Send start upload message to slave
-		await this.master.forwardRequestToInstance(libLink.messages.pushSave, {
-			instance_id,
+		// Send start upload message to host
+		await this.controller.sendTo({ hostId: host_id }, new lib.InstancePushSaveRequest({
+			instanceId: instance_id,
 			stream_id: stream.id,
 			save: filename,
-		});
+		}));
 
 		await ready;
 
@@ -115,69 +110,61 @@ module.exports = async function migrateInstanceRequestHandler(message, request) 
 		};
 	}));
 
-	// Unassign instance from origin slave
-	await libLink.messages.unassignInstance.send(originSlaveConnection, {
-		instance_id,
-	});
+	// Unassign instance from origin host
+	await originHostConnection.send(new lib.InstanceUnassignInternalRequest(instance_id));
 
 	try {
-		// Assign instance to destination slave
-		instance.config.set("instance.assigned_slave", slave_id);
-		await libLink.messages.assignInstance.send(destinationSlaveConnection, {
+		// Assign instance to destination host
+		instance.config.set("instance.assigned_host", host_id);
+		await destinationHostConnection.send(new lib.InstanceAssignInternalRequest(
 			instance_id,
-			serialized_config: instance.config.serialize("slave"),
-		});
+			instance.config.toRemote("host"),
+		));
 	} catch (e) {
-		// Reassign instance to origin slave
-		instance.config.set("instance.assigned_slave", originSlaveId);
-		await libLink.messages.assignInstance.send(originSlaveConnection, {
+		// Reassign instance to origin host
+		instance.config.set("instance.assigned_host", originHostId);
+
+		await originHostConnection.send(new lib.InstanceAssignInternalRequest(
 			instance_id,
-			serialized_config: instance.config.serialize("slave"),
-		});
+			instance.config.toRemote("host"),
+		));
 
 		throw e;
 	}
 	try {
-		// Start transfer of files to slave
+		// Start transfer of files to host
 		for (let preparedUpload of preparedUploads) {
 			const { stream_id, filename } = preparedUpload;
 			logger.info(`Transferring ${preparedUpload.filename}`);
 
-			// Make the other slave download the file
-			await libLink.messages.pullSave.send(destinationSlaveConnection, {
+			// Make the other host download the file
+			await destinationHostConnection.send(new lib.InstancePullSaveRequest(
 				instance_id,
 				stream_id,
 				filename,
-			});
+			));
 		}
 	} catch (e) {
-		// Unassign instance from destination slave
-		await libLink.messages.unassignInstance.send(destinationSlaveConnection, {
-			instance_id,
-		});
+		// Unassign instance from destination host
+		await destinationHostConnection.send(new lib.InstanceUnassignInternalRequest(instance_id));
 
-		// Assign instance to origin slave
-		instance.config.set("instance.assigned_slave", originSlaveId);
-		await libLink.messages.assignInstance.send(originSlaveConnection, {
+		// Assign instance to origin host
+		instance.config.set("instance.assigned_host", originHostId);
+		await originHostConnection.send(new lib.InstanceAssignInternalRequest(
 			instance_id,
-			serialized_config: instance.config.serialize("slave"),
-		});
+			instance.config.toRemote("host"),
+		));
 
 		throw e;
 	}
 
 	// Restart the instance if we stopped it
 	if (originalStatus === "running") {
-		await libLink.messages.startInstance.send(destinationSlaveConnection, {
-			instance_id,
-			save: null,
-		});
+		await this.controller.sendTo({ instanceId: instance_id }, new lib.InstanceStartRequest());
 	}
 
 	// Clean up the leftover files
-	await libLink.messages.deleteInstance.send(originSlaveConnection, {
-		instance_id,
-	});
+	await originHostConnection.send(new lib.InstanceDeleteInternalRequest(instance_id));
 
 	return { status: "success" };
 };

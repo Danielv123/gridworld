@@ -1,6 +1,6 @@
 "use strict";
 module.exports = async function getMapDataRequestHandler() {
-	const instances = [...this.master.instances]
+	const instances = [...this.controller.instances]
 		.filter(instance => instance[1].config.get("gridworld.is_lobby_server") === false);
 	return {
 		map_data: instances.map(instance => ({

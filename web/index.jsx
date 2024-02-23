@@ -1,15 +1,14 @@
 import React from "react";
 
-import { libPlugin } from "@clusterio/lib";
-import { notifyErrorHandler, useItemMetadata, useLocale, PageLayout, ControlContext } from "@clusterio/web_ui";
-import info from "../info";
+import { BaseWebPlugin, notifyErrorHandler } from "@clusterio/web_ui";
 
 import OverviewPage from "./pages/OverviewPage";
 import CreateGridworldPage from "./pages/CreateGridworldPage";
 import FactionsPage from "./pages/FactionsPage";
 import FactionViewPage from "./pages/FactionViewPage";
+import messages from "../messages";
 
-export class WebPlugin extends libPlugin.BaseWebPlugin {
+export class WebPlugin extends BaseWebPlugin {
 	async init() {
 		this.pages = [
 			{
@@ -42,7 +41,7 @@ export class WebPlugin extends libPlugin.BaseWebPlugin {
 		};
 	}
 
-	onMasterConnectionEvent(event) {
+	onControllerConnectionEvent(event) {
 		if (event === "connect") {
 			this.updateSubscription();
 		}
@@ -91,11 +90,10 @@ export class WebPlugin extends libPlugin.BaseWebPlugin {
 		if (!this.control.connector.connected) {
 			return;
 		}
-
-		info.messages.setWebSubscription.send(this.control, {
+		this.control.send(new messages.SetWebSubscription({
 			player_position: this.updateHandlerCounts["player_position"] > 0,
 			faction_list: this.updateHandlerCounts["faction_list"] > 0,
-		}).catch(notifyErrorHandler("Error subscribing to event updates"));
+		})).catch(notifyErrorHandler("Error subscribing to event updates"));
 
 		if (this.updateHandlerCounts["player_position"] === 0) {
 			this.playerPositions.clear();

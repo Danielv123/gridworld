@@ -1,8 +1,7 @@
 import React from "react";
-import { Tooltip, Progress, Modal, Button } from "antd";
+import { Button } from "antd";
 
-import { ControlContext, PageLayout, useInstanceList, useAccount, notifyErrorHandler } from "@clusterio/web_ui";
-import info from "../../info";
+import { useAccount } from "@clusterio/web_ui";
 import RefreshTileDataModal from "./RefreshTileDataModal";
 
 export default function RefreshTileDataButton() {
@@ -17,7 +16,7 @@ export default function RefreshTileDataButton() {
 		</Button> : "",
 		<RefreshTileDataModal
 			key="modal"
-			visible={modal}
+			open={modal}
 			hideModal={() => showModal(false)}
 		/>,
 	];

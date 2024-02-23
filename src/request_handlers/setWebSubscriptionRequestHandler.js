@@ -1,16 +1,18 @@
 "use strict";
 
-async function transmitInitialFactionsData(master, link) {
+const messages = require("../../messages");
+
+async function transmitInitialFactionsData(controller, link) {
 	// Transmit a full copy of the data to the new client
-	for (let [id, faction] of master.factionsDatastore) {
-		await master.info.messages.factionUpdate.send(link, { faction });
+	for (let [id, faction] of controller.factionsDatastore) {
+		await link.send(new messages.FactionUpdate({ faction }));
 	}
 }
 
-async function transmitInitialPlayerPositionsData(master, link) {
-	// Transmit a full copy of the data to the new client
-	// for (let [id, player] of master.gridworldDatastore) {
-	//  await master.info.messages.playerPositionUpdate.send(link, { player });
+async function transmitInitialPlayerPositionsData(controller, link) {
+	// TODO: Transmit a full copy of the data to the new client
+	// for (let [id, player] of controller.gridworldDatastore) {
+	//  await controller.info.messages.playerPositionUpdate.send(link, { player });
 	// }
 }
 

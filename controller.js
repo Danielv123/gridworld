@@ -2,13 +2,19 @@
 const fs = require("fs-extra");
 const path = require("path");
 
-const { libLink, libPlugin, libErrors } = require("@clusterio/lib");
+const lib = require("@clusterio/lib");
+// eslint-disable-next-line node/no-extraneous-require
+const { BaseControllerPlugin } = require("@clusterio/controller");
 const registerTileServer = require("./src/routes/tileserver");
 
+// Messages
+const messages = require("./messages");
+const MigrateInstanceRequest = require("./src/instance_migration/info/MigrateInstanceRequest");
+
+// Message handlers
 const getMapDataRequestHandler = require("./src/request_handlers/getMapDataRequestHandler");
 const refreshTileDataRequestHandler = require("./src/request_handlers/refreshTileDataRequestHandler");
 const setWebSubscriptionRequestHandler = require("./src/request_handlers/setWebSubscriptionRequestHandler");
-const startInstanceRequestHandler = require("./src/request_handlers/startInstanceRequestHandler");
 const createFactionRequestHandler = require("./src/request_handlers/createFactionRequestHandler");
 const updateFactionRequestHandler = require("./src/request_handlers/updateFactionRequestHandler");
 const migrateInstanceRequestHandler = require("./src/instance_migration/migrateInstanceRequestHandler");
@@ -27,12 +33,14 @@ const unclaimServerRequestHandler = require("./src/request_handlers/unclaimServe
 const setLoadFactorEventHandler = require("./src/event_handlers/setLoadFactorEventHandler");
 
 async function loadDatabase(config, filename, logger) {
-	let itemsPath = path.resolve(config.get("master.database_directory"), filename);
+	let itemsPath = path.resolve(config.get("controller.database_directory"), filename);
 	logger.verbose(`Loading ${itemsPath}`);
 	try {
-		let content = await fs.readFile(itemsPath);
+		let content = await fs.readFile(itemsPath, "utf-8");
+		if (content.length === 0) {
+			return new Map();
+		}
 		return new Map(JSON.parse(content));
-
 	} catch (err) {
 		if (err.code === "ENOENT") {
 			logger.verbose("Creating new gridworld database");
@@ -42,89 +50,70 @@ async function loadDatabase(config, filename, logger) {
 	}
 }
 
-async function saveDatabase(masterConfig, datastore, filename, logger) {
+async function saveDatabase(controllerConfig, datastore, filename, logger) {
 	if (datastore) {
-		let file = path.resolve(masterConfig.get("master.database_directory"), filename);
+		let file = path.resolve(controllerConfig.get("controller.database_directory"), filename);
 		logger.verbose(`writing ${file}`);
 		let content = JSON.stringify(Array.from(datastore));
 		await fs.outputFile(file, content);
 	}
 }
 
-class MasterPlugin extends libPlugin.BaseMasterPlugin {
+class ControllerPlugin extends BaseControllerPlugin {
 	async init() {
-		this.gridworldDatastore = await loadDatabase(this.master.config, "gridworld.json", this.logger);
-		this.factionsDatastore = await loadDatabase(this.master.config, "factions.json", this.logger);
+		this.gridworldDatastore = await loadDatabase(this.controller.config, "gridworld.json", this.logger);
+		this.factionsDatastore = await loadDatabase(this.controller.config, "factions.json", this.logger);
 		this.autosaveId = setInterval(() => {
-			saveDatabase(this.master.config, this.gridworldDatastore, "gridworld.json", this.logger).catch(err => {
+			saveDatabase(this.controller.config, this.gridworldDatastore, "gridworld.json", this.logger).catch(err => {
 				this.logger.error(`Unexpected error autosaving gridworld data:\n${err.stack}`);
 			});
-			saveDatabase(this.master.config, this.factionsDatastore, "factions.json", this.logger).catch(err => {
+			saveDatabase(this.controller.config, this.factionsDatastore, "factions.json", this.logger).catch(err => {
 				this.logger.error(`Unexpected error autosaving factions data:\n${err.stack}`);
 			});
-		}, this.master.config.get("gridworld.autosave_interval") * 1000);
+		}, this.controller.config.get("gridworld.autosave_interval") * 1000);
 
 		// Prepare tiles folder
 		this._tilesPath = path.resolve(
-			this.master.config.get("master.database_directory"),
-			this.master.config.get("gridworld.tiles_directory")
+			this.controller.config.get("controller.database_directory"),
+			this.controller.config.get("gridworld.tiles_directory")
 		);
 		await fs.ensureDir(this._tilesPath);
 
-		registerTileServer(this.master.app, this._tilesPath);
+		registerTileServer(this.controller.app, this._tilesPath);
 
 		this.subscribedControlLinks = [];
+
+		// Register event handlers to messages
+		this.controller.handle(messages.PlayerPosition, playerPositionEventHandler.bind(this));
+		this.controller.handle(messages.GetMapData, getMapDataRequestHandler.bind(this));
+		this.controller.handle(messages.UpdateEdgeTransportEdges, updateEdgeTransportEdgesRequestHandler.bind(this));
+		this.controller.handle(messages.CreateFactionGrid, createFactionGridRequestHandler.bind(this));
+		this.controller.handle(messages.RefreshTileData, refreshTileDataRequestHandler.bind(this));
+		this.controller.handle(messages.SetWebSubscription, setWebSubscriptionRequestHandler.bind(this));
+		this.controller.handle(messages.CreateFaction, createFactionRequestHandler.bind(this));
+		this.controller.handle(messages.UpdateFaction, updateFactionRequestHandler.bind(this));
+		this.controller.handle(MigrateInstanceRequest, migrateInstanceRequestHandler.bind(this));
+		this.controller.handle(messages.JoinGridworld, joinGridworldRequestHandler.bind(this));
+		this.controller.handle(messages.PerformEdgeTeleport, performEdgeTeleportRequestHandler.bind(this));
+		this.controller.handle(messages.RefreshFactionData, refreshFactionDataRequestHandler.bind(this));
+		this.controller.handle(messages.FactionInvitePlayer, factionInvitePlayerRequestHandler.bind(this));
+		this.controller.handle(messages.JoinFaction, joinFactionRequestHandler.bind(this));
+		this.controller.handle(messages.FactionChangeMemberRole, factionChangeMemberRoleRequestHandler.bind(this));
+		this.controller.handle(messages.LeaveFaction, leaveFactionRequestHandler.bind(this));
+		this.controller.handle(messages.ClaimServer, claimServerRequestHandler.bind(this));
+		this.controller.handle(messages.UnclaimServer, unclaimServerRequestHandler.bind(this));
+		this.controller.handle(messages.SetLoadFactor, setLoadFactorEventHandler.bind(this));
 	}
-
-	playerPositionEventHandler = playerPositionEventHandler;
-
-	getMapDataRequestHandler = getMapDataRequestHandler;
-
-	updateEdgeTransportEdgesRequestHandler = updateEdgeTransportEdgesRequestHandler;
-
-	createFactionGridRequestHandler = createFactionGridRequestHandler;
-
-	refreshTileDataRequestHandler = refreshTileDataRequestHandler;
-
-	setWebSubscriptionRequestHandler = setWebSubscriptionRequestHandler;
-
-	startInstanceRequestHandler = startInstanceRequestHandler;
-
-	createFactionRequestHandler = createFactionRequestHandler;
-
-	updateFactionRequestHandler = updateFactionRequestHandler;
-
-	migrateInstanceRequestHandler = migrateInstanceRequestHandler;
-
-	joinGridworldRequestHandler = joinGridworldRequestHandler;
-
-	performEdgeTeleportRequestHandler = performEdgeTeleportRequestHandler;
-
-	refreshFactionDataRequestHandler = refreshFactionDataRequestHandler;
-
-	factionInvitePlayerRequestHandler = factionInvitePlayerRequestHandler;
-
-	joinFactionRequestHandler = joinFactionRequestHandler;
-
-	factionChangeMemberRoleRequestHandler = factionChangeMemberRoleRequestHandler;
-
-	leaveFactionRequestHandler = leaveFactionRequestHandler;
-
-	claimServerRequestHandler = claimServerRequestHandler;
-
-	unclaimServerRequestHandler = unclaimServerRequestHandler;
-
-	setLoadFactorEventHandler = setLoadFactorEventHandler;
 
 	async onInstanceStatusChanged(instance) {
 		if (instance.status === "running") {
 			let instanceId = instance.config.get("instance.id");
-			let slaveId = instance.config.get("instance.assigned_slave");
+			let hostId = instance.config.get("instance.assigned_host");
 			let x = instance.config.get("gridworld.grid_x_position");
 			let y = instance.config.get("gridworld.grid_y_position");
-			let slaveConnection = this.master.wsServer.slaveConnections.get(slaveId);
-			let instances = [...this.master.instances];
-			await this.info.messages.populateNeighborData.send(slaveConnection, {
+			let hostConnection = this.controller.wsServer.hostConnections.get(hostId);
+			let instances = [...this.controller.instances];
+			await this.controller.sendTo({ instanceId }, new messages.PopulateNeighborData({
 				instance_id: instanceId,
 				north: instances.find(z => z[1].config.get("gridworld.grid_x_position") === x
 					&& z[1].config.get("gridworld.grid_y_position") === y - 1)?.[0] || null,
@@ -134,24 +123,24 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 					&& z[1].config.get("gridworld.grid_y_position") === y)?.[0] || null,
 				west: instances.find(z => z[1].config.get("gridworld.grid_x_position") === x - 1
 					&& z[1].config.get("gridworld.grid_y_position") === y)?.[0] || null,
-			});
+			}));
 		}
 	}
 
 	async setInstanceConfigField(instanceId, field, value) {
 		// Code lifted from ControlConnection.js setInstanceConfigFieldRequestHandler(message)
-		let instance = this.master.instances.get(instanceId);
+		let instance = this.controller.instances.get(instanceId);
 		if (!instance) {
-			throw new libErrors.RequestError(`Instance with ID ${instanceId} does not exist`);
+			throw new lib.RequestError(`Instance with ID ${instanceId} does not exist`);
 		}
 
-		if (field === "instance.assigned_slave") {
-			throw new libErrors.RequestError("instance.assigned_slave must be set through the assign-slave interface");
+		if (field === "instance.assigned_host") {
+			throw new lib.RequestError("instance.assigned_host must be set through the assign-host interface");
 		}
 
 		if (field === "instance.id") {
 			// XXX is this worth implementing?  It's race condition galore.
-			throw new libErrors.RequestError("Setting instance.id is not supported");
+			throw new lib.RequestError("Setting instance.id is not supported");
 		}
 
 		instance.config.set(field, value, "control");
@@ -159,14 +148,14 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 	}
 
 	async updateInstanceConfig(instance) {
-		let slaveId = instance.config.get("instance.assigned_slave");
-		if (slaveId) {
-			let connection = this.master.wsServer.slaveConnections.get(slaveId);
+		let hostId = instance.config.get("instance.assigned_host");
+		if (hostId) {
+			let connection = this.controller.wsServer.hostConnections.get(hostId);
 			if (connection) {
-				await libLink.messages.assignInstance.send(connection, {
-					instance_id: instance.config.get("instance.id"),
-					serialized_config: instance.config.serialize("slave"),
-				});
+				await connection.send(new lib.InstanceAssignInternalRequest(
+					instance.config.get("instance.id"),
+					instance.config.toRemote("host"),
+				));
 			}
 		}
 	}
@@ -180,11 +169,11 @@ class MasterPlugin extends libPlugin.BaseMasterPlugin {
 
 	async onShutdown() {
 		clearInterval(this.autosaveId);
-		await saveDatabase(this.master.config, this.gridworldDatastore, "gridworld.json", this.logger);
-		await saveDatabase(this.master.config, this.factionsDatastore, "factions.json", this.logger);
+		await saveDatabase(this.controller.config, this.gridworldDatastore, "gridworld.json", this.logger);
+		await saveDatabase(this.controller.config, this.factionsDatastore, "factions.json", this.logger);
 	}
 }
 
 module.exports = {
-	MasterPlugin,
+	ControllerPlugin,
 };

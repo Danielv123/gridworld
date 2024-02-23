@@ -1,11 +1,11 @@
 import React, { useContext, useState } from "react";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom";
 
-import { ControlContext, useSlaveList } from "@clusterio/web_ui";
-import info from "../../info";
+import { ControlContext, useHosts } from "@clusterio/web_ui";
 
 import "../index.css";
 import { Form, Input, Button, Select, InputNumber, Checkbox } from "antd";
+import messages from "../../messages";
 const { Option } = Select;
 
 const layout = {
@@ -17,18 +17,17 @@ const tailLayout = {
 };
 
 function NewGridworldForm() {
-	let history = useHistory();
+	let navigate = useNavigate();
 	let control = useContext(ControlContext);
 	let [loading, setLoading] = useState();
-	let [slaveList] = useSlaveList();
+	let [hosts] = useHosts();
 
 	async function onFinish(values) {
-		// console.log("Success:", values);
 		setLoading(true);
-		await info.messages.createFactionGrid.send(control, values);
+		await control.send(new messages.CreateFactionGrid(values));
 		setLoading(false);
 		await new Promise(resolve => setTimeout(resolve, 1500));
-		history.push("/gridworld");
+		navigate("/gridworld");
 	};
 
 	function onFinishFailed(errorInfo) {
@@ -70,14 +69,14 @@ function NewGridworldForm() {
 			<InputNumber />
 		</Form.Item>
 		<Form.Item
-			name="slave"
-			label="Slave to create lobby instance on"
+			name="host"
+			label="Host to create lobby instance on"
 			rules={[{ required: true }]}
 		>
 			<Select
-				placeholder="Select slave"
+				placeholder="Select host"
 			>
-				{slaveList.map(slave => <Option key={slave.id} value={slave.id}>{slave.name}</Option>)}
+				{[...hosts?.keys()].map(key => hosts.get(key)).map?.(host => <Option key={host.id} value={host.id}>{host.name}</Option>)}
 			</Select>
 		</Form.Item>
 

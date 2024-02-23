@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-  pull_request:
+  # pull_request:
   create:
     tags:
       - v*
@@ -15,19 +15,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
       with:
-        node-version: 16.x
-    - run: npm i --no-optional
-    - run: npm i eslint eslint-plugin-node
-    - run: npm run lint
+        node-version: 18.x
+    - run: npm i -g pnpm
+    - run: pnpm i --no-optional
+    - run: pnpm i eslint eslint-plugin-node
+    - run: pnpm run lint
   lualint:
     name: Luacheck
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: nebularg/actions-luacheck@v1.1.0
       with:
         files: module/
@@ -39,12 +40,13 @@ jobs:
 
     if: github.event.ref_type == 'tag' && startsWith(github.event.ref, 'v')
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
       with:
-        node-version: 16.x
-    - run: npm i --no-optional
-    - run: npm run prepare
-    - run: npm publish --access public
+        node-version: 18.x
+    - run: npm i -g pnpm
+    - run: pnpm i --no-optional
+    - run: pnpm run prepare
+    - run: pnpm publish --access public
       env:
         NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

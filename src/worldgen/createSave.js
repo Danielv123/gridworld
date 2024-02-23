@@ -1,22 +1,21 @@
 "use strict";
-const { libLink } = require("@clusterio/lib");
+const lib = require("@clusterio/lib");
 const loadMapSettings = require("./../loadMapSettings");
 
 module.exports = async function createSave(plugin, instance_id, seed_orig, mapExchangeString) {
-	let instance = plugin.master.instances.get(instance_id);
-	let slave_id = instance.config.get("instance.assigned_slave");
+	let instance = plugin.controller.instances.get(instance_id);
+	let host_id = instance.config.get("instance.assigned_host");
 
 	let { seed, mapGenSettings, mapSettings } = await loadMapSettings({
 		seed: seed_orig,
 		mapExchangeString,
 	});
 
-	let slaveConnection = plugin.master.wsServer.slaveConnections.get(slave_id);
-	return await libLink.messages.createSave.send(slaveConnection, {
-		instance_id,
-		name: "Gridworld",
+	let hostConnection = plugin.controller.wsServer.hostConnections.get(host_id);
+	return await hostConnection.sendTo({ instanceId: instance_id }, new lib.InstanceCreateSaveRequest(
+		"Gridworld",
 		seed,
-		map_gen_settings: mapGenSettings,
-		map_settings: mapSettings,
-	});
+		mapGenSettings,
+		mapSettings,
+	));
 };

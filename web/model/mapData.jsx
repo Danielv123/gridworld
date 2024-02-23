@@ -1,23 +1,23 @@
 import React, { useEffect, useContext, useState } from "react";
-import { ControlContext, useInstanceList } from "@clusterio/web_ui";
-import { libLogging } from "@clusterio/lib";
+import { ControlContext, useInstances } from "@clusterio/web_ui";
 
-import info from "../../info";
+import messages from "../../messages";
 
-const { logger } = libLogging;
+const { logger } = require("@clusterio/lib");
 
 export function useMapData(id) {
-	let [instances] = useInstanceList();
+	let [instances] = useInstances();
 	let control = useContext(ControlContext);
 	let [mapData, setMapData] = useState({ loading: true });
 
 	function updateMapData() {
-		info.messages.getMapData.send(control).then(result => {
-			setMapData({ ...result, loading: false });
-		}).catch(err => {
-			logger.error(`Failed to get instance: ${err}`);
-			setMapData({ missing: true });
-		});
+		control.send(new messages.GetMapData())
+			.then(result => {
+				setMapData({ ...result, loading: false });
+			}).catch(err => {
+				logger.error(`Failed to get instance: ${err}`);
+				setMapData({ missing: true });
+			});
 	}
 
 	useEffect(() => {

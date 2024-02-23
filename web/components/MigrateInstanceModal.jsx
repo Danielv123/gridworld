@@ -1,13 +1,14 @@
 import React, { useContext, useState } from "react";
-import { Progress, Modal, Form, Select, Spin } from "antd";
+import { Modal, Form, Select } from "antd";
 
-import { ControlContext, useInstance, useSlaveList, notifyErrorHandler } from "@clusterio/web_ui";
-import info from "../../info";
+import { ControlContext, useInstance, useHosts } from "@clusterio/web_ui";
+
+import MigrateInstanceRequest from "../../src/instance_migration/info/MigrateInstanceRequest";
 
 export default function MigrateInstanceModal(props) {
 	const control = useContext(ControlContext);
 	let [isWorking, setWorking] = useState(false);
-	let [slaveList] = useSlaveList();
+	let [hostList] = useHosts();
 	let [instance] = useInstance(props.instanceId);
 	let [form] = Form.useForm();
 
@@ -18,7 +19,7 @@ export default function MigrateInstanceModal(props) {
 
 	return <Modal
 		title="Migrate instance"
-		visible={props.visible}
+		open={props.visible}
 		onCancel={() => {
 			if (isWorking) {
 				document.location = document.location;
@@ -28,36 +29,36 @@ export default function MigrateInstanceModal(props) {
 		}}
 		okText="Migrate instance"
 		onOk={async () => {
-			let slaveId = form.getFieldValue("slave");
-			if (slaveId === undefined) {
+			let hostId = form.getFieldValue("host");
+			if (hostId === undefined) {
 				props.hideModal();
 				return;
 			}
 
 			setWorking(true);
-			await info.messages.migrateInstance.send(control, {
+			await control.send(new MigrateInstanceRequest({
 				instance_id: props.instanceId,
-				slave_id: slaveId,
-			});
+				host_id: hostId,
+			}));
 			await new Promise(resolve => setTimeout(resolve, 1000));
 			closeAndReset();
 		}}
 		confirmLoading={isWorking}
 		destroyOnClose
 	>
-		<p>Migrate an instance to a different slave</p>
+		<p>Migrate an instance to a different host</p>
 		<p>
-			The migration process will stop the instance for the duration of the transfer. Ensure the target slave has enabled
-			the same plugins as the source slave.
+			The migration process will stop the instance for the duration of the transfer. Ensure the target host has enabled
+			the same plugins as the source host.
 		</p>
-		<Form form={form} initialValues={{ slave: props.slaveId }}>
-			<Form.Item name="slave" label="Target slave" rules={[{ required: true, message: "Please select a slave" }]}>
-				<Select showSearch placeholder="Select a slave" optionFilterProp="children">
-					{slaveList.map(slave => <Select.Option
-						key={slave.id}
-						value={slave.id}>
-						{slave.name}
-						{!slave.connected && " (offline)"}
+		<Form form={form} initialValues={{ host: props.hostId }}>
+			<Form.Item name="host" label="Target host" rules={[{ required: true, message: "Please select a host" }]}>
+				<Select showSearch placeholder="Select a host" optionFilterProp="children">
+					{hostList.map(host => <Select.Option
+						key={host.id}
+						value={host.id}>
+						{host.name}
+						{!host.connected && " (offline)"}
 					</Select.Option>)}
 				</Select>
 			</Form.Item>

@@ -1,5 +1,5 @@
 "use strict";
-const { libLink } = require("@clusterio/lib");
+const lib = require("@clusterio/lib");
 const mapFilter = require("../util/mapFilter");
 const mapFind = require("../util/mapFind");
 
@@ -9,14 +9,14 @@ const worldPositionToInstance = require("../worldgen/util/worldPositionToInstanc
 module.exports = async function joinGridworldRequestHandler(message, request, link) {
 	const player_name = message.data.player_name;
 
-	// Get player profile from master
-	const player = this.master.userManager.users.get(player_name);
+	// Get player profile from controller
+	const player = this.controller.userManager.users.get(player_name);
 
 	// Get player faction
 	const faction = mapFind(this.factionsDatastore, f => f.members.find(member => member.name.toLowerCase() === player_name.toLowerCase()));
 
 	// Get all instances in the current grid
-	const instances = mapFilter(this.master.instances, instance => instance.config.get("gridworld.grid_id") === message.data.grid_id);
+	const instances = mapFilter(this.controller.instances, instance => instance.config.get("gridworld.grid_id") === message.data.grid_id);
 
 	const response = {
 		ok: false,
@@ -51,7 +51,7 @@ module.exports = async function joinGridworldRequestHandler(message, request, li
 	} else {
 		// If the player doesn't have a faction, send them to the factionless spawn
 		// Factionless spawn is 25,25
-		const position = worldPositionToInstance(25, 25, message.data.grid_id, this.master.instances);
+		const position = worldPositionToInstance(25, 25, message.data.grid_id, this.controller.instances);
 		if (!position.instance) {
 			// No instance found for factionless spawn, create a new one
 			const instance_id = (await createServer({
@@ -60,7 +60,7 @@ module.exports = async function joinGridworldRequestHandler(message, request, li
 				y: position.grid_y_position,
 				grid_id: message.data.grid_id,
 			})).instanceId;
-			const instance = this.master.instances.get(instance_id);
+			const instance = this.controller.instances.get(instance_id);
 
 			response.ok = true;
 			response.message = "Created new instance";
@@ -81,18 +81,17 @@ module.exports = async function joinGridworldRequestHandler(message, request, li
 
 	// Ensure the instance we are connecting to is started
 	if (instance_to_connect_to) {
-		const slaveId = instance_to_connect_to.config.get("instance.assigned_slave");
-		let slaveConnection = this.master.wsServer.slaveConnections.get(slaveId);
+		const hostId = instance_to_connect_to.config.get("instance.assigned_host");
 		// Instance status
 		if (instance_to_connect_to.status !== "running") {
-			await libLink.messages.startInstance.send(slaveConnection, {
-				instance_id: instance_to_connect_to.config.get("instance.id"),
-				save: null,
-			});
+			await this.controller.sendTo(
+				{ instanceId: instance_to_connect_to.config.get("instance.id") },
+				new lib.InstanceStartRequest()
+			);
 		}
 
-		const slave = this.master.slaves.get(slaveId);
-		response.connection_address = `${slave.public_address}:${instance_to_connect_to.game_port || instance_to_connect_to.config.get("factorio.game_port")}`;
+		const host = this.controller.hosts.get(hostId);
+		response.connection_address = `${host.publicAddress}:${instance_to_connect_to.game_port || instance_to_connect_to.config.get("factorio.game_port")}`;
 	}
 
 	// Return response to client

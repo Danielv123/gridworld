@@ -37,9 +37,13 @@ module.exports = async function joinFactionEventHandler(message) {
 		let member = oldFaction.members.find(m => m.name.toLowerCase() === player.toLowerCase());
 		if (member) {
 			oldFaction.members.splice(oldFaction.members.indexOf(member), 1);
-			this.broadcastEventToSlaves(this.info.messages.factionUpdate, { faction: oldFaction });
+			this.controller.sendTo("allInstances", new messages.FactionUpdate({ faction: faction }));
+
+			// Propagate changes to listening web clients
 			for (let sub of this.subscribedControlLinks) {
-				if (sub.faction_list) { this.info.messages.factionUpdate.send(sub.link, { faction: oldFaction }); }
+				if (sub.faction_list) {
+					sub.link.send(new messages.FactionUpdate({ faction: faction }));
+				}
 			}
 		}
 	}
@@ -59,11 +63,13 @@ module.exports = async function joinFactionEventHandler(message) {
 	}
 
 	// Propagate changes to all online instances
-	this.broadcastEventToSlaves(this.info.messages.factionUpdate, { faction: faction });
+	this.controller.sendTo("allInstances", new messages.FactionUpdate({ faction: faction }));
 
 	// Propagate changes to listening web clients
 	for (let sub of this.subscribedControlLinks) {
-		if (sub.faction_list) { this.info.messages.factionUpdate.send(sub.link, { faction: faction }); }
+		if (sub.faction_list) {
+			sub.link.send(new messages.FactionUpdate({ faction: faction }));
+		}
 	}
 
 	return {
