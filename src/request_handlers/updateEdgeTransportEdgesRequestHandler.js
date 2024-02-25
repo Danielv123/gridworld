@@ -3,12 +3,14 @@
 const mapFind = require("../util/mapFind");
 const getEdges = require("../worldgen/getEdges");
 
+// Grid coordinate offsets, X,Y pair where negative is north/west
+// Offset is used to get from the destination back to the origin, using edge id from origin edge as index
 const edge_target_position_offets = [
 	{},
-	[-1, 0], // [0, -1],
-	[1, 0], // [0, 1],
-	[0, 1], // [1, 0],
-	[0, -1], // [-1, 0],
+	[0, -1], // North, when walking south
+	[1, 0], // East, when walking west
+	[0, 1], // South, when walking north
+	[-1, 0], // West, when walking east
 ];
 
 module.exports = async function updateEdgeTransportsEdges(message) {
@@ -50,12 +52,12 @@ module.exports = async function updateEdgeTransportsEdges(message) {
 			&& target_instance.config.get("gridworld.grid_y_position") === target_position[1]
 		) {
 			// Update target instance edge configuration
-			const edge_transports_config = target_instance.config.get("edge_transports.internal");
+			const edge_transports_config = JSON.parse(JSON.stringify(target_instance.config.get("edge_transports.internal")));
 			const target_edge = edge_transports_config.edges.find(e => e.id === edge.target_edge);
 			if (target_edge) {
 				target_edge.target_instance = message.data.instance_id;
 				await this.setInstanceConfigField(edge.target_instance, "edge_transports.internal", edge_transports_config);
-				this.logger.info(`Updated edge adjacent instance ${edge.target_instance} for edge ${edge.id}`);
+				this.logger.info(`Updated edge ${target_edge.id} on existing instance ${edge.target_instance} to target ${message.data.instance_id}`);
 			} else {
 				// Add new edge
 				const target_x_size = target_instance.config.get("gridworld.grid_x_size");
@@ -89,12 +91,13 @@ module.exports = async function updateEdgeTransportsEdges(message) {
 				};
 				edge_transports_config.edges.push(new_edge);
 				await this.setInstanceConfigField(edge.target_instance, "edge_transports.internal", edge_transports_config);
-				this.logger.info(`Created new edge on adjacent instance ${edge.target_instance}`);
+				this.logger.info(`Created new edge on existing instance ${edge.target_instance}`);
 			}
 		}
 	}
 
 	// Set config
+	this.logger.info(`Set edges on new instance ${message.data.instance_id}`);
 	await this.setInstanceConfigField(message.data.instance_id, "edge_transports.internal", {
 		edges: edges,
 	});
