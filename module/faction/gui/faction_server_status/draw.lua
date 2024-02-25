@@ -8,7 +8,10 @@ local function draw_faction_server_status(player)
 	if player == nil then return false end
 
 	local player_faction = get_player_faction(player)
-	local faction_id = player_faction.faction_id
+	local faction_id = nil
+	if player_faction ~= nil then
+		faction_id = player_faction.faction_id
+	end
 	local server_is_claimed = global.gridworld.claiming_faction.claimed
 	local claiming_faction = get_faction(global.gridworld.claiming_faction.faction_id)
 	local server_is_claimed_by_player = server_is_claimed and global.gridworld.claiming_faction.faction_id == faction_id

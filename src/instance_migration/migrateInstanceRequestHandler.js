@@ -36,7 +36,7 @@ async function createProxyStream(app) {
 
 
 module.exports = async function migrateInstanceRequestHandler(message, request) {
-	let { instance_id, host_id } = message.data;
+	let { instance_id, host_id } = message;
 	let instance = this.controller.instances.get(instance_id);
 	if (!instance) {
 		throw new lib.RequestError(`Instance with ID ${instance_id} does not exist`);
