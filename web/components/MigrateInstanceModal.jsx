@@ -54,7 +54,7 @@ export default function MigrateInstanceModal(props) {
 		<Form form={form} initialValues={{ host: props.hostId }}>
 			<Form.Item name="host" label="Target host" rules={[{ required: true, message: "Please select a host" }]}>
 				<Select showSearch placeholder="Select a host" optionFilterProp="children">
-					{hostList.map(host => <Select.Option
+					{hostList.values().map(host => <Select.Option
 						key={host.id}
 						value={host.id}>
 						{host.name}

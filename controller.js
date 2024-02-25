@@ -111,7 +111,6 @@ class ControllerPlugin extends BaseControllerPlugin {
 			let hostId = instance.config.get("instance.assigned_host");
 			let x = instance.config.get("gridworld.grid_x_position");
 			let y = instance.config.get("gridworld.grid_y_position");
-			let hostConnection = this.controller.wsServer.hostConnections.get(hostId);
 			let instances = [...this.controller.instances];
 			await this.controller.sendTo({ instanceId }, new messages.PopulateNeighborData({
 				instance_id: instanceId,
