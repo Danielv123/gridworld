@@ -128,12 +128,8 @@ class ControllerPlugin extends BaseControllerPlugin {
 	}
 
 	async setInstanceConfigField(instanceId, field, value) {
-		// Code lifted from ControlConnection.js setInstanceConfigFieldRequestHandler(message)
-		let instance = this.controller.instances.get(instanceId);
-		if (!instance) {
-			throw new lib.RequestError(`Instance with ID ${instanceId} does not exist`);
-		}
-
+		// Code lifted from ControlConnection.js handleInstanceConfigSetFieldRequest(request)
+		let instance = this.controller.getRequestInstance(instanceId);
 		if (field === "instance.assigned_host") {
 			throw new lib.RequestError("instance.assigned_host must be set through the assign-host interface");
 		}
@@ -144,20 +140,7 @@ class ControllerPlugin extends BaseControllerPlugin {
 		}
 
 		instance.config.set(field, value, "control");
-		await this.updateInstanceConfig(instance);
-	}
-
-	async updateInstanceConfig(instance) {
-		let hostId = instance.config.get("instance.assigned_host");
-		if (hostId) {
-			let connection = this.controller.wsServer.hostConnections.get(hostId);
-			if (connection) {
-				await connection.send(new lib.InstanceAssignInternalRequest(
-					instance.config.get("instance.id"),
-					instance.config.toRemote("host"),
-				));
-			}
-		}
+		await this.controller.instanceConfigUpdated(instance);
 	}
 
 	onControlConnectionEvent(connection, event) {
