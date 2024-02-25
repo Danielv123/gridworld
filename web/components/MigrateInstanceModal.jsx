@@ -9,8 +9,8 @@ export default function MigrateInstanceModal(props) {
 	const control = useContext(ControlContext);
 	let [isWorking, setWorking] = useState(false);
 	let [hostList] = useHosts();
-	let [instance] = useInstance(props.instanceId);
 	let [form] = Form.useForm();
+	const targetHost = Form.useWatch("host", form);
 
 	function closeAndReset() {
 		setWorking(false);
@@ -19,7 +19,7 @@ export default function MigrateInstanceModal(props) {
 
 	return <Modal
 		title="Migrate instance"
-		open={props.visible}
+		open={props.open}
 		onCancel={() => {
 			if (isWorking) {
 				document.location = document.location;
@@ -28,18 +28,18 @@ export default function MigrateInstanceModal(props) {
 			}
 		}}
 		okText="Migrate instance"
+		okButtonProps={{ disabled: targetHost === undefined }}
 		onOk={async () => {
-			let hostId = form.getFieldValue("host");
-			if (hostId === undefined) {
+			if (targetHost === undefined) {
 				props.hideModal();
 				return;
 			}
 
 			setWorking(true);
-			await control.send(new MigrateInstanceRequest({
-				instance_id: props.instanceId,
-				host_id: hostId,
-			}));
+			await control.send(new MigrateInstanceRequest(
+				props.instanceId,
+				targetHost,
+			));
 			await new Promise(resolve => setTimeout(resolve, 1000));
 			closeAndReset();
 		}}
@@ -54,7 +54,7 @@ export default function MigrateInstanceModal(props) {
 		<Form form={form} initialValues={{ host: props.hostId }}>
 			<Form.Item name="host" label="Target host" rules={[{ required: true, message: "Please select a host" }]}>
 				<Select showSearch placeholder="Select a host" optionFilterProp="children">
-					{hostList.values().map(host => <Select.Option
+					{Array.from(hostList.values()).map(host => <Select.Option
 						key={host.id}
 						value={host.id}>
 						{host.name}
