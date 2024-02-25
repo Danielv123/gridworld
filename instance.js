@@ -176,12 +176,14 @@ class InstancePlugin extends BaseInstancePlugin {
 	}
 
 	async sendPlayerPosition(data) {
-		await this.instance.sendTo("controller", new messages.PlayerPosition({
-			player_name: data.player_name,
-			instance_id: data.instance_id,
-			x: data.x,
-			y: data.y,
-		}));
+		if (this.host.connector.connected) {
+			await this.instance.sendTo("controller", new messages.PlayerPosition({
+				player_name: data.player_name,
+				instance_id: data.instance_id,
+				x: data.x,
+				y: data.y,
+			}));
+		}
 	}
 
 	async createFaction(data) {

@@ -42,11 +42,11 @@ local function check_player_position()
 				-- north=6, east=0, south=2, and west=4
 				-- Check north edge
 				if y_min > player.position.y then
-					player.print("Looking for eastbound teleport")
+					player.print("Looking for teleport")
 					perform_edge_teleport(player)
 				-- Check east edge
 				elseif x_min > player.position.x then
-					player.print("Looking for southbound teleport")
+					player.print("Looking for teleport")
 					perform_edge_teleport(player)
 				-- Check south edge
 				elseif y_max < player.position.y then
