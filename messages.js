@@ -7,7 +7,7 @@ const pluginName = "gridworld";
 module.exports = {
 	CreateFactionGrid: class CreateFactionGrid {
 		static type = "request"; // request/event
-		static src = "control"; // string or array of strings
+		static src = ["control", "instance"]; // string or array of strings
 		static dst = "controller";
 		static plugin = pluginName;
 		static permission = "gridworld.create";

@@ -14,7 +14,7 @@ local function get_tab_welcome(player)
 
 	-- Check if player is part of a faction
 	local player_faction = get_player_faction(player)
-	if player_faction ~= nil then
+	if player_faction ~= nil or true then -- TODO: Faction creation is disabled as it does not work. Fix it, maybe.
 		-- Don't allow the player to create a new game if they are part of a faction
 		new_game_button = {}
 	end
