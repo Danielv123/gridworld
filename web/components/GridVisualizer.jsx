@@ -1,6 +1,7 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Row, Col } from "antd";
-import { MapContainer, Polyline, Rectangle, Tooltip, TileLayer, SVGOverlay, Marker, Popup, Circle } from "react-leaflet";
+import { MapContainer, Polyline, Rectangle, Tooltip, SVGOverlay, Popup, Circle } from "react-leaflet";
+import { TileLayer as TileLayerCustom } from "./leaflet/TileLayerCustomReact";
 
 import { ControlContext, useInstance, statusColors } from "@clusterio/web_ui";
 import { useMapData } from "../model/mapData";
@@ -23,6 +24,14 @@ export default function GridVisualizer(props) {
 	const playerPositions = usePlayerPosition(control);
 	const [mapData] = useMapData();
 	const [activeInstance, setActiveInstance] = useState();
+	const [refreshTiles, setRefreshTiles] = useState("1");
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setRefreshTiles(Math.floor(Math.random() * 10000).toString());
+		}, 2500);
+		return () => clearInterval(interval);
+	});
 
 	return <>
 		<div className="grid-visualizer">
@@ -34,7 +43,6 @@ export default function GridVisualizer(props) {
 				// eslint-disable-next-line max-len
 				integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
 				crossOrigin=""></script>
-
 			<Row>
 				<Col lg={24} xl={12}>
 					{mapData.map_data?.length ? <MapContainer
@@ -50,8 +58,8 @@ export default function GridVisualizer(props) {
 						maxZoom={18}
 						crs={L.CRS.Simple}
 					>
-						<TileLayer
-							url={`${document.location.origin}/api/gridworld/tiles/{z}/{x}/{y}.png`}
+						<TileLayerCustom
+							url={`${document.location.origin}/api/gridworld/tiles/{z}/{x}/{y}.png?refresh=${refreshTiles}`}
 							maxNativeZoom={10} // 10 max
 							minNativeZoom={7} // 7 min
 						/>
