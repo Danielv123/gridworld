@@ -29,7 +29,6 @@ function InstanceModal(props) {
 	return <>
 		{props.instance_id && <>
 			<Descriptions
-				loading={props.instance_id !== instance.id}
 				bordered
 				size="small"
 				title={instance["name"]}
@@ -71,29 +70,32 @@ function InstanceModal(props) {
 					<InstanceStatusTag status={instance["status"]} />
 				</Descriptions.Item>}
 			</Descriptions>
-			<Tabs defaultActiveKey="1">
-				{
-					account.hasAllPermission("core.instance.save.list", "core.instance.save.list_subscribe")
-					&& <Tabs.TabPane tab="Saves" key="saves">
-						<SavesList instance={instance} />
-					</Tabs.TabPane>
-				}
-				{
-					account.hasAnyPermission("core.log.follow", "core.instance.send_rcon")
-					&& <Tabs.TabPane tab="Console" key="console">
-						<Typography.Title level={5} style={{ marginTop: 16 }}>Console</Typography.Title>
-						{account.hasPermission("core.log.follow") && <LogConsole instances={[props.instance_id]} />}
-						{account.hasPermission("core.instance.send_rcon")
-							&& <InstanceRcon id={props.instance_id} disabled={instance["status"] !== "running"} />}
-					</Tabs.TabPane>
-				}
-				{
-					account.hasPermission("core.instance.get_config")
-					&& <Tabs.TabPane tab="Config" key="config">
-						<InstanceConfigTree id={props.instance_id} />
-					</Tabs.TabPane>
-				}
-			</Tabs>
+			<Tabs
+				defaultActiveKey="console"
+				items={[
+					{
+						disabled: !account.hasAllPermission("core.instance.save.list", "core.instance.save.subscribe"),
+						label: "Saves",
+						key: "saves",
+						children: <SavesList instance={instance} />,
+					}, {
+						disabled: !account.hasAnyPermission("core.log.follow", "core.instance.send_rcon"),
+						label: "Console",
+						key: "console",
+						children: <div>
+							<Typography.Title level={5} style={{ marginTop: 16 }}>Console</Typography.Title>
+							{account.hasPermission("core.log.follow") && <LogConsole instances={[props.instance_id]} />}
+							{account.hasPermission("core.instance.send_rcon")
+								&& <InstanceRcon id={props.instance_id} disabled={instance["status"] !== "running"} />}
+						</div>,
+					}, {
+						disabled: !account.hasPermission("core.instance.get_config"),
+						label: "Config",
+						key: "config",
+						children: <InstanceConfigTree id={props.instance_id} />,
+					},
+				]}
+			/>
 		</>}
 	</>;
 }

@@ -110,8 +110,10 @@ function InstanceRender(props) {
 			-1 * position[1] / scaleFactor,
 			position[0] / scaleFactor,
 		]))}
-		onclick={() => {
-			props.setActiveInstance(props.instance.instance_id);
+		eventHandlers={{
+			click: () => {
+				props.setActiveInstance(props.instance.instance_id);
+			},
 		}}
 		color={props.instance.instance_id === props.activeInstance ? "#ffff00" : "#3388ff"}
 		opacity={0.5}
