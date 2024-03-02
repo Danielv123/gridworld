@@ -22,7 +22,7 @@ import MigrateInstanceButton from "./MigrateInstanceButton";
 function InstanceModal(props) {
 	let control = useContext(ControlContext);
 	let [instance] = useInstance(props.instance_id);
-	let [host] = useHost(instance?.["assigned_host"]);
+	let [host] = useHost(instance?.assignedHost);
 	let account = useAccount();
 	let navigate = useNavigate();
 
@@ -61,9 +61,9 @@ function InstanceModal(props) {
 				</Space>}
 			>
 				<Descriptions.Item label="Host">
-					{!instance.assigned_host
+					{!instance.assignedHost
 						? <em>Unassigned</em>
-						: host["name"] || instance["assigned_host"]
+						: host.name || instance.assignedHost
 					}
 				</Descriptions.Item>
 				{instance["status"] && <Descriptions.Item label="Status">
