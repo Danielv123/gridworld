@@ -127,9 +127,8 @@ class InstancePlugin extends BaseInstancePlugin {
 			await sleep(1000);
 			const x = data.world_x * data.x_size;
 			const y = data.world_y * data.y_size;
-			const ocmmand = `/sc gridworld.map.dump_mapview({${x - data.x_size},${y - data.y_size}}, {${x},${y}})`;
-			await this.sendRcon(ocmmand);
-			await this.sendRcon(`/sc gridworld.map.dump_entities(game.surfaces[1].find_entities_filtered{area = {${x + data.x_size},${y + data.y_size}}, {${x},${y}}})`);
+			await this.sendRcon(`/sc gridworld.map.dump_mapview({${x - data.x_size},${y - data.y_size}}, {${x},${y}})`);
+			await this.sendRcon(`/c gridworld.map.dump_entities(game.surfaces[1].find_entities_filtered{area = {{${x - data.x_size},${y - data.y_size}}, {${x},${y}}}})`);
 		}
 	}
 

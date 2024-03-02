@@ -32,8 +32,6 @@ local function dump_entities(entities)
 		::continue::
 	end
 
-	game.print(table.concat(map_data, ";"))
-
 	clusterio_api.send_json("gridworld:tile_data", {
 		type = "pixels",
 		data = table.concat(map_data, ";"),

@@ -17,15 +17,15 @@ module.exports = async function tileDataEventHandler({ type, data, size, positio
 			const rgba = [Number(`0x${data[i + 2].slice(0, 2)}`), Number(`0x${data[i + 2].slice(2, 4)}`), Number(`0x${data[i + 2].slice(4, 6)}`), 255];
 
 			// Figure out which image tile the pixel belongs to
-			const x_tile = (x - x % TILE_SIZE) / TILE_SIZE - 1;
-			const y_tile = (y - y % TILE_SIZE) / TILE_SIZE;
+			const x_tile = (x - x % TILE_SIZE) / TILE_SIZE + (x < 0 ? -1 : 0);
+			const y_tile = (y - y % TILE_SIZE) / TILE_SIZE + (y < 0 ? -1 : 0);
 			const filename = `z10x${x_tile}y${y_tile}.png`;
 			if (!updates.has(filename)) {
 				updates.set(filename, new Set());
 			}
 			updates.get(filename).add([
-				x % TILE_SIZE,
-				y % TILE_SIZE,
+				(x + TILE_SIZE) % TILE_SIZE,
+				(y + TILE_SIZE) % TILE_SIZE,
 				rgba,
 			]);
 		}
