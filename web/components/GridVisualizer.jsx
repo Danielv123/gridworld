@@ -63,6 +63,11 @@ export default function GridVisualizer(props) {
 							maxNativeZoom={10} // 10 max
 							minNativeZoom={7} // 7 min
 						/>
+						<TileLayerCustom
+							url={`${document.location.origin}/api/gridworld/entities/{z}/{x}/{y}.png?refresh=${refreshTiles}`}
+							maxNativeZoom={10} // 10 max
+							minNativeZoom={7} // 7 min
+						/>
 						{mapData?.map_data?.map?.(instance => <div key={instance.instance_id}>
 							{instance.edges.map(edge => {
 								// Coordinates are given as lat and long corresponding to Y and X in the grid
