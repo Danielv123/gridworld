@@ -15,3 +15,8 @@
   image-rendering: pixelated;				 /* CSS4 Proposed  */
   -ms-interpolation-mode: nearest-neighbor;   /* IE8+		   */
 }
+
+/* Hide tile fade-in animation */
+.leaflet-tile-container img {
+  opacity: 1 !important;
+}

@@ -31,6 +31,7 @@ const leaveFactionRequestHandler = require("./src/request_handlers/leaveFactionR
 const claimServerRequestHandler = require("./src/request_handlers/claimServerRequestHandler");
 const unclaimServerRequestHandler = require("./src/request_handlers/unclaimServerRequestHandler");
 const setLoadFactorEventHandler = require("./src/event_handlers/setLoadFactorEventHandler");
+const tileDataEventHandler = require("./src/mapview/tileDataEventHandler");
 
 async function loadDatabase(config, filename, logger) {
 	let itemsPath = path.resolve(config.get("controller.database_directory"), filename);
@@ -79,7 +80,7 @@ class ControllerPlugin extends BaseControllerPlugin {
 		);
 		await fs.ensureDir(this._tilesPath);
 
-		registerTileServer(this.controller.app, this._tilesPath);
+		await registerTileServer(this.controller.app, this._tilesPath);
 
 		this.subscribedControlLinks = [];
 
@@ -103,6 +104,7 @@ class ControllerPlugin extends BaseControllerPlugin {
 		this.controller.handle(messages.ClaimServer, claimServerRequestHandler.bind(this));
 		this.controller.handle(messages.UnclaimServer, unclaimServerRequestHandler.bind(this));
 		this.controller.handle(messages.SetLoadFactor, setLoadFactorEventHandler.bind(this));
+		this.controller.handle(messages.TileData, tileDataEventHandler.bind(this));
 	}
 
 	async onInstanceStatusChanged(instance) {
