@@ -15,6 +15,18 @@
 	"bugs": {
 		"url": "https://github.com/Danielv123/gridworld/issues"
 	},
+	"files":[
+		"dist",
+		"module",
+		"src",
+		"index.js",
+		"instance.js",
+		"controller.js",
+		"messages.js",
+		"README.md",
+		"docs",
+		"images"
+	],
 	"engines": {
 		"node": ">=18"
 	},
