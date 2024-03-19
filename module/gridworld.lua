@@ -62,6 +62,12 @@ gridworld.events[clusterio_api.events.on_server_startup] = function()
 			claim_cost = nil,
 		}
 	end
+	if global.gridworld.map == nil then
+		global.gridworld.map = {
+			added_entities_to_update = nil,
+			removed_entities_to_update = nil,
+		}
+	end
 
 	-- Fun factions inititalization
 	setup_forces()
@@ -122,6 +128,7 @@ gridworld.events[defines.events.on_built_entity] = function(event)
 			factions.on_built_entity(event)
 			if entity.valid then
 				load_balancing.events.on_built_entity(event, entity)
+				map.events.on_built_entity(event, entity)
 			end
 		end
 	end
@@ -131,6 +138,7 @@ gridworld.events[defines.events.on_entity_cloned] = function(event)
 		local entity = event.destination
 		if entity.valid then
 			load_balancing.events.on_entity_cloned(event, entity)
+			map.events.on_entity_cloned(event, entity)
 		end
 	end
 end
@@ -139,6 +147,7 @@ gridworld.events[defines.events.on_robot_built_entity] = function(event)
 		local entity = event.created_entity
 		if entity.valid then
 			load_balancing.events.on_robot_built_entity(event, entity)
+			map.events.on_robot_built_entity(event, entity)
 		end
 	end
 end
@@ -147,6 +156,7 @@ gridworld.events[defines.events.script_raised_built] = function(event)
 		local entity = event.entity
 		if entity.valid then
 			load_balancing.events.script_raised_built(event, entity)
+			map.events.script_raised_built(event, entity)
 		end
 	end
 end
@@ -155,6 +165,7 @@ gridworld.events[defines.events.script_raised_revive] = function(event)
 		local entity = event.entity
 		if entity.valid then
 			load_balancing.events.script_raised_revive(event, entity)
+			map.events.script_raised_revive(event, entity)
 		end
 	end
 end
@@ -162,6 +173,7 @@ gridworld.events[defines.events.on_entity_destroyed] = function(event)
 	if not global.gridworld.lobby_server then
 		-- This event is triggered after the entity is gone, so we can't use it to get the entity
 		-- Instead, use the registration_number stored previously.
+		map.events.on_entity_destroyed(event) -- Run before load balancing to hijack its event registrations
 		load_balancing.events.on_entity_destroyed(event)
 	end
 end
@@ -215,6 +227,12 @@ gridworld.on_nth_tick[121] = function()
 		load_balancing.events.on_nth_tick()
 	end
 end
+gridworld.on_nth_tick[243] = function()
+	if not global.gridworld.lobby_server then
+		-- Update entity data on map
+		map.events.on_nth_tick()
+	end
+end
 
 -- Handle custom events
 gridworld.events[constants.custom_events.on_faction_claimed_server] = function(event)
@@ -249,5 +267,9 @@ gridworld.hmi_hide_status = function()
 end
 gridworld.claim_server = claim_server
 gridworld.unclaim_server = unclaim_server
+gridworld.map = {
+	dump_entities = map.dump_entities,
+	dump_mapview = map.dump_mapview,
+}
 
 return gridworld

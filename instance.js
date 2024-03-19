@@ -8,6 +8,7 @@ const { BaseInstancePlugin } = require("@clusterio/host");
 
 const sleep = require("./src/util/sleep");
 const messages = require("./messages");
+const tileDataIpcHandler = require("./src/mapview/tileDataIpcHandler");
 
 class InstancePlugin extends BaseInstancePlugin {
 	async init() {
@@ -20,67 +21,72 @@ class InstancePlugin extends BaseInstancePlugin {
 
 		this.instance.server.on("ipc-gridworld:send_teleport_command", data => {
 			this.teleportPlayer(data).catch(err => this.logger.error(
-				`Error handling player teleport:\n${err.stack}`
+				`Error handling player teleport:\n${err}`
 			));
 		});
 		this.instance.server.on("ipc-gridworld:send_player_position", data => {
 			this.sendPlayerPosition(data).catch(err => this.logger.error(
-				`Error handling sending player position:\n${err.stack}`
+				`Error handling sending player position:\n${err}`
 			));
 		});
 		this.instance.server.on("ipc-gridworld:create_faction", data => {
 			this.createFaction(data).catch(err => this.logger.error(
-				`Error creating faction:\n${err.stack}`
+				`Error creating faction:\n${err}`
 			));
 		});
 		this.instance.server.on("ipc-gridworld:update_faction", data => {
 			this.updateFaction(data).catch(err => this.logger.error(
-				`Error updating faction:\n${err.stack}`
+				`Error updating faction:\n${err}`
 			));
 		});
 		this.instance.server.on("ipc-gridworld:faction_invite_player", data => {
 			this.factionInvitePlayer(data).catch(err => this.logger.error(
-				`Error inviting player to faction:\n${err.stack}`
+				`Error inviting player to faction:\n${err}`
 			));
 		});
 		this.instance.server.on("ipc-gridworld:join_faction", data => {
 			this.joinFaction(data).catch(err => this.logger.error(
-				`Error joining faction:\n${err.stack}`
+				`Error joining faction:\n${err}`
 			));
 		});
 		this.instance.server.on("ipc-gridworld:faction_kick_player", data => {
 			this.factionKickPlayer(data).catch(err => this.logger.error(
-				`Error kicking player from faction:\n${err.stack}`
+				`Error kicking player from faction:\n${err}`
 			));
 		});
 		this.instance.server.on("ipc-gridworld:faction_change_member_role", data => {
 			this.factionChangeMemberRole(data).catch(err => this.logger.error(
-				`Error changing player role in faction:\n${err.stack}`
+				`Error changing player role in faction:\n${err}`
 			));
 		});
 		this.instance.server.on("ipc-gridworld:claim_server", data => {
 			this.claimServer(data).catch(err => this.logger.error(
-				`Error claiming server:\n${err.stack}`
+				`Error claiming server:\n${err}`
 			));
 		});
 		this.instance.server.on("ipc-gridworld:unclaim_server", data => {
 			this.unclaimServer(data).catch(err => this.logger.error(
-				`Error unclaiming server:\n${err.stack}`
+				`Error unclaiming server:\n${err}`
 			));
 		});
 		this.instance.server.on("ipc-gridworld:join_gridworld", data => {
 			this.joinGridworld(data).catch(err => this.logger.error(
-				`Error joining gridworld:\n${err.stack}`
+				`Error joining gridworld:\n${err}`
 			));
 		});
 		this.instance.server.on("ipc-gridworld:perform_edge_teleport", data => {
 			this.performEdgeTeleport(data).catch(err => this.logger.error(
-				`Error performing edge teleport:\n${err.stack}`
+				`Error performing edge teleport:\n${err}`
 			));
 		});
 		this.instance.server.on("ipc-gridworld:load_balancing", data => {
 			this.loadBalancing(data).catch(err => this.logger.error(
-				`Error performing load balancing:\n${err.stack}`
+				`Error performing load balancing:\n${err}`
+			));
+		});
+		this.instance.server.on("ipc-gridworld:tile_data", data => {
+			tileDataIpcHandler(this, data).catch(err => this.logger.error(
+				`Error handling tile data:´n${err}`
 			));
 		});
 
@@ -117,6 +123,12 @@ class InstancePlugin extends BaseInstancePlugin {
 			for (let faction of response.factions) {
 				await this.runTask(this.sendRcon(`/sc gridworld.sync_faction("${faction.faction_id}",'${lib.escapeString(JSON.stringify(faction))}')`));
 			}
+			// Update map (should not be ran always)
+			await sleep(1000);
+			const x = data.world_x * data.x_size;
+			const y = data.world_y * data.y_size;
+			await this.sendRcon(`/sc gridworld.map.dump_mapview({${x - data.x_size},${y - data.y_size}}, {${x},${y}})`);
+			await this.sendRcon(`/c gridworld.map.dump_entities(game.surfaces[1].find_entities_filtered{area = {{${x - data.x_size},${y - data.y_size}}, {${x},${y}}}})`);
 		}
 	}
 
@@ -128,7 +140,7 @@ class InstancePlugin extends BaseInstancePlugin {
 	onControllerConnectionEvent(event) {
 		if (event === "drop" || event === "close") {
 			this.sendRcon("/sc gridworld.populate_neighbor_data(nil, nil, nil, nil)").catch(
-				err => this.logger(`Error deactivating neighbors:\n${err.stack}`)
+				err => this.logger(`Error deactivating neighbors:\n${err}`)
 			);
 		}
 	}

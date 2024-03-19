@@ -580,6 +580,40 @@ module.exports = {
 			return this.data;
 		}
 	},
+	// Event with tile data, generally either a new chunk or placed entities
+	TileData: class TileData {
+		static type = "request";
+		static src = "instance";
+		static dst = "controller";
+		static plugin = pluginName;
+		static jsonSchema = {
+			type: "object",
+			required: ["type", "data"],
+			properties: {
+				type: {
+					type: "string", enum: [
+						"tiles", // array of pixels for a 32x32 chunk with lines starting horizontally from the top
+						"pixels", // array of pixels with [x,y,rgb,x,y,rgb] values where rgb are 6 hexadecimal characters
+					],
+				},
+				position: { type: "array", items: { type: "number" } }, // Top left corner of tile area
+				size: { type: "number" }, // size of tile area (square)
+				data: {
+					type: "array",
+					items: { type: "string" },
+				},
+			},
+		};
+		constructor(type, data, position, size) {
+			this.type = type;
+			this.data = data;
+			this.position = position;
+			this.size = size;
+		}
+		static fromJSON(json) {
+			return new this(json.type, json.data, json.position, json.size);
+		}
+	},
 	RefreshTileData: class RefreshTileData {
 		static type = "request";
 		static src = "control";
