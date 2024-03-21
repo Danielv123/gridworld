@@ -20,6 +20,8 @@ function worldPositionToInstance(x, y, grid_id, instances) {
 	return {
 		x,
 		y,
+		grid_x_size,
+		grid_y_size,
 		grid_x_position,
 		grid_y_position,
 		instance: mapFind(grid_instances, instance => instance.config.get("gridworld.grid_x_position") === grid_x_position

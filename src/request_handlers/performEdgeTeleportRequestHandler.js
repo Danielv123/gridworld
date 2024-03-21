@@ -77,7 +77,6 @@ module.exports = async function joinGridworldRequestHandler(message) {
 	// Ensure the instance we are connecting to is started
 	if (instance_to_connect_to) {
 		const hostId = instance_to_connect_to.config.get("instance.assigned_host");
-		let hostConnection = this.controller.wsServer.hostConnections.get(hostId);
 		// Instance status
 		if (instance_to_connect_to.status !== "running") {
 			try {
@@ -96,7 +95,7 @@ module.exports = async function joinGridworldRequestHandler(message) {
 		}
 
 		const host = this.controller.hosts.get(hostId);
-		response.connection_address = `${host.publicAddress}:${instance_to_connect_to.game_port || instance_to_connect_to.config.get("factorio.game_port")}`;
+		response.connection_address = `${host.publicAddress}:${instance_to_connect_to.gamePort || instance_to_connect_to.config.get("factorio.game_port")}`;
 	}
 
 	// Return response to client

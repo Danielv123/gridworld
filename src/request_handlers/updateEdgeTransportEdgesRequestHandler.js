@@ -2,16 +2,7 @@
 
 const mapFind = require("../util/mapFind");
 const getEdges = require("../worldgen/getEdges");
-
-// Grid coordinate offsets, X,Y pair where negative is north/west
-// Offset is used to get from the destination back to the origin, using edge id from origin edge as index
-const edge_target_position_offets = [
-	{},
-	[0, -1], // North, when walking south
-	[1, 0], // East, when walking west
-	[0, 1], // South, when walking north
-	[-1, 0], // West, when walking east
-];
+const { edge_target_position_offsets } = require("../worldgen/factionGrid/edge_target_position_offsets");
 
 module.exports = async function updateEdgeTransportsEdges(message) {
 	// message.data === {
@@ -42,8 +33,8 @@ module.exports = async function updateEdgeTransportsEdges(message) {
 	// Find neighboring instances and update edge target instance ID
 	for (const edge of edges) {
 		const target_position = [
-			x + edge_target_position_offets[edge.id][0],
-			y + edge_target_position_offets[edge.id][1],
+			x + edge_target_position_offsets[edge.id][0],
+			y + edge_target_position_offsets[edge.id][1],
 		];
 		const target_instance = this.controller.instances.get(edge.target_instance);
 		if (

@@ -2,7 +2,7 @@
 const { InstanceInfo } = require("@clusterio/controller");
 const lib = require("@clusterio/lib");
 
-module.exports = async function createInstance(plugin, name, x, y, x_size, y_size, grid_id, game_port) {
+module.exports = async function createInstance(plugin, name, x, y, x_size, y_size, grid_id, game_port = undefined) {
 	plugin.logger.info("Creating instance", name);
 	let instanceConfig = new lib.InstanceConfig("controller");
 	instanceConfig.set("instance.name", name);

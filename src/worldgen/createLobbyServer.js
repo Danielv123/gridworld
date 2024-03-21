@@ -15,7 +15,7 @@ module.exports = async function createLobbyServer(plugin, hostId, x_size, y_size
 	instanceConfig.set("gridworld.grid_id", Math.ceil(Math.random() * 1000));
 	instanceConfig.set("gridworld.grid_x_size", x_size);
 	instanceConfig.set("gridworld.grid_y_size", y_size);
-	instanceConfig.set("factorio.game_port", 10000);
+	// instanceConfig.set("factorio.game_port", 10000); // Use clusterio port assignment
 	lib.logger.info("Created config");
 	let instanceId = instanceConfig.get("instance.id");
 	if (plugin.controller.instances.has(instanceId)) {

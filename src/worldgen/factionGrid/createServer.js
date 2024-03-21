@@ -7,7 +7,6 @@ const getEdges = require("../getEdges");
 const packagejson = require("../../../package.json");
 const mapFind = require("../../util/mapFind");
 const mapFilter = require("../../util/mapFilter");
-const hostGetNextFreePort = require("../../util/hostGetNextFreePort");
 
 module.exports = async function createServer({
 	plugin,
@@ -41,8 +40,7 @@ module.exports = async function createServer({
 	}
 
 	// Create instance
-	const instance_game_port = hostGetNextFreePort(plugin.controller, hostId);
-	const instanceId = await createInstance(plugin, `Grid square ${Math.floor(Math.random() * 2 ** 16).toString()}`, x, y, x_size, y_size, grid_id, instance_game_port);
+	const instanceId = await createInstance(plugin, `Grid square ${Math.floor(Math.random() * 2 ** 16).toString()}`, x, y, x_size, y_size, grid_id);
 
 	// Assign instance to host
 	await assignInstance(plugin, instanceId, hostId);
