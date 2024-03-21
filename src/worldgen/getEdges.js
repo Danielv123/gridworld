@@ -9,6 +9,7 @@ module.exports = function getEdges({
 	y,
 	instances,
 	grid_id,
+	includeMissing = false,
 }) {
 	const worldfactor_x = (x - 1) * x_size;
 	const worldfactor_y = (y - 1) * y_size;
@@ -66,5 +67,8 @@ module.exports = function getEdges({
 		)?.config.get("instance.id") || 0,
 		target_edge: 2,
 	});
+	if (includeMissing) {
+		return edges;
+	}
 	return edges.filter(edge => edge.target_instance !== 0);
 };
