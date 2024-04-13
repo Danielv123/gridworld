@@ -40,7 +40,7 @@ module.exports = async function createServer({
 	}
 
 	// Create instance
-	const instanceId = await createInstance(plugin, `Grid square ${Math.floor(Math.random() * 2 ** 16).toString()}`, x, y, x_size, y_size, grid_id);
+	const instanceId = await createInstance(plugin, `${lobby_server.config.get("gridworld.grid_name_prefix")} ${Math.floor(Math.random() * 2 ** 16).toString()}`, x, y, x_size, y_size, grid_id);
 
 	// Assign instance to host
 	await assignInstance(plugin, instanceId, hostId);

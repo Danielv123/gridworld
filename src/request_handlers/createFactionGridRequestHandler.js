@@ -15,6 +15,7 @@ module.exports = async function createRequestHandler(message) {
 	if (!message.data.use_edge_transports) { return; }
 	const grid = createFactionGrid({
 		plugin: this,
+		name_prefix: message.data.name_prefix,
 		hostId: message.data.host,
 		x_size: message.data.x_size,
 		y_size: message.data.y_size,

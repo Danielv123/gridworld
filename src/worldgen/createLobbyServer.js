@@ -4,14 +4,15 @@ const assignInstance = require("./assignInstance");
 const createSave = require("./createSave");
 const { InstanceInfo } = require("@clusterio/controller");
 
-module.exports = async function createLobbyServer(plugin, hostId, x_size, y_size) {
+module.exports = async function createLobbyServer(plugin, name_prefix, hostId, x_size, y_size) {
 	// Create instance
 	lib.logger.info("Creating lobby server");
-	const name = "Gridworld lobby server";
+	const name = `${name_prefix} lobby server`;
 	let instanceConfig = new lib.InstanceConfig("controller");
 	instanceConfig.set("instance.name", name);
 	instanceConfig.set("instance.auto_start", true);
 	instanceConfig.set("gridworld.is_lobby_server", true);
+	instanceConfig.set("gridworld.grid_name_prefix", name_prefix);
 	instanceConfig.set("gridworld.grid_id", Math.ceil(Math.random() * 1000));
 	instanceConfig.set("gridworld.grid_x_size", x_size);
 	instanceConfig.set("gridworld.grid_y_size", y_size);

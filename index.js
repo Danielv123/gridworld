@@ -94,6 +94,12 @@ module.exports = {
           "Grid identifier - used to run multiple gridworlds on the same cluster",
 				initialValue: 0,
 			},
+			"gridworld.grid_name_prefix": {
+				type: "string",
+				title: "Grid name prefix",
+				description: "Prefix for autogeneration, only used for main lobby server where is_lobby_server = true",
+				initialValue: "",
+			},
 			"gridworld.claimed_by_faction": {
 				type: "string",
 				title: "Claimed by faction",
