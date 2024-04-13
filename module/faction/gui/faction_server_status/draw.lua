@@ -21,17 +21,6 @@ local function draw_faction_server_status(player)
 		direction = "vertical",
 		name = "gridworld_faction_server_status",
 		{
-			type = "button",
-			caption = "Join lobby server",
-			style = "green_button",
-			actions = {
-				on_click = {
-					location = "faction_server_status",
-					action = "join_lobby_server",
-				},
-			},
-		},
-		{
 			type = "label",
 			caption = "Server name: "..clusterio_api.get_instance_name(),
 		},
