@@ -31,7 +31,7 @@ export default function GridVisualizer(props) {
 			setRefreshTiles(Math.floor(Math.random() * 10000).toString());
 		}, 2500);
 		return () => clearInterval(interval);
-	});
+	}, []);
 
 	return <>
 		<div className="grid-visualizer">
