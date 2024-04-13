@@ -34,7 +34,12 @@ local function dump_entities(entities)
 						-- Format as hexadecimal
 						table.insert(map_data, position.x + x - (size_x-1)/2)
 						table.insert(map_data, position.y + y - (size_y-1)/2)
+						if entity.type == "entity-ghost" then
+							-- Render as purple
+							table.insert(map_data, "A800A8")
+						else
 						table.insert(map_data, string.format("%02x%02x%02x", map_color.r, map_color.g, map_color.b))
+						end
 					end
 				end
 			end
