@@ -39,6 +39,9 @@ export class WebPlugin extends BaseWebPlugin {
 			player_position: 0,
 			faction_list: 0,
 		};
+
+		this.control.handle(messages.PlayerPosition, this.playerPositionEventHandler.bind(this));
+		this.control.handle(messages.FactionUpdate, this.factionUpdateEventHandler.bind(this));
 	}
 
 	onControllerConnectionEvent(event) {
@@ -50,7 +53,7 @@ export class WebPlugin extends BaseWebPlugin {
 	async playerPositionEventHandler(message) {
 		this.updateHandlers.forEach(handler => {
 			if (handler.type === "player_position") {
-				handler.callback(message.data);
+				handler.callback(message);
 			}
 		});
 	}
@@ -58,7 +61,7 @@ export class WebPlugin extends BaseWebPlugin {
 	async factionUpdateEventHandler(message) {
 		this.updateHandlers.forEach(handler => {
 			if (handler.type === "faction_list") {
-				handler.callback(message.data.faction);
+				handler.callback(message.faction);
 			}
 		});
 	}

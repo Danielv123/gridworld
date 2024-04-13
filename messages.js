@@ -149,7 +149,7 @@ module.exports = {
 	},
 	PlayerPosition: class PlayerPosition {
 		static type = "event";
-		static src = "instance";
+		static src = ["instance", "controller"];
 		static dst = ["controller", "control"];
 		static plugin = pluginName;
 		static jsonSchema = {

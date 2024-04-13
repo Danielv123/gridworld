@@ -2,7 +2,7 @@
 
 const messages = require("../../messages");
 
-module.exports = async function factionChangeMemberRoleRequestHandler(message, request, link) {
+module.exports = async function factionChangeMemberRoleRequestHandler(message, link) {
 	const faction = this.factionsDatastore.get(message.data.faction_id);
 	if (faction) {
 		// Check that the player is in the faction
