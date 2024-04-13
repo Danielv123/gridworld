@@ -2,7 +2,7 @@
 
 const messages = require("../../messages");
 
-module.exports = async function createFactionRequestHandler(message, request, link) {
+module.exports = async function createFactionRequestHandler(message, link) {
 	const new_faction = {
 		faction_id: message.data.faction_id,
 		name: message.data.name,

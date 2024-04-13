@@ -9,7 +9,7 @@ local function set_player_permission_group(player)
 	-- Get claiming faction
 	local claiming_faction_id = global.gridworld.claiming_faction.faction_id
 	local faction = get_player_faction(player)
-	if claiming_faction_id == faction.faction_id then
+	if faction and claiming_faction_id == faction.faction_id then
 		player.permission_group = game.permissions.get_group("Owner")
 		player.print("Setting permission group to Owner")
 	else

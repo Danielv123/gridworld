@@ -8,9 +8,6 @@ local function on_gui_click(_, action, player)
 		if action.action == "close" then
 			player.gui.left.clear()
 		end
-		if action.action == "join_lobby_server" then
-			player.connect_to_server({address = "localhost:10000", name = "Lobby server"}) -- TODO: Use correct lobby address here
-		end
 		if action.action == "claim_server" then
 			-- Open claim dialog
 			local faction = get_player_faction(player)

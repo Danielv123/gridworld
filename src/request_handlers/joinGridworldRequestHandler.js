@@ -6,7 +6,7 @@ const mapFind = require("../util/mapFind");
 const createServer = require("../worldgen/factionGrid/createServer");
 const worldPositionToInstance = require("../worldgen/util/worldPositionToInstance");
 
-module.exports = async function joinGridworldRequestHandler(message, request, link) {
+module.exports = async function joinGridworldRequestHandler(message, link) {
 	const player_name = message.data.player_name;
 
 	// Get player profile from controller

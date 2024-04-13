@@ -16,7 +16,7 @@ async function transmitInitialPlayerPositionsData(controller, link) {
 	// }
 }
 
-module.exports = async function setWebSubscriptionRequestHandler(message, request, link) {
+module.exports = async function setWebSubscriptionRequestHandler(message, link) {
 	let existingLink = this.subscribedControlLinks.find((sub) => sub.link === link);
 	if (message.data.player_position || message.data.faction_list) {
 		// Check if this link is already subscribed

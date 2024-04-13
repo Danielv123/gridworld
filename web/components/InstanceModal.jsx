@@ -14,6 +14,7 @@ import {
 	InstanceRcon,
 	LogConsole,
 	InstanceConfigTree,
+	Link,
 } from "@clusterio/web_ui";
 import * as lib from "@clusterio/lib";
 
@@ -63,7 +64,12 @@ function InstanceModal(props) {
 				<Descriptions.Item label="Host">
 					{!instance.assignedHost
 						? <em>Unassigned</em>
-						: host.name || instance.assignedHost
+						: <Link
+							to={`/hosts/${instance.assignedHost}/view`}
+							onClick={e => e.stopPropagation()}
+						>
+							{host.name || instance.assignedHost}
+						</Link>
 					}
 				</Descriptions.Item>
 				{instance["status"] && <Descriptions.Item label="Status">

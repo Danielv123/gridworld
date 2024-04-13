@@ -7,8 +7,8 @@ module.exports = async function playerPositionEventHandler(message) {
 	// TODO: Save position on controller and broadcast full list on connect.
 	// TODO: Don't broadcast individual events unless position has changed.
 	for (let sub of this.subscribedControlLinks) {
-		if (sub.player_posiiton) {
-			sub.link.send(new messages.PlayerPosition(message.data));
+		if (sub.player_position) {
+			await this.controller.sendTo(sub.link, message);
 		}
 	}
 };

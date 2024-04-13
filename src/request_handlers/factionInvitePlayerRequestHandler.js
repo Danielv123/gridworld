@@ -1,5 +1,5 @@
 "use strict";
-module.exports = async function factionInvitePlayerRequestHandler(message, request, link) {
+module.exports = async function factionInvitePlayerRequestHandler(message, link) {
 	const faction = this.factionsDatastore.get(message.data.faction_id);
 	if (faction) {
 		// Check if the player is already in the faction
