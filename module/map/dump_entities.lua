@@ -6,6 +6,9 @@ local clusterio_api = require("modules/clusterio/api")
 local ignored_entities = require("modules/gridworld/map/ignored_entities")
 
 local function dump_entities(entities, removed_entities)
+	-- Only process on the server. Modifying any game state after this statement will desync
+	if not gridworld.is_server_unsafe_desync then return end
+
 	-- Do removals first, then additions afterwards to avoid issues with entities being removed and added in the same cycle
 	-- Additions check .valid so the race condition can't happen that way
 	local tasks = removed_entities or {}

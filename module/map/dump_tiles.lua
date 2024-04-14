@@ -9,6 +9,9 @@
 local clusterio_api = require("modules/clusterio/api")
 
 local function dump_tiles(tiles)
+	-- Only process on the server. Modifying any game state after this statement will desync
+	if not gridworld.is_server_unsafe_desync then return end
+
 	local map_data = {}
 	for _, tilePosition in pairs(tiles) do
 		local tile = game.surfaces[1].get_tile(tilePosition)
