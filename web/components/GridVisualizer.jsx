@@ -56,17 +56,18 @@ export default function GridVisualizer(props) {
 							])
 						).flat() ?? [])}
 						maxZoom={18}
+						minZoom={7}
 						crs={L.CRS.Simple}
 					>
 						<TileLayerCustom
 							url={`${document.location.origin}/api/gridworld/tiles/{z}/{x}/{y}.png?refresh=${refreshTiles}`}
 							maxNativeZoom={10} // 10 max
-							minNativeZoom={7} // 7 min
+							minNativeZoom={10} // 7 min
 						/>
 						<TileLayerCustom
 							url={`${document.location.origin}/api/gridworld/entities/{z}/{x}/{y}.png?refresh=${refreshTiles}`}
 							maxNativeZoom={10} // 10 max
-							minNativeZoom={7} // 7 min
+							minNativeZoom={10} // 7 min
 						/>
 						{mapData?.map_data?.map?.(instance => <div key={instance.instance_id}>
 							{instance.edges.map(edge => {
