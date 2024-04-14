@@ -8,6 +8,7 @@ local ignored_entities = {
 	"spider-vehicle",
 	"character",
 	"character-corpse",
+	"fish",
 }
 
 return ignored_entities
