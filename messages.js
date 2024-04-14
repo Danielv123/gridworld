@@ -602,16 +602,18 @@ module.exports = {
 					type: "array",
 					items: { type: "string" },
 				},
+				layer: { type: "string" }, // optional, defaults to "" for entities
 			},
 		};
-		constructor(type, data, position, size) {
+		constructor(type, data, position, size, layer = "") {
 			this.type = type;
 			this.data = data;
 			this.position = position;
 			this.size = size;
+			this.layer = layer;
 		}
 		static fromJSON(json) {
-			return new this(json.type, json.data, json.position, json.size);
+			return new this(json.type, json.data, json.position, json.size, json.layer);
 		}
 	},
 	RefreshTileData: class RefreshTileData {

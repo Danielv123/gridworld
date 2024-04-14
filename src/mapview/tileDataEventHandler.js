@@ -4,13 +4,13 @@ const path = require("path");
 sharp.cache(false);
 const sleep = require("../util/sleep");
 
+const TILE_SIZE = 512;
 const fileLocks = {}; // Used to prevent multiple writes to the same file
 const updates = new Map();
 
-module.exports = async function tileDataEventHandler({ type, data, size, position }) {
+module.exports = async function tileDataEventHandler({ type, data, size, position, layer }) {
 	// console.log(type, size, position);
 	// Image tiles are 512x512 pixels arranged in a grid, starting at 0,0
-	const TILE_SIZE = 512;
 	if (type === "pixels") {
 		if (data.length % 3 !== 0) {
 			this.logger.error(`Invalid pixel data length: ${data.length}`);
@@ -24,7 +24,7 @@ module.exports = async function tileDataEventHandler({ type, data, size, positio
 			// Figure out which image tile the pixel belongs to
 			const x_tile = (x - x % TILE_SIZE) / TILE_SIZE + (x < 0 ? -1 : 0);
 			const y_tile = (y - y % TILE_SIZE) / TILE_SIZE + (y < 0 ? -1 : 0);
-			const filename = `z10x${x_tile}y${y_tile}.png`;
+			const filename = `${layer}z10x${x_tile}y${y_tile}.png`;
 			if (!updates.has(filename)) {
 				updates.set(filename, new Set());
 			}
@@ -51,7 +51,7 @@ module.exports = async function tileDataEventHandler({ type, data, size, positio
 			const pixel_world_y = originPosition[1] + y;
 			const x_tile = (pixel_world_x - pixel_world_x % TILE_SIZE) / TILE_SIZE + (pixel_world_x < 0 ? -1 : 0);
 			const y_tile = (pixel_world_y - pixel_world_y % TILE_SIZE) / TILE_SIZE + (pixel_world_y < 0 ? -1 : 0);
-			const filename = `tiles_z10x${x_tile}y${y_tile}.png`;
+			const filename = `${layer}z10x${x_tile}y${y_tile}.png`;
 			if (!updates.has(filename)) {
 				updates.set(filename, new Set());
 			}

@@ -27,6 +27,7 @@ local function dump_mapview(position_a, position_b)
 		position = position_a,
 		size = CHUNK_SIZE,
 		data = table.concat(map_data, ";"),
+		layer = "tiles_"
 	})
 end
 -- dump_mapview(game.player.position, {x = game.player.position.x + 128, y = game.player.position.y + 128})

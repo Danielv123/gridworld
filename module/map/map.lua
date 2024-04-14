@@ -7,6 +7,7 @@ local entity_removed_unregistered = require("modules/gridworld/map/entity_remove
 
 local on_nth_tick = require("modules/gridworld/map/events/on_nth_tick")
 local on_chunk_generated = require("modules/gridworld/map/events/on_chunk_generated")
+local on_tile_changed = require("modules/gridworld/map/events/on_tile_changed")
 
 return {
 	dump_mapview = dump_mapview,
@@ -26,5 +27,11 @@ return {
 		on_robot_mined_entity = entity_removed_unregistered,
 		on_entity_died = entity_removed_unregistered,
 		on_pre_robot_exploded_cliff = entity_removed_unregistered,
+		-- Tile update events
+		on_player_built_tile = on_tile_changed,
+		on_player_mined_tile = on_tile_changed,
+		on_robot_built_tile = on_tile_changed,
+		on_robot_mined_tile = on_tile_changed,
+		script_raised_set_tiles = on_tile_changed,
 	},
 }

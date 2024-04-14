@@ -67,6 +67,7 @@ gridworld.events[clusterio_api.events.on_server_startup] = function()
 			added_entities_to_update = nil,
 			removed_entities_to_update = nil,
 			entity_registrations = {},
+			tiles_to_update = nil,
 		}
 	end
 	if global.gridworld.map.entity_registrations == nil then
@@ -245,6 +246,31 @@ end
 gridworld.events[defines.events.on_tick] = function(event)
 	if not global.gridworld.lobby_server then
 		worldgen.events.on_tick(event)
+	end
+end
+gridworld.events[defines.events.on_player_built_tile] = function(event)
+	if not global.gridworld.lobby_server then
+		map.events.on_player_built_tile(event)
+	end
+end
+gridworld.events[defines.events.on_robot_built_tile] = function(event)
+	if not global.gridworld.lobby_server then
+		map.events.on_robot_built_tile(event)
+	end
+end
+gridworld.events[defines.events.on_player_mined_tile] = function(event)
+	if not global.gridworld.lobby_server then
+		map.events.on_player_mined_tile(event)
+	end
+end
+gridworld.events[defines.events.on_robot_mined_tile] = function(event)
+	if not global.gridworld.lobby_server then
+		map.events.on_robot_mined_tile(event)
+	end
+end
+gridworld.events[defines.events.script_raised_set_tiles] = function(event)
+	if not global.gridworld.lobby_server then
+		map.events.script_raised_set_tiles(event)
 	end
 end
 gridworld.on_nth_tick = {}

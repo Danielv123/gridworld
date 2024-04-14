@@ -13,5 +13,5 @@ module.exports = async function handleTileDataIpc(instancePlugin, json) {
 		instancePlugin.logger.error(`Received tile data with invalid type ${type}`);
 	}
 
-	await instancePlugin.instance.sendTo("controller", new messages.TileData(type, tileData, json.position, json.size));
+	await instancePlugin.instance.sendTo("controller", new messages.TileData(type, tileData, json.position, json.size, json.layer));
 };
