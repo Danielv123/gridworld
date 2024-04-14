@@ -6,6 +6,7 @@ local entity_removed = require("modules/gridworld/map/entity_removed")
 local entity_removed_unregistered = require("modules/gridworld/map/entity_removed_unregistered")
 
 local on_nth_tick = require("modules/gridworld/map/events/on_nth_tick")
+local on_chunk_generated = require("modules/gridworld/map/events/on_chunk_generated")
 
 return {
 	dump_mapview = dump_mapview,
@@ -19,6 +20,7 @@ return {
 		on_robot_built_entity = entity_added,
 		script_raised_built = entity_added,
 		script_raised_revive = entity_added,
+		on_chunk_generated = on_chunk_generated,
 		-- Pre-destruction events, not reliable but used for cleanup of things we havent registered
 		on_player_mined_entity = entity_removed_unregistered,
 		on_robot_mined_entity = entity_removed_unregistered,

@@ -239,6 +239,7 @@ end
 gridworld.events[defines.events.on_chunk_generated] = function(event)
 	if not global.gridworld.lobby_server then
 		worldgen.events.on_chunk_generated(event)
+		map.events.on_chunk_generated(event)
 	end
 end
 gridworld.events[defines.events.on_tick] = function(event)
