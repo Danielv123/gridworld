@@ -5,6 +5,9 @@
 local clusterio_api = require("modules/clusterio/api")
 
 local function dump_mapview(position_a, position_b)
+	-- Only process on the server. Modifying any game state after this statement will desync
+	if not gridworld.is_server_unsafe_desync then return end
+
 	local tiles = game.surfaces[1].find_tiles_filtered{area = {position_a, position_b}}
 
 	local map_data = {}
@@ -27,6 +30,7 @@ local function dump_mapview(position_a, position_b)
 		position = position_a,
 		size = CHUNK_SIZE,
 		data = table.concat(map_data, ";"),
+		layer = "tiles_"
 	})
 end
 -- dump_mapview(game.player.position, {x = game.player.position.x + 128, y = game.player.position.y + 128})

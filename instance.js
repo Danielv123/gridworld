@@ -104,6 +104,7 @@ class InstancePlugin extends BaseInstancePlugin {
 			world_x: this.instance.config.get("gridworld.grid_x_position"),
 			world_y: this.instance.config.get("gridworld.grid_y_position"),
 		};
+		await this.sendRcon("/sc gridworld.is_server_unsafe_desync = true");
 		if (this.instance.config.get("gridworld.is_lobby_server")) {
 			await this.sendRcon("/sc gridworld.register_lobby_server(true)");
 			// Get gridworld data
@@ -116,7 +117,7 @@ class InstancePlugin extends BaseInstancePlugin {
 			// Update neighboring nodes for edge_transports
 			await sleep(1000);
 			await this.instance.sendTo("controller", new messages.UpdateEdgeTransportEdges({
-				instance_id: this.instance.id,
+				instance_id: this.instance.config.get("instance.id"),
 			}));
 			// Refresh faction data
 			const response = await this.instance.sendTo("controller", new messages.RefreshFactionData());
@@ -128,7 +129,7 @@ class InstancePlugin extends BaseInstancePlugin {
 			const x = data.world_x * data.x_size;
 			const y = data.world_y * data.y_size;
 			await this.sendRcon(`/sc gridworld.map.dump_mapview({${x - data.x_size},${y - data.y_size}}, {${x},${y}})`);
-			await this.sendRcon(`/c gridworld.map.dump_entities(game.surfaces[1].find_entities_filtered{area = {{${x - data.x_size},${y - data.y_size}}, {${x},${y}}}})`);
+			await this.sendRcon(`/sc gridworld.map.dump_entities(game.surfaces[1].find_entities_filtered{area = {{${x - data.x_size},${y - data.y_size}}, {${x},${y}}}})`);
 		}
 	}
 
