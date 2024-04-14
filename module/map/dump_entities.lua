@@ -3,6 +3,7 @@
 ]]
 
 local clusterio_api = require("modules/clusterio/api")
+local ignored_entities = require("modules/gridworld/map/ignored_entities")
 
 local function dump_entities(entities, removed_entities)
 	-- Do removals first, then additions afterwards to avoid issues with entities being removed and added in the same cycle
@@ -18,7 +19,7 @@ local function dump_entities(entities, removed_entities)
 	local map_data = {}
 	-- Get entities in the area
 	for _, entity in pairs(tasks) do
-		if entity == nil or entity.valid == false then
+		if entity == nil or entity.valid == false or ignored_entities[entity.type] then
 			goto continue
 		end
 		local position = entity.position
