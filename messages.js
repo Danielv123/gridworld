@@ -588,8 +588,9 @@ module.exports = {
 		static plugin = pluginName;
 		static jsonSchema = {
 			type: "object",
-			required: ["type", "data"],
+			required: ["type", "data", "instance_id", "grid_id"],
 			properties: {
+				grid_id: { type: "integer" },
 				type: {
 					type: "string", enum: [
 						"tiles", // array of pixels for a 32x32 chunk with lines starting horizontally from the top
@@ -602,18 +603,21 @@ module.exports = {
 					type: "array",
 					items: { type: "string" },
 				},
+				instance_id: { type: "integer" },
 				layer: { type: "string" }, // optional, defaults to "" for entities
 			},
 		};
-		constructor(type, data, position, size, layer = "") {
+		constructor(type, data, position, size, instance_id, grid_id, layer = "") {
 			this.type = type;
 			this.data = data;
 			this.position = position;
 			this.size = size;
+			this.instance_id = instance_id;
+			this.grid_id = grid_id;
 			this.layer = layer;
 		}
 		static fromJSON(json) {
-			return new this(json.type, json.data, json.position, json.size, json.layer);
+			return new this(json.type, json.data, json.position, json.size, json.instance_id, json.grid_id, json.layer);
 		}
 	},
 	RefreshTileData: class RefreshTileData {

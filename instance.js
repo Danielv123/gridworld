@@ -117,7 +117,7 @@ class InstancePlugin extends BaseInstancePlugin {
 			// Update neighboring nodes for edge_transports
 			await sleep(1000);
 			await this.instance.sendTo("controller", new messages.UpdateEdgeTransportEdges({
-				instance_id: this.instance.id,
+				instance_id: this.instance.config.get("instance.id"),
 			}));
 			// Refresh faction data
 			const response = await this.instance.sendTo("controller", new messages.RefreshFactionData());

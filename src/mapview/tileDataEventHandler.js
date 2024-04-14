@@ -3,12 +3,13 @@ const sharp = require("sharp");
 const path = require("path");
 sharp.cache(false);
 const sleep = require("../util/sleep");
+const worldPositionToInstance = require("../worldgen/util/worldPositionToInstance");
 
 const TILE_SIZE = 512;
 const fileLocks = {}; // Used to prevent multiple writes to the same file
 const updates = new Map();
 
-module.exports = async function tileDataEventHandler({ type, data, size, position, layer }) {
+module.exports = async function tileDataEventHandler({ type, data, size, position, instance_id, grid_id, layer }) {
 	// console.log(type, size, position);
 	// Image tiles are 512x512 pixels arranged in a grid, starting at 0,0
 	if (type === "pixels") {
@@ -20,6 +21,13 @@ module.exports = async function tileDataEventHandler({ type, data, size, positio
 			const x = Math.floor(data[i]); // Convert from string and strip decimals
 			const y = Math.floor(data[i + 1]); // Convert from string and strip decimals
 			const rgba = [Number(`0x${data[i + 2].slice(0, 2)}`), Number(`0x${data[i + 2].slice(2, 4)}`), Number(`0x${data[i + 2].slice(4, 6)}`), Number(`0x${data[i + 2].slice(6, 8)}`)];
+
+			// Check if the x and y coordinates overlap with any grid instances
+			const instance = worldPositionToInstance(x, y, grid_id, this.controller.instances);
+			if (instance.instance !== undefined && instance.instance.id !== instance_id) {
+				// Prevent instances from updating tiles that are inside the grid of another instance
+				continue;
+			}
 
 			// Figure out which image tile the pixel belongs to
 			const x_tile = (x - x % TILE_SIZE) / TILE_SIZE + (x < 0 ? -1 : 0);
@@ -52,6 +60,14 @@ module.exports = async function tileDataEventHandler({ type, data, size, positio
 			const x_tile = (pixel_world_x - pixel_world_x % TILE_SIZE) / TILE_SIZE + (pixel_world_x < 0 ? -1 : 0);
 			const y_tile = (pixel_world_y - pixel_world_y % TILE_SIZE) / TILE_SIZE + (pixel_world_y < 0 ? -1 : 0);
 			const filename = `${layer}z10x${x_tile}y${y_tile}.png`;
+
+			// Check if the x and y coordinates overlap with any grid instances
+			const instance = worldPositionToInstance(pixel_world_x, pixel_world_y, grid_id, this.controller.instances);
+			if (instance.instance !== undefined && instance.instance.id !== instance_id) {
+				// Prevent instances from updating tiles that are inside the grid of another instance
+				continue;
+			}
+
 			if (!updates.has(filename)) {
 				updates.set(filename, new Set());
 			}

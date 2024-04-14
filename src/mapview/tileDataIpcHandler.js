@@ -2,7 +2,7 @@
 
 const messages = require("./../../messages");
 
-module.exports = async function handleTileDataIpc(instancePlugin, json) {
+module.exports = async function tileDataIpcHandler(instancePlugin, json) {
 	let tileData = json.data.split(";");
 	if (!Array.isArray(tileData)) {
 		instancePlugin.logger.error(`Received tile data with invalid data (should be array) ${json.data}`);
@@ -13,5 +13,13 @@ module.exports = async function handleTileDataIpc(instancePlugin, json) {
 		instancePlugin.logger.error(`Received tile data with invalid type ${type}`);
 	}
 
-	await instancePlugin.instance.sendTo("controller", new messages.TileData(type, tileData, json.position, json.size, json.layer));
+	await instancePlugin.instance.sendTo("controller", new messages.TileData(
+		type,
+		tileData,
+		json.position,
+		json.size,
+		instancePlugin.instance.config.get("instance.id"),
+		instancePlugin.instance.config.get("gridworld.grid_id"),
+		json.layer
+	));
 };
