@@ -66,7 +66,11 @@ gridworld.events[clusterio_api.events.on_server_startup] = function()
 		global.gridworld.map = {
 			added_entities_to_update = nil,
 			removed_entities_to_update = nil,
+			entity_registrations = {},
 		}
+	end
+	if global.gridworld.map.entity_registrations == nil then
+		global.gridworld.map.entity_registrations = {}
 	end
 
 	-- Fun factions inititalization
@@ -133,6 +137,14 @@ gridworld.events[defines.events.on_built_entity] = function(event)
 		end
 	end
 end
+gridworld.events[defines.events.on_biter_base_built] = function(event)
+	if not global.gridworld.lobby_server then
+		local entity = event.entity
+		if entity.valid then
+			map.events.on_biter_base_built(event, entity)
+		end
+	end
+end
 gridworld.events[defines.events.on_entity_cloned] = function(event)
 	if not global.gridworld.lobby_server then
 		local entity = event.destination
@@ -175,6 +187,27 @@ gridworld.events[defines.events.on_entity_destroyed] = function(event)
 		-- Instead, use the registration_number stored previously.
 		map.events.on_entity_destroyed(event) -- Run before load balancing to hijack its event registrations
 		load_balancing.events.on_entity_destroyed(event)
+	end
+end
+-- "Soft" entity removal events, used for cleanup of things we havent registered
+gridworld.events[defines.events.on_player_mined_entity] = function(event)
+	if not global.gridworld.lobby_server then
+		map.events.on_player_mined_entity(event)
+	end
+end
+gridworld.events[defines.events.on_robot_mined_entity] = function(event)
+	if not global.gridworld.lobby_server then
+		map.events.on_robot_mined_entity(event)
+	end
+end
+gridworld.events[defines.events.on_entity_died] = function(event)
+	if not global.gridworld.lobby_server then
+		map.events.on_entity_died(event)
+	end
+end
+gridworld.events[defines.events.on_pre_robot_exploded_cliff] = function(event)
+	if not global.gridworld.lobby_server then
+		map.events.on_pre_robot_exploded_cliff(event)
 	end
 end
 gridworld.events[defines.events.on_gui_click] = function(event)

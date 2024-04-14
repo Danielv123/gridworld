@@ -10,11 +10,10 @@ module.exports = async function tileDataEventHandler({ type, data, size, positio
 	// Image tiles are 512x512 pixels arranged in a grid, starting at 0,0
 	const TILE_SIZE = 512;
 	if (type === "pixels") {
-		// console.log(data);
 		for (let i = 0; i < data.length; i += 3) {
 			const x = Math.floor(data[i]); // Convert from string and strip decimals
 			const y = Math.floor(data[i + 1]); // Convert from string and strip decimals
-			const rgba = [Number(`0x${data[i + 2].slice(0, 2)}`), Number(`0x${data[i + 2].slice(2, 4)}`), Number(`0x${data[i + 2].slice(4, 6)}`), 255];
+			const rgba = [Number(`0x${data[i + 2].slice(0, 2)}`), Number(`0x${data[i + 2].slice(2, 4)}`), Number(`0x${data[i + 2].slice(4, 6)}`), Number(`0x${data[i + 2].slice(6, 8)}`)];
 
 			// Figure out which image tile the pixel belongs to
 			const x_tile = (x - x % TILE_SIZE) / TILE_SIZE + (x < 0 ? -1 : 0);
