@@ -48,6 +48,12 @@ lib.definePermission({
 	description: "Delete *any* faction",
 	grantByDefault: false,
 });
+lib.definePermission({
+	name: "gridworld.merge.start",
+	title: "Start merge",
+	description: "Merge instances to a single map. Resource intensive",
+	grantByDefault: false,
+});
 
 module.exports = {
 	plugin: {

@@ -32,6 +32,7 @@ const claimServerRequestHandler = require("./src/request_handlers/claimServerReq
 const unclaimServerRequestHandler = require("./src/request_handlers/unclaimServerRequestHandler");
 const setLoadFactorEventHandler = require("./src/event_handlers/setLoadFactorEventHandler");
 const tileDataEventHandler = require("./src/mapview/tileDataEventHandler");
+const startMapMergeRequestHandler = require("./src/request_handlers/startMapMergeRequestHandler");
 
 async function loadDatabase(config, filename, logger) {
 	let itemsPath = path.resolve(config.get("controller.database_directory"), filename);
@@ -105,6 +106,7 @@ class ControllerPlugin extends BaseControllerPlugin {
 		this.controller.handle(messages.UnclaimServer, unclaimServerRequestHandler.bind(this));
 		this.controller.handle(messages.SetLoadFactor, setLoadFactorEventHandler.bind(this));
 		this.controller.handle(messages.TileData, tileDataEventHandler.bind(this));
+		this.controller.handle(messages.StartMapMerge, startMapMergeRequestHandler.bind(this));
 	}
 
 	async onInstanceStatusChanged(instance) {

@@ -26,7 +26,7 @@ module.exports = async function createInstance(plugin, name, x, y, x_size, y_siz
 
 		"name": `${plugin.controller.config.get("controller.name")} - ${name}`,
 		"description": `Clusterio instance for ${plugin.controller.config.get("controller.name")}`,
-		"tags": ["clusterio"],
+		"tags": ["clusterio", "gridworld"],
 		"max_players": 0,
 		"visibility": { "public": true, "lan": true },
 		"username": "",

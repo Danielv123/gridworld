@@ -664,4 +664,28 @@ module.exports = {
 			return this.data;
 		}
 	},
+	StartMapMerge: class StartMapMerge {
+		static type = "request";
+		static src = "control";
+		static dst = "controller";
+		static plugin = pluginName;
+		static permission = "gridworld.merge.start";
+		static jsonSchema = {
+			type: "object",
+			required: ["host_id", "grid_id"],
+			properties: {
+				// Target host
+				host_id: { type: "integer" },
+				// Grid to merge
+				grid_id: { type: "integer" },
+			},
+		};
+		constructor(host_id, grid_id) {
+			this.host_id = host_id;
+			this.grid_id = grid_id;
+		}
+		static fromJSON(json) {
+			return new this(json.host_id, json.grid_id);
+		}
+	},
 };

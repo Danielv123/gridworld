@@ -1,5 +1,5 @@
---[[ local clusterio_serialize = require("modules/clusterio/serialize")]]
-local clusterio_serialize = serialize
+local clusterio_serialize = require("modules/clusterio/serialize")
+-- local clusterio_serialize = serialize
 
 --[[
 	Function to serialize an entity to a string.
