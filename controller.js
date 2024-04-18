@@ -65,6 +65,21 @@ class ControllerPlugin extends BaseControllerPlugin {
 	async init() {
 		this.gridworldDatastore = await loadDatabase(this.controller.config, "gridworld.json", this.logger);
 		this.factionsDatastore = await loadDatabase(this.controller.config, "factions.json", this.logger);
+		this.gridworlds = new Map();
+		// Reconstruct gridworld information by iterating over all instances and finding lobby servers
+		for (let [instanceId, instance] of this.controller.instances) {
+			if (instance.config.get("gridworld.is_lobby_server")) {
+				this.gridworlds.set(instance.config.get("gridworld.grid_id"), {
+					lobby_server: instanceId,
+					id: instance.config.get("gridworld.grid_id"),
+					name_prefix: instance.config.get("gridworld.grid_name_prefix"),
+					x_size: instance.config.get("gridworld.grid_x_size"),
+					y_size: instance.config.get("gridworld.grid_y_size"),
+					use_edge_transports: true, // TODO: This should not be hardcoded
+				});
+			}
+		}
+
 		this.autosaveId = setInterval(() => {
 			saveDatabase(this.controller.config, this.gridworldDatastore, "gridworld.json", this.logger).catch(err => {
 				this.logger.error(`Unexpected error autosaving gridworld data:\n${err.stack}`);

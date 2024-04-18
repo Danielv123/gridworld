@@ -11,13 +11,34 @@ module.exports = async function createRequestHandler(message) {
 	// }
 
 	// Create a new gridworld. We also need to store the x_size and y_size somewhere.
-
 	if (!message.data.use_edge_transports) { return; }
-	const grid = createFactionGrid({
+	const grid = await createFactionGrid({
 		plugin: this,
 		name_prefix: message.data.name_prefix,
 		hostId: message.data.host,
 		x_size: message.data.x_size,
 		y_size: message.data.y_size,
 	});
+
+	// Store in the controller database
+	this.gridworlds.set(grid.grid_id, {
+		lobby_server: grid.lobby_server,
+		id: grid.grid_id,
+		name_prefix: message.data.name_prefix,
+		x_size: message.data.x_size,
+		y_size: message.data.y_size,
+		use_edge_transports: message.data.use_edge_transports,
+	});
+
+	// Send update to all connected clients
+	for (let sub of this.subscribedControlLinks) {
+		if (sub.gridworlds) {
+			await this.controller.sendTo(sub.link, this.gridworldDatastore.get(grid.grid_id));
+		}
+	}
+
+	return {
+		ok: true,
+		message: "Gridworld created",
+	};
 };

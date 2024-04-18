@@ -3,6 +3,7 @@ const lib = require("@clusterio/lib");
 
 const assignInstance = require("../worldgen/assignInstance");
 const createSave = require("../worldgen/createSave");
+const { InstanceInfo } = require("@clusterio/controller");
 
 module.exports = async function startMapMergeRequestHandler(message) {
 	// message === {
@@ -17,7 +18,7 @@ module.exports = async function startMapMergeRequestHandler(message) {
 	instanceConfig.set("instance.name", name);
 
 	let instanceId = instanceConfig.get("instance.id");
-	if (plugin.controller.instances.has(instanceId)) {
+	if (this.controller.instances.has(instanceId)) {
 		throw new lib.RequestError(`Instance with ID ${instanceId} already exists`);
 	}
 

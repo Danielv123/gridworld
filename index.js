@@ -151,6 +151,7 @@ module.exports = {
 			"/gridworld/create",
 			"/gridworld/factions",
 			"/gridworld/factions/:factionId/view",
+			"/gridworld/merge_map",
 		],
 
 		messages: [

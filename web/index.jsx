@@ -6,6 +6,7 @@ import OverviewPage from "./pages/OverviewPage";
 import CreateGridworldPage from "./pages/CreateGridworldPage";
 import FactionsPage from "./pages/FactionsPage";
 import FactionViewPage from "./pages/FactionViewPage";
+import MergeMapPage from "./pages/MergeMapPage";
 import messages from "../messages";
 
 export class WebPlugin extends BaseWebPlugin {
@@ -31,17 +32,25 @@ export class WebPlugin extends BaseWebPlugin {
 				path: "/gridworld/factions/:faction_id/view",
 				content: <FactionViewPage />,
 			},
+			{
+				path: "/gridworld/merge_map",
+				permission: "gridworld.merge.start",
+				content: <MergeMapPage />,
+			},
 		];
 		this.playerPositions = new Map();
 		this.factions = new Map();
+		this.gridworlds = new Map();
 		this.updateHandlers = new Set();
 		this.updateHandlerCounts = {
 			player_position: 0,
 			faction_list: 0,
+			gridworlds: 0,
 		};
 
 		this.control.handle(messages.PlayerPosition, this.playerPositionEventHandler.bind(this));
 		this.control.handle(messages.FactionUpdate, this.factionUpdateEventHandler.bind(this));
+		this.control.handle(messages.GridworldUpdate, this.gridworldUpdateEventHandler.bind(this));
 	}
 
 	onControllerConnectionEvent(event) {
@@ -62,6 +71,14 @@ export class WebPlugin extends BaseWebPlugin {
 		this.updateHandlers.forEach(handler => {
 			if (handler.type === "faction_list") {
 				handler.callback(message.faction);
+			}
+		});
+	}
+
+	async gridworldUpdateEventHandler(message) {
+		this.updateHandlers.forEach(handler => {
+			if (handler.type === "gridworlds") {
+				handler.callback(message);
 			}
 		});
 	}
@@ -96,13 +113,17 @@ export class WebPlugin extends BaseWebPlugin {
 		this.control.send(new messages.SetWebSubscription({
 			player_position: this.updateHandlerCounts["player_position"] > 0,
 			faction_list: this.updateHandlerCounts["faction_list"] > 0,
+			gridworlds: this.updateHandlerCounts["gridworlds"] > 0,
 		})).catch(notifyErrorHandler("Error subscribing to event updates"));
 
 		if (this.updateHandlerCounts["player_position"] === 0) {
 			this.playerPositions.clear();
 		}
 		if (this.updateHandlerCounts["faction_list"] === 0) {
-			this.factions.length = 0;
+			this.factions.clear();
+		}
+		if (this.updateHandlerCounts["gridworlds"] === 0) {
+			this.gridworlds.clear();
 		}
 	}
 }
