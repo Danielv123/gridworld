@@ -6,6 +6,7 @@ module.exports = async function createInstance(plugin, name, x, y, x_size, y_siz
 	plugin.logger.info("Creating instance", name);
 	let instanceConfig = new lib.InstanceConfig("controller");
 	instanceConfig.set("instance.name", name);
+	instanceConfig.set("gridworld.is_grid_square", true);
 	instanceConfig.set("gridworld.grid_id", grid_id);
 	instanceConfig.set("gridworld.grid_x_position", x);
 	instanceConfig.set("gridworld.grid_y_position", y);

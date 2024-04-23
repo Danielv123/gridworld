@@ -4,6 +4,7 @@ const lib = require("@clusterio/lib");
 const assignInstance = require("../worldgen/assignInstance");
 const createSave = require("../worldgen/createSave");
 const { InstanceInfo } = require("@clusterio/controller");
+const mapFilter = require("../util/mapFilter");
 
 module.exports = async function startMapMergeRequestHandler(message) {
 	// message === {
@@ -55,8 +56,11 @@ module.exports = async function startMapMergeRequestHandler(message) {
 	await this.controller.sendTo({ instanceId }, new lib.InstanceStartRequest());
 
 	// Get instances with the same grid_id
-	const instances = this.controller.instances.filter(instance => instance.config.get("gridworld.grid_id") === message.grid_id);
-	for (let instance of instances) {
+	const instances = mapFilter(this.controller.instances,
+		instance => instance.config.get("gridworld.grid_id") === message.grid_id
+			&& instance.config.get("gridworld.is_grid_square") === true
+	);
+	for (let [_, instance] of instances) {
 		// Generate chunks in target area on merge target
 		const grid_x_size = instance.config.get("gridworld.grid_x_size");
 		const grid_y_size = instance.config.get("gridworld.grid_y_size");
@@ -64,9 +68,11 @@ module.exports = async function startMapMergeRequestHandler(message) {
 		const grid_y_position = instance.config.get("gridworld.grid_y_position");
 		const leftTop = [grid_x_position * grid_x_size, grid_y_position * grid_y_size];
 		const rightBottom = [(grid_x_position + 1) * grid_x_size, (grid_y_position + 1) * grid_y_size];
-		const command = `/c gridworld.merge_map.prepare_chunks({${leftTop[0]}, ${leftTop[1]}}, {${rightBottom[0]}, ${rightBottom[1]})`;
+
+		// Send command to the merge target
+		const command = `/c gridworld.merge_map.prepare_chunks({${leftTop[0]}, ${leftTop[1]}}, {${rightBottom[0]}, ${rightBottom[1]}})`;
 		const status = await this.controller.sendTo({ instanceId }, new lib.InstanceSendRconRequest(command));
-		this.logger.info(`Prepare chunks status for ${instance.name}: ${status}`);
+		this.logger.info(`Prepare chunks status for ${instance.config.get("instance.name")}: ${status}`);
 	}
 
 	for (let instance of instances) {

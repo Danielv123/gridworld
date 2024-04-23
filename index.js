@@ -93,6 +93,12 @@ module.exports = {
 				description: "Make this instance act as a lobby server for a gridworld",
 				initialValue: false,
 			},
+			"gridworld.is_grid_square": {
+				type: "boolean",
+				title: "Server is a grid square",
+				description: "Make this instance act as a grid square for a gridworld",
+				initialValue: false,
+			},
 			"gridworld.grid_id": {
 				type: "number",
 				title: "Grid ID",

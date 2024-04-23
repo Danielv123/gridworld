@@ -4,12 +4,23 @@ const mapFind = require("../util/mapFind");
 const getEdges = require("../worldgen/getEdges");
 const { edge_target_position_offsets } = require("../worldgen/factionGrid/edge_target_position_offsets");
 
+/**
+ * Update edge transports edges for a grid square instance
+ * @param {object} message Message as defined by UpdateEdgeTransportEdges
+ * @param {object} message.data - The message data
+ * @param {number} message.data.instance_id - The instance ID of the instance to update edge transports for
+ */
 module.exports = async function updateEdgeTransportsEdges(message) {
-	// message.data === {
-	// instance_id: instance_id,
-	// }
-
 	const instance = this.controller.instances.get(message.data.instance_id);
+
+	if (!instance) {
+		this.logger.error(`Instance ${message.data.instance_id} not found`);
+		return;
+	}
+	if (!instance.config.get("gridworld.is_grid_square")) {
+		return;
+	}
+
 	const x = instance.config.get("gridworld.grid_x_position");
 	const y = instance.config.get("gridworld.grid_y_position");
 	const grid_id = instance.config.get("gridworld.grid_id");

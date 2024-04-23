@@ -28,6 +28,7 @@ local gui_events = require("gui/events")
 local set_player_permission_group = require("faction/building_restrictions/set_player_permission_group")
 local worldgen = require("worldgen/index")
 local load_balancing = require("load_balancing/load_balancing")
+local merge_map = require("merge_map/merge_map")
 
 gridworld.events = {}
 gridworld.events[clusterio_api.events.on_server_startup] = function()
@@ -331,5 +332,6 @@ gridworld.map = {
 	dump_entities = map.dump_entities,
 	dump_mapview = map.dump_mapview,
 }
+gridworld.merge_map = merge_map
 
 return gridworld
