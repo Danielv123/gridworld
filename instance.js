@@ -110,7 +110,9 @@ class InstancePlugin extends BaseInstancePlugin {
 			// Get gridworld data
 			const { map_data } = await this.instance.sendTo("controller", new messages.GetMapData());
 			await this.sendRcon(`/sc gridworld.register_map_data('${JSON.stringify(map_data)}')`);
-		} else {
+		}
+		if (this.instance.config.get("gridworld.is_grid_square")) {
+			await this.sendRcon("/sc global.is_grid_square = true");
 			await this.sendRcon("/sc global.disable_crashsite = true");
 			await this.sendRcon(`/sc gridworld.create_world_limit("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
 			await this.sendRcon(`/sc gridworld.create_spawn("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
