@@ -1,10 +1,11 @@
 local clusterio_serialize = require("modules/clusterio/serialize")
--- local clusterio_serialize = serialize
+
+local entity_serializer = {}
 
 --[[
 	Function to serialize an entity to a string.
 ]]
-local function serialize_entity(entity)
+function entity_serializer.serialize(entity)
 	local entity_data = {
 		surface = entity.surface.name,
 		name = entity.name,
@@ -61,12 +62,11 @@ local function serialize_entity(entity)
 
 	return serpent.line(entity_data)
 end
-game.print(serialize_entity(game.player.selected))
 
 --[[
 	Function to deserialize an entity from a string.
 ]]
-local function deserialize_entity(serialized_entity)
+function entity_serializer.deserialize(serialized_entity)
 	local entity_data = loadstring("return " .. serialized_entity)()
 	local properties = {
 		name = entity_data.name,
@@ -152,4 +152,5 @@ local function deserialize_entity(serialized_entity)
 
 	return entity
 end
-deserialize_entity(serialize_entity(game.player.selected))
+
+return entity_serializer

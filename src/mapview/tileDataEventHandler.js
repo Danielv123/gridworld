@@ -5,7 +5,8 @@ sharp.cache(false);
 const sleep = require("../util/sleep");
 const worldPositionToInstance = require("../worldgen/util/worldPositionToInstance");
 
-const TILE_SIZE = 512;
+const { TILE_SIZE } = require("./constants");
+
 const fileLocks = {}; // Used to prevent multiple writes to the same file
 const updates = new Map();
 
