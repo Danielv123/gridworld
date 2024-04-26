@@ -22,7 +22,6 @@ local function entity_deserialize(serialized_entity)
 		create_build_effect_smoke = false,
 		spawn_decorations = true,
 		move_stuck_players = true,
-		stack = {count = 1, name = "tank"},
 	}
 	if player ~= nil then -- Prevent crash if player has never joined this server
 		properties.player = player
@@ -88,6 +87,40 @@ local function entity_deserialize(serialized_entity)
 	--[[ train-stop ]]
 	if entity_data.type == "train-stop" then
 		entity.trains_limit = entity_data.trains_limit
+	end
+	if entity_data.control_behavior ~= nil then
+		if entity_data.control_behavior.object_name == "LuaTrainStopControlBehavior" then
+			---@class LuaTrainStopControlBehavior
+			local control_behavior = entity.get_or_create_control_behavior()
+			control_behavior.send_to_train = entity_data.control_behavior.send_to_train
+			control_behavior.read_from_train = entity_data.control_behavior.read_from_train
+			control_behavior.read_stopped_train = entity_data.control_behavior.read_stopped_train
+			control_behavior.set_trains_limit = entity_data.control_behavior.set_trains_limit
+			control_behavior.read_trains_count = entity_data.control_behavior.read_trains_count
+			control_behavior.enable_disable = entity_data.control_behavior.enable_disable
+			control_behavior.stopped_train_signal = entity_data.control_behavior.stopped_train_signal
+			control_behavior.trains_count_signal = entity_data.control_behavior.trains_count_signal
+			control_behavior.trains_limit_signal = entity_data.control_behavior.trains_limit_signal
+			-- Shared with LuaGenericOnOffControlBehavior
+			control_behavior.connect_to_logistic_network = entity_data.control_behavior.connect_to_logistic_network
+			if entity_data.control_behavior.circuit_condition ~= nil then
+				control_behavior.circuit_condition = entity_data.control_behavior.circuit_condition
+			end
+			if entity_data.control_behavior.logistic_condition ~= nil then
+				control_behavior.logistic_condition = entity_data.control_behavior.logistic_condition
+			end
+		end
+		if entity_data.control_behavior.object_name == "LuaGenericOnOffControlBehavior" then
+			---@class LuaGenericOnOffControlBehavior
+			local control_behavior = entity.get_or_create_control_behavior()
+			control_behavior.connect_to_logistic_network = entity_data.control_behavior.connect_to_logistic_network
+			if entity_data.control_behavior.circuit_condition ~= nil then
+				control_behavior.circuit_condition = entity_data.control_behavior.circuit_condition
+			end
+			if entity_data.control_behavior.logistic_condition ~= nil then
+				control_behavior.logistic_condition = entity_data.control_behavior.logistic_condition
+			end
+		end
 	end
 
 	--[[ Handle inventories ]]
