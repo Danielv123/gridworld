@@ -105,6 +105,7 @@ class InstancePlugin extends BaseInstancePlugin {
 			world_y: this.instance.config.get("gridworld.grid_y_position"),
 		};
 		await this.sendRcon("/sc gridworld.is_server_unsafe_desync = true");
+		await this.sendRcon("/sc global.disable_crashsite = true");
 		if (this.instance.config.get("gridworld.is_lobby_server")) {
 			await this.sendRcon("/sc gridworld.register_lobby_server(true)");
 			// Get gridworld data
@@ -113,7 +114,6 @@ class InstancePlugin extends BaseInstancePlugin {
 		}
 		if (this.instance.config.get("gridworld.is_grid_square")) {
 			await this.sendRcon("/sc global.is_grid_square = true");
-			await this.sendRcon("/sc global.disable_crashsite = true");
 			await this.sendRcon(`/sc gridworld.create_world_limit("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
 			await this.sendRcon(`/sc gridworld.create_spawn("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
 			// Update neighboring nodes for edge_transports

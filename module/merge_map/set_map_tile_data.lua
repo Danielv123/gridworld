@@ -38,12 +38,8 @@ local function set_map_tile_data(data)
 			local x = bytesToInt(data:byte(i, i+3))
 			local y = bytesToInt(data:byte(i+4, i+7))
 			local name = tile_id_to_name[tile]
-			if name == nil then
-				log("Tile ID " .. tile .. " not found in tile_colors")
-				log(data:sub(i, i+8))
-				log("x: " .. x .. " y: " .. y)
-				log(#data)
-			else
+			-- TODO: Figure out why empty-ish tiles generate garbage data
+			if name ~= nil then
 				table.insert(tiles, {position = {x, y}, name = name})
 			end
 		end

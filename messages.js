@@ -688,6 +688,14 @@ module.exports = {
 				grid_id: { type: "integer" },
 			},
 		};
+		static Response = plainJson({
+			type: "object",
+			properties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+				instance_id: { type: "integer" },
+			},
+		});
 		constructor(data) {
 			this.host_id = data.host_id;
 			this.grid_id = data.grid_id;

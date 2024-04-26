@@ -65,14 +65,20 @@ module.exports = async function startMapMergeRequestHandler(message) {
 		instance => instance.config.get("gridworld.grid_id") === message.grid_id
 			&& instance.config.get("gridworld.is_grid_square") === true
 	);
+
+	const gridSquareAreas = new Map();
+
 	for (let [_, instance] of instances) {
 		// Generate chunks in target area on merge target
 		const grid_x_size = instance.config.get("gridworld.grid_x_size");
 		const grid_y_size = instance.config.get("gridworld.grid_y_size");
 		const grid_x_position = instance.config.get("gridworld.grid_x_position");
 		const grid_y_position = instance.config.get("gridworld.grid_y_position");
-		const leftTop = [grid_x_position * grid_x_size, grid_y_position * grid_y_size];
-		const rightBottom = [(grid_x_position + 1) * grid_x_size, (grid_y_position + 1) * grid_y_size];
+		const leftTop = [(grid_x_position - 1) * grid_x_size, (grid_y_position - 1) * grid_y_size];
+		const rightBottom = [grid_x_position * grid_x_size, grid_y_position * grid_y_size];
+
+		// Store the grid square area for later use
+		gridSquareAreas.set(instance.config.get("instance.id"), { leftTop, rightBottom });
 
 		// Send command to the merge target
 		const command = `/c gridworld.merge_map.prepare_chunks({${leftTop[0]}, ${leftTop[1]}}, {${rightBottom[0]}, ${rightBottom[1]}})`;
@@ -149,14 +155,38 @@ module.exports = async function startMapMergeRequestHandler(message) {
 		this.logger.info(`Set map tile data status for ${filename}: ${status}`);
 	}
 
-	for (let instance of instances) {
+	for (let [grid_square_id, grid_square] of instances) {
+		const grid_square_name = grid_square.config.get("instance.name");
 		// Ensure the instance is running
-		if (instance.status === "stopped") {
-			this.logger.info(`Starting instance ${instance.name}`);
-			await this.controller.sendTo({ instanceId: instance.id }, new lib.InstanceStartRequest());
+		const wasStopped = grid_square.status === "stopped";
+		if (grid_square.status === "stopped") {
+			this.logger.info(`Starting instance ${grid_square_name}`);
+			await this.controller.sendTo({ instanceId: grid_square_id }, new lib.InstanceStartRequest());
 		}
 
 		// Perform entity dump
+		this.logger.info(`Dumping entities for ${grid_square_name}`);
+		const leftTop = gridSquareAreas.get(grid_square_id).leftTop;
+		const rightBottom = gridSquareAreas.get(grid_square_id).rightBottom;
+		const serializeCommand = `/c gridworld.merge_map.serialize_entities({{${leftTop[0]}, ${leftTop[1]}}, {${rightBottom[0]}, ${rightBottom[1]}}})`;
+		const entities = await this.controller.sendTo({ instanceId: grid_square_id }, new lib.InstanceSendRconRequest(serializeCommand));
 
+		// Load entities into the merge target
+		const command = `/sc gridworld.merge_map.deserialize_entities([=======[${entities}]=======])`;
+		const status = await this.controller.sendTo({ instanceId }, new lib.InstanceSendRconRequest(command));
+		this.logger.info(`Deserialize entities status for ${grid_square_name}: ${status}`);
+
+		// Stop the instance if it was stopped
+		if (wasStopped) {
+			this.logger.info(`Stopping instance ${grid_square_name}`);
+			await this.controller.sendTo({ instanceId: grid_square_id }, new lib.InstanceStopRequest());
+		}
 	}
+
+	this.logger.info(`Map merge completed for grid ${message.grid_id}`);
+	return {
+		success: true,
+		message: `Map merge completed for grid ${message.grid_id}`,
+		instance_id: instanceId,
+	};
 };

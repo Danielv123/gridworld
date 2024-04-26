@@ -14,6 +14,7 @@ local function dump_tiles(tiles)
 
 	local map_data = {}
 	for _, tilePosition in pairs(tiles) do
+		---@diagnostic disable-next-line: missing-parameter
 		local tile = game.surfaces[1].get_tile(tilePosition)
 		local map_color = tile.prototype.map_color
 		table.insert(map_data, tilePosition.x)
