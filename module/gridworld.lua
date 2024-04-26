@@ -118,7 +118,7 @@ gridworld.events[defines.events.on_built_entity] = function(event)
 		local x = entity.position.x
 		local y = entity.position.y
 
-		if out_of_bounds(x,y) then
+		if global.is_grid_square and out_of_bounds(x,y) then
 			if player and player.valid then
 				-- Tell the player what is happening
 				-- if player then player.print("Attempted building outside allowed area (placed at x "..x.." y "..y..")") end

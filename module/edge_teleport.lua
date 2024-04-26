@@ -37,7 +37,7 @@ local function check_player_position()
 	local y_min = y_size * world_y
 
 	for _,player in pairs(game.connected_players) do
-		if out_of_bounds(player.position.x, player.position.y) then
+		if global.is_grid_square and out_of_bounds(player.position.x, player.position.y) then
 			if not global.gridworld.players[player.name].has_been_offered_teleport and player.character ~= nil then
 				-- north=6, east=0, south=2, and west=4
 				-- Check north edge
