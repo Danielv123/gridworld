@@ -1,8 +1,9 @@
 local clusterio_serialize = require("modules/clusterio/serialize")
-
+local LuaTrain_serialize = require("modules/gridworld/universal_serializer/classes/LuaTrain_serialize")
 --[[
 	Function to serialize an entity to a string.
 ]]
+---@param entity LuaEntity
 local function entity_serialize(entity)
 	local entity_data = {
 		surface = entity.surface.name,
@@ -76,6 +77,11 @@ local function entity_serialize(entity)
 			end
 		end
 		-- LuaCircuitNetwork (not implemented, needs red and green)
+	end
+
+	-- Trains
+	if entity.train ~= nil then
+		entity_data.train = LuaTrain_serialize(entity.train)
 	end
 
 	entity_data.inventories = {}

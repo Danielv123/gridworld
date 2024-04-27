@@ -11,7 +11,7 @@ local function deserialize_entities(string)
 
 	local entities = {}
 	for _, serialized_entity in pairs(serialized_entities) do
-		local entity = universal_serializer.entity.deserialize(serialized_entity)
+		local entity = universal_serializer.LuaEntity.deserialize(serialized_entity)
 		table.insert(entities, entity)
 	end
 

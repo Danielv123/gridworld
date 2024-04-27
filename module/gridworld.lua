@@ -29,6 +29,7 @@ local set_player_permission_group = require("faction/building_restrictions/set_p
 local worldgen = require("worldgen/index")
 local load_balancing = require("load_balancing/load_balancing")
 local merge_map = require("merge_map/merge_map")
+local universal_serializer = require("universal_serializer/universal_serializer")
 
 gridworld.events = {}
 gridworld.events[clusterio_api.events.on_server_startup] = function()
@@ -248,6 +249,7 @@ gridworld.events[defines.events.on_tick] = function(event)
 	if not global.gridworld.lobby_server then
 		worldgen.events.on_tick(event)
 	end
+	universal_serializer.events.on_tick(event)
 end
 gridworld.events[defines.events.on_player_built_tile] = function(event)
 	if not global.gridworld.lobby_server then

@@ -11,7 +11,7 @@ local function serialize_entities(area, surface)
 	local serialized_entities = {}
 	for _, entity in pairs(entities) do
 		if entity.valid then
-			local serialized_entity = universal_serializer.entity.serialize(entity)
+			local serialized_entity = universal_serializer.LuaEntity.serialize(entity)
 			table.insert(serialized_entities, serialized_entity)
 		end
 	end

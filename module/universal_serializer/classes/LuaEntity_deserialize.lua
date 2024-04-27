@@ -1,10 +1,28 @@
 local clusterio_serialize = require("modules/clusterio/serialize")
+local LuaTrain_deserialize = require("modules/gridworld/universal_serializer/classes/LuaTrain_deserialize")
 
 --[[
 	Function to deserialize an entity from a string.
 ]]
-local function entity_deserialize(serialized_entity)
+local function entity_deserialize(serialized_entity, is_already_delayed)
 	local entity_data = load("return " .. serialized_entity)()
+
+	-- Some entities need to be delayed by a tick to allow the game to initialize stuff
+	-- This is a list of entities that need to be delayed
+	local delayed_entity_types = {
+		["locomotive"] = true,
+		["cargo-wagon"] = true,
+		["fluid-wagon"] = true,
+		["artillery-wagon"] = true,
+	}
+	if not is_already_delayed and delayed_entity_types[entity_data.type] then
+		-- Delay entity creation by a tick
+		global.delayed_entities_tick = game.tick + 1 -- Delay by 1 tick
+		global.delayed_entities = global.delayed_entities or {}
+		table.insert(global.delayed_entities, serialized_entity)
+		return nil
+	end
+
 	-- Check if player is valid before using it
 	local player = nil
 	if entity_data.player ~= nil then
@@ -78,7 +96,9 @@ local function entity_deserialize(serialized_entity)
 
 	local entity = game.surfaces[entity_data.surface].create_entity(properties)
 	if entity == nil then
-		error("Failed to create entity")
+		log("Failed to create entity " .. entity_data.name .. " at " .. serpent.block(entity_data))
+		log("Properties: " .. serpent.block(properties))
+		return nil
 	end
 
 	if entity.supports_backer_name() then
@@ -121,6 +141,11 @@ local function entity_deserialize(serialized_entity)
 				control_behavior.logistic_condition = entity_data.control_behavior.logistic_condition
 			end
 		end
+	end
+
+	-- Trains
+	if entity_data.train ~= nil then
+		LuaTrain_deserialize(entity, entity_data.train)
 	end
 
 	--[[ Handle inventories ]]
