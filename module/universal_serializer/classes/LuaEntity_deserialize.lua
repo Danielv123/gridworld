@@ -72,9 +72,13 @@ local function entity_deserialize(serialized_entity, is_already_delayed)
 	--[[ locomotive ]]
 	if entity_data.type == "locomotive" then
 		properties.snap_to_train_stop = false
-		-- TODO: use entity.train to serialize the schedule
 	end
 	--[[ logistic-container is not implemented ]]
+	if entity_data.type == "logistic-container" then
+		-- request_filters are mmb filters, not request slots
+		-- properties.request_filters = entity_data.request_filters
+		properties.request_from_buffers = entity_data.request_from_buffers
+	end
 	--[[ particle is not implemented ]]
 	--[[ artillery-flare is not implemented ]]
 	--[[ projectile is not implemented ]]
@@ -174,10 +178,24 @@ local function entity_deserialize(serialized_entity, is_already_delayed)
 		LuaTrain_deserialize(entity, entity_data.train)
 	end
 
+	-- Entity ghost again
+	if entity_data.type == "entity-ghost" then
+		properties.item_requests = entity_data.item_requests
+	end
+
 	--[[ Handle inventories ]]
 	for i = 1, 10 do
 		if entity_data.inventories[i] ~= nil then
 			clusterio_serialize.deserialize_inventory(entity.get_inventory(i), entity_data.inventories[i])
+		end
+	end
+
+	-- Set requester slots
+	if entity_data.request_slots ~= nil then
+		for i = 1, entity_data.request_slot_count do
+			if entity_data.request_slots[i] ~= nil then
+				entity.set_request_slot(entity_data.request_slots[i], i)
+			end
 		end
 	end
 
