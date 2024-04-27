@@ -109,6 +109,24 @@ local function entity_deserialize(serialized_entity, is_already_delayed)
 		entity.trains_limit = entity_data.trains_limit
 	end
 	if entity_data.control_behavior ~= nil then
+		log(entity_data.name)
+		log(serpent.block(entity_data.control_behavior))
+		---@param cb LuaGenericOnOffControlBehavior
+		local function LuaGenericOnOffControlBehavior_deserialize(cb)
+			cb.connect_to_logistic_network = entity_data.control_behavior.connect_to_logistic_network
+			log("1")
+			if entity_data.control_behavior.circuit_condition ~= nil then
+				log("2")
+				cb.circuit_condition = entity_data.control_behavior.circuit_condition
+			end
+			log("3")
+			if entity_data.control_behavior.logistic_condition ~= nil then
+				log("Setting logistic_condition")
+				log(serpent.block(entity_data.control_behavior.logistic_condition))
+				cb.logistic_condition = entity_data.control_behavior.logistic_condition
+			end
+			log("5")
+		end
 		if entity_data.control_behavior.object_name == "LuaTrainStopControlBehavior" then
 			---@class LuaTrainStopControlBehavior
 			local control_behavior = entity.get_or_create_control_behavior()
@@ -118,28 +136,36 @@ local function entity_deserialize(serialized_entity, is_already_delayed)
 			control_behavior.set_trains_limit = entity_data.control_behavior.set_trains_limit
 			control_behavior.read_trains_count = entity_data.control_behavior.read_trains_count
 			control_behavior.enable_disable = entity_data.control_behavior.enable_disable
-			control_behavior.stopped_train_signal = entity_data.control_behavior.stopped_train_signal
-			control_behavior.trains_count_signal = entity_data.control_behavior.trains_count_signal
-			control_behavior.trains_limit_signal = entity_data.control_behavior.trains_limit_signal
-			-- Shared with LuaGenericOnOffControlBehavior
-			control_behavior.connect_to_logistic_network = entity_data.control_behavior.connect_to_logistic_network
-			if entity_data.control_behavior.circuit_condition ~= nil then
-				control_behavior.circuit_condition = entity_data.control_behavior.circuit_condition
+			if entity_data.control_behavior.stopped_train_signal ~= nil then
+				control_behavior.stopped_train_signal = entity_data.control_behavior.stopped_train_signal
 			end
-			if entity_data.control_behavior.logistic_condition ~= nil then
-				control_behavior.logistic_condition = entity_data.control_behavior.logistic_condition
+			if entity_data.control_behavior.trains_count_signal ~= nil then
+				control_behavior.trains_count_signal = entity_data.control_behavior.trains_count_signal
 			end
+			if entity_data.control_behavior.trains_limit_signal ~= nil then
+				control_behavior.trains_limit_signal = entity_data.control_behavior.trains_limit_signal
+			end
+			-- Inhertited from LuaGenericOnOffControlBehavior
+			LuaGenericOnOffControlBehavior_deserialize(control_behavior)
+		end
+		if entity_data.control_behavior.object_name == "LuaInserterControlBehavior" then
+			---@class LuaInserterControlBehavior
+			local control_behavior = entity.get_or_create_control_behavior()
+			control_behavior.circuit_read_hand_contents = entity_data.control_behavior.circuit_read_hand_contents
+			control_behavior.circuit_mode_of_operation = entity_data.control_behavior.circuit_mode_of_operation
+			control_behavior.circuit_hand_read_mode = entity_data.control_behavior.circuit_hand_read_mode
+			control_behavior.circuit_set_stack_size = entity_data.control_behavior.circuit_set_stack_size
+			if entity_data.control_behavior.circuit_stack_control_signal ~= nil then
+				control_behavior.circuit_stack_control_signal = entity_data.control_behavior
+					.circuit_stack_control_signal
+			end
+			-- Inhertited from LuaGenericOnOffControlBehavior
+			LuaGenericOnOffControlBehavior_deserialize(control_behavior)
 		end
 		if entity_data.control_behavior.object_name == "LuaGenericOnOffControlBehavior" then
 			---@class LuaGenericOnOffControlBehavior
 			local control_behavior = entity.get_or_create_control_behavior()
-			control_behavior.connect_to_logistic_network = entity_data.control_behavior.connect_to_logistic_network
-			if entity_data.control_behavior.circuit_condition ~= nil then
-				control_behavior.circuit_condition = entity_data.control_behavior.circuit_condition
-			end
-			if entity_data.control_behavior.logistic_condition ~= nil then
-				control_behavior.logistic_condition = entity_data.control_behavior.logistic_condition
-			end
+			LuaGenericOnOffControlBehavior_deserialize(control_behavior)
 		end
 	end
 
