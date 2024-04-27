@@ -14,6 +14,8 @@ local function entity_serialize(entity)
 		orientation = entity.orientation,
 		force = entity.force.name,
 		player = entity.last_user and entity.last_user.name or nil,
+		energy = entity.energy,
+		temperature = entity.temperature,
 	}
 	if entity.supports_backer_name() then
 		entity_data.backer_name = entity.backer_name
