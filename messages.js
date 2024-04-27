@@ -30,6 +30,13 @@ module.exports = {
 		toJSON() {
 			return this.data;
 		}
+		static Response = plainJson({
+			type: "object",
+			properties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+			},
+		});
 	},
 	GetMapData: class GetMapData {
 		static type = "request";
@@ -182,6 +189,7 @@ module.exports = {
 			properties: {
 				player_position: { type: "boolean" },
 				faction_list: { type: "boolean" },
+				gridworlds: { type: "boolean" },
 			},
 		};
 		constructor(data) {
@@ -662,6 +670,67 @@ module.exports = {
 		}
 		toJSON() {
 			return this.data;
+		}
+	},
+	StartMapMerge: class StartMapMerge {
+		static type = "request";
+		static src = "control";
+		static dst = "controller";
+		static plugin = pluginName;
+		static permission = "gridworld.merge.start";
+		static jsonSchema = {
+			type: "object",
+			required: ["host_id", "grid_id"],
+			properties: {
+				// Target host
+				host_id: { type: "integer" },
+				// Grid to merge
+				grid_id: { type: "integer" },
+			},
+		};
+		static Response = plainJson({
+			type: "object",
+			properties: {
+				ok: { type: "boolean" },
+				message: { type: "string" },
+				instance_id: { type: "integer" },
+			},
+		});
+		constructor(data) {
+			this.host_id = data.host_id;
+			this.grid_id = data.grid_id;
+		}
+		static fromJSON(json) {
+			return new this(json);
+		}
+	},
+	GridworldUpdate: class GridworldUpdate {
+		static type = "event";
+		static src = "controller";
+		static dst = "control";
+		static plugin = pluginName;
+		static permission = "gridworld.overview.view";
+		static jsonSchema = {
+			type: "object",
+			properties: {
+				lobby_server: { type: "integer" }, // Lobby server instance ID
+				id: { type: "integer" }, // grid_id
+				name_prefix: { type: "string" },
+				x_size: { type: "integer" },
+				y_size: { type: "integer" },
+				use_edge_transports: { type: "boolean" },
+			},
+		};
+		constructor(data) {
+			this.lobby_server = data.lobby_server;
+			this.id = data.id;
+			this.name_prefix = data.name_prefix;
+			this.x_size = data.x_size;
+			this.y_size = data.y_size;
+			this.use_edge_transports = data.use_edge_transports;
+		}
+		static fromJSON(json) {
+			return new this(json);
 		}
 	},
 };

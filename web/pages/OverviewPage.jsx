@@ -49,6 +49,8 @@ function OverviewPage() {
 					</Button>
 				</Popconfirm>,
 				<RefreshTileDataButton key="refresh" />,
+				account.hasPermission("gridworld.merge.start")
+				&& <Button key="merge_map" onClick={() => navigate("/gridworld/merge_map")}>Merge map</Button>,
 			]}
 		/>
 		<p>This plugin handles creation, configuration and management of gridworlds.</p>

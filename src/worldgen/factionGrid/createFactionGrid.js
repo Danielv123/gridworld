@@ -13,5 +13,6 @@ module.exports = async function createFactionGrid({
 	let grid_id = lobbyInstance.config.get("gridworld.grid_id");
 	return {
 		grid_id,
+		lobby_server: lobbyInstance.config.get("instance.id"),
 	};
 };

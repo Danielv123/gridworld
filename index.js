@@ -48,6 +48,12 @@ lib.definePermission({
 	description: "Delete *any* faction",
 	grantByDefault: false,
 });
+lib.definePermission({
+	name: "gridworld.merge.start",
+	title: "Start merge",
+	description: "Merge instances to a single map. Resource intensive",
+	grantByDefault: false,
+});
 
 module.exports = {
 	plugin: {
@@ -85,6 +91,12 @@ module.exports = {
 				type: "boolean",
 				title: "Server is a lobby server",
 				description: "Make this instance act as a lobby server for a gridworld",
+				initialValue: false,
+			},
+			"gridworld.is_grid_square": {
+				type: "boolean",
+				title: "Server is a grid square",
+				description: "Make this instance act as a grid square for a gridworld",
 				initialValue: false,
 			},
 			"gridworld.grid_id": {
@@ -145,6 +157,7 @@ module.exports = {
 			"/gridworld/create",
 			"/gridworld/factions",
 			"/gridworld/factions/:factionId/view",
+			"/gridworld/merge_map",
 		],
 
 		messages: [

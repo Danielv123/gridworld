@@ -149,6 +149,8 @@ do -- Factorio STDs--
 			'serpent',
 			-- @table_size@: Returns the number of elements inside an LUA table.
 			'table_size',
+			-- @loadstring@: Loads a string as a Lua chunk.
+			'loadstring',
 			-- @lldebugger@: Provided by lua local debugger vscode extension.
 			lldebugger = {fields = {'requestBreak'}, other_fields = true, read_only = false},
 			-- @__DebugAdapter@: Provided by Factorio Mod Debug vscode extension.
