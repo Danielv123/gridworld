@@ -44,6 +44,18 @@ module.exports = {
 		static dst = "controller";
 		static plugin = pluginName;
 		static permission = "gridworld.overview.view";
+		static jsonSchema = {
+			type: "object",
+			properties: {
+				grid_id: { type: "integer" },
+			},
+		};
+		constructor(grid_id) {
+			this.grid_id = grid_id;
+		}
+		static fromJSON(json) {
+			return new this(json.grid_id);
+		}
 		static Response = plainJson({
 			type: "object",
 			properties: {

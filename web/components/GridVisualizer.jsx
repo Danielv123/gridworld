@@ -22,7 +22,7 @@ const scaleFactor = 2048;
 export default function GridVisualizer(props) {
 	const control = useContext(ControlContext);
 	const playerPositions = usePlayerPosition(control);
-	const [mapData] = useMapData();
+	const [mapData] = useMapData(props.grid_id);
 	const [activeInstance, setActiveInstance] = useState();
 	const [refreshTiles, setRefreshTiles] = useState("1");
 

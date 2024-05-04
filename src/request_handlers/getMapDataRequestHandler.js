@@ -1,7 +1,11 @@
 "use strict";
-module.exports = async function getMapDataRequestHandler() {
+module.exports = async function getMapDataRequestHandler({ grid_id }) {
+	if (grid_id === undefined) {
+		throw new Error("grid_id is required");
+	}
 	const instances = [...this.controller.instances]
-		.filter(instance => instance[1].config.get("gridworld.is_lobby_server") === false);
+		.filter(instance => instance[1].config.get("gridworld.grid_id") === grid_id)
+		.filter(instance => instance[1].config.get("gridworld.is_grid_square") === true);
 	return {
 		map_data: instances.map(instance => ({
 			instance_id: instance[1].config.get("instance.id"),

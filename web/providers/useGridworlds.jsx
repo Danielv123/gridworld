@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { ControlContext } from "@clusterio/web_ui";
 
-export default function useGridworlds(control) {
+export default function useGridworlds() {
+	const control = useContext(ControlContext);
 	let plugin = control.plugins.get("gridworld");
 	let [gridworlds, setGridworlds] = useState(new Map(plugin.gridworlds));
 

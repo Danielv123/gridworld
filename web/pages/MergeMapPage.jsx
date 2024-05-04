@@ -2,13 +2,12 @@ import { useContext } from "react";
 import { PageHeader, PageLayout, useHosts, ControlContext } from "@clusterio/web_ui";
 import { Form, Button, Select } from "antd";
 import useGridworlds from "../providers/useGridworlds";
-import gridworld from "../..";
 import messages from "../../messages";
 
 export default function MergeMapPage() {
 	const control = useContext(ControlContext);
 	const [hosts] = useHosts();
-	const gridworlds = useGridworlds(control);
+	const gridworlds = useGridworlds();
 
 	return <PageLayout nav={[{ name: "Gridworld", path: "/gridworld" }, { name: "merge_map" }]}>
 		<PageHeader
