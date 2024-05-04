@@ -104,12 +104,13 @@ class InstancePlugin extends BaseInstancePlugin {
 			world_x: this.instance.config.get("gridworld.grid_x_position"),
 			world_y: this.instance.config.get("gridworld.grid_y_position"),
 		};
+		const grid_id = this.instance.config.get("gridworld.grid_id");
 		await this.sendRcon("/sc gridworld.is_server_unsafe_desync = true");
 		await this.sendRcon("/sc global.disable_crashsite = true");
 		if (this.instance.config.get("gridworld.is_lobby_server")) {
 			await this.sendRcon("/sc gridworld.register_lobby_server(true)");
 			// Get gridworld data
-			const { map_data } = await this.instance.sendTo("controller", new messages.GetMapData());
+			const { map_data } = await this.instance.sendTo("controller", new messages.GetMapData(grid_id));
 			await this.sendRcon(`/sc gridworld.register_map_data('${JSON.stringify(map_data)}')`);
 		}
 		if (this.instance.config.get("gridworld.is_grid_square")) {
