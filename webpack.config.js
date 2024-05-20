@@ -1,7 +1,9 @@
+/* eslint-disable node/no-process-env */
 "use strict";
 const path = require("path");
 const webpack = require("webpack");
 const { merge } = require("webpack-merge");
+const { codecovWebpackPlugin } = require("@codecov/webpack-plugin");
 
 const common = require("@clusterio/web_ui/webpack.common");
 
@@ -29,6 +31,11 @@ module.exports = (env = {}) => merge(common(env), {
 				"react-router": { import: false },
 				"react-router-dom": { import: false },
 			},
+		}),
+		codecovWebpackPlugin({
+			enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
+			bundleName: "example-webpack-bundle",
+			uploadToken: process.env.CODECOV_TOKEN,
 		}),
 	],
 });

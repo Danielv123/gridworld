@@ -41,6 +41,8 @@
 	},
 	"devDependencies": {
 		"@clusterio/web_ui": "^2.0.0-alpha.0",
+		"@codecov/webpack-plugin": "0.0.1-beta.6",
+		"@react-leaflet/core": "^2.1.0",
 		"@swc/core": "^1.4.0",
 		"antd": "^5.13.0",
 		"eslint": "^8.4.1",
@@ -50,7 +52,6 @@
 		"leaflet-rastercoords": "^1.0.4",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
-		"@react-leaflet/core": "^2.1.0",
 		"react-leaflet": "^4.2.1",
 		"spaces-to-tabs": "^0.0.3",
 		"webpack": "^5.88.2",
