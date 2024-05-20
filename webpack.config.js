@@ -34,7 +34,7 @@ module.exports = (env = {}) => merge(common(env), {
 		}),
 		codecovWebpackPlugin({
 			enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
-			bundleName: "example-webpack-bundle",
+			bundleName: "plugin_gridworld",
 			uploadToken: process.env.CODECOV_TOKEN,
 		}),
 	],

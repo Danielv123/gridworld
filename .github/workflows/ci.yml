@@ -21,6 +21,8 @@ jobs:
         node-version: 18.x
     - run: npm i -g pnpm
     - run: pnpm i --no-optional
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     - run: pnpm i eslint eslint-plugin-node
     - run: pnpm run lint
   lualint:
