@@ -26,7 +26,6 @@ function OverviewPage() {
 
 	return <PageLayout nav={[{ name: "Gridworld" }]}>
 		<PageHeader
-			className="site-page-header"
 			title={<Dropdown menu={{
 				items: [...gridworlds.values()].map(gridworld => ({
 					label: `${gridworld.name_prefix} ${gridworld.id}`,

@@ -15,7 +15,6 @@ function FactionsPage() {
 
 	return <PageLayout nav={[{ name: "Gridworld" }]}>
 		<PageHeader
-			className="site-page-header"
 			title="Factions"
 			extra={[
 				account.hasPermission("gridworld.faction.delete")

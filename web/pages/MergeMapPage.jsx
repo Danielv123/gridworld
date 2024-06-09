@@ -11,7 +11,6 @@ export default function MergeMapPage() {
 
 	return <PageLayout nav={[{ name: "Gridworld", path: "/gridworld" }, { name: "merge_map" }]}>
 		<PageHeader
-			className="site-page-header"
 			title="Merge map"
 		/>
 		<Form

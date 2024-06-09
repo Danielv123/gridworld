@@ -42,7 +42,6 @@ export default function FactionViewPage() {
 
 	return <PageLayout nav={nav}>
 		<PageHeader
-			className="site-page-header"
 			title={factionName}
 			subTitle={faction.about.header}
 		/>
