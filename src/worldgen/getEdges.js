@@ -85,14 +85,14 @@ module.exports = function getEdges({
 				&& instance.config.get("gridworld.grid_x_position") === x + 1
 				&& instance.config.get("gridworld.grid_y_position") === y
 			)?.config.get("instance.id") || 0,
-			origin: [worldfactor_x, worldfactor_y + y_size], // Bottom left on source, top right on target
+			origin: [worldfactor_x + x_size, worldfactor_y + y_size], // Bottom right corner
 			surface: 1,
 			direction: string_to_direction("North"), // Points north, exit is from the right side
 			ready: false,
 		},
 		target: {
 			instanceId, // Local instance
-			origin: [worldfactor_x + x_size, worldfactor_y],
+			origin: [worldfactor_x + x_size, worldfactor_y], // Top right corner
 			surface: 1,
 			direction: string_to_direction("South"), // Points south, entrance is from the right side
 			ready: false,
@@ -117,9 +117,9 @@ module.exports = function getEdges({
 				&& instance.config.get("gridworld.grid_x_position") === x - 1
 				&& instance.config.get("gridworld.grid_y_position") === y
 			)?.config.get("instance.id") || 0,
-			origin: [worldfactor_x, worldfactor_y], // Top left corner of this instance, top right corner of target
+			origin: [worldfactor_x, worldfactor_y], // Top right corner
 			surface: 1,
-			direction: string_to_direction("South"), // Points south, entrane is from the right side
+			direction: string_to_direction("South"), // Points south, entrance is from the right side
 			ready: false,
 		},
 	});

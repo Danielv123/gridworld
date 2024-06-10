@@ -70,7 +70,7 @@ export default function GridVisualizer(props) {
 							minNativeZoom={10} // 7 min
 						/>
 						{mapData?.map_data?.map?.(instance => <div key={instance.instance_id}>
-							{instance.edges.map(edge => {
+							{/* {instance.edges.map(edge => { // TODO: Reimplement using universal_edges config subscription
 								// Coordinates are given as lat and long corresponding to Y and X in the grid
 								let origin = [-1 * edge.origin[1] / scaleFactor, edge.origin[0] / scaleFactor];
 								let destination = [...origin];
@@ -83,7 +83,7 @@ export default function GridVisualizer(props) {
 									positions={[origin, destination]}
 									opacity={0.3}
 								/>;
-							})}
+							})} */}
 							<InstanceRender
 								instance={instance}
 								activeInstance={activeInstance}

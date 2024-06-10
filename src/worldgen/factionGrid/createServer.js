@@ -65,7 +65,7 @@ module.exports = async function createServer({
 		instanceId,
 	});
 	edges.forEach(edge => {
-		this.controller.plugins.get("universal_edges").handleSetEdgeConfigRequest({ edge });
+		plugin.controller.plugins.get("universal_edges").handleSetEdgeConfigRequest({ edge });
 	});
 
 	return {
