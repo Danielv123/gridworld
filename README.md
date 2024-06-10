@@ -15,8 +15,29 @@ Run the following commands in the folder Clusterio is installed to:
 
 	npm install @danielv123/gridworld
 	npx clusteriocontroller plugin add @danielv123/gridworld
+	npm install universal_edges
+	npx clusteriocontroller plugin add universal_edges
 
 Substitute clusteriocontroller with clusteriohost or clusterioctl if this a dedicated host or ctl installation respectively.
+
+Install the companion mod as a modpack in clusterio, this is required for power, fluid transfers and train pathfinding to work:
+
+https://mods.factorio.com/mod/universal_edges
+
+## Usage
+
+Open the web UI, navigate to the gridworld page and create a new gridworld. A lobby server will be created. If you want to use a custom map exchange string, navigate to the controller page and set "Gridworld map exchange string" to the long string you get from the game.
+
+Once this is done, join the lobby server and press the "Joing game button". Additional server are created on demand as you explore. The load balancing picks the host with the fewest instances to create the new server on.
+
+### Transfers between servers
+
+The universal_edges plugin is used to transfer items between servers. When an edge is green, it is active and can be used for transfers. Connectors are set up by placing the following items up against the edge:
+
+* Transport belts
+* Pipes
+* Substations
+* Straight rails (the departing train can't leave from a curve, leave a long straight)
 
 ![Visualization of this repo](./images/diagram.svg)
 
