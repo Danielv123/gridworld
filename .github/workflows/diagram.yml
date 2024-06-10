@@ -1,9 +1,7 @@
 name: Create diagram
 on:
   workflow_dispatch: {}
-  create:
-    tags:
-      - v*
+
 jobs:
   get_data:
     runs-on: ubuntu-latest

@@ -36,7 +36,10 @@ module.exports = async function createServer({
 			hostId: host.id,
 			load: mapFilter(instances, instance => instance.config.get("instance.assigned_host") === host.id).length,
 		}));
-		hostId = hostLoads.sort((a, b) => a.load - b.load)[0].hostId;
+		hostId = hostLoads.sort((a, b) => a.load - b.load)[0]?.hostId;
+	}
+	if (hostId === undefined) {
+		throw new Error("No hosts with gridworld plugin found");
 	}
 
 	// Create instance
