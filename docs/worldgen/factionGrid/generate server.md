@@ -8,10 +8,9 @@ The server generation function takes care of the following:
 2. Assign to a host with free capacity
 3. Create a new save
 4. Apply gridworld configuration options
-5. Apply edge transports configuration
-6. Apply edge transports configuration to neighboring servers
-7. Start the server
-8. Run world border creation scripts
+5. Apply universal edges configuration
+6. Start the server
+7. Run world border creation scripts
 
 ## Gridworld configuration options
 
@@ -25,22 +24,12 @@ The following settings are set on the instance:
 | `gridworld.grid_x_size`     | The x size of the grid in the world     |
 | `gridworld.grid_y_size`     | The y size of the grid in the world     |
 
-## Edge transports configuration
+## Universal edges configuration
 
-The following settings are set on the instance:
+As of version 0.6 gridworld uses [universal_edges](https://github.com/Danielv123/universal_edges) instead of [edge_transports](https://github.com/clusterio/edge_transports). Universal edges is a typescript rewrite that uses a new configuration system and has support for more connector types (fluids, power, trains).
 
-| Setting                    | Description                   |
-| -------------------------- | ----------------------------- |
-| `edge_transports.internal` | Edge transports configuration |
+Edges allow for setting up connectors to transport items/fluids/power/trains between servers. They are automatically configured during server creation. Edges can be inspected/modified using the universal_edges web UI. There are a few peculiarities to how edges are set up with gridworld:
 
-The edge transports configuration is an object like `{edges: []}`. Each edge has the following properties:
-
-| Property          | Description                                                                                     |
-| ----------------- | ----------------------------------------------------------------------------------------------- |
-| `id`              | edge ID                                                                                         |
-| `origin`          | [x,y]                                                                                           |
-| `surface`         | Target surface index, always 1 for gridworld                                                    |
-| `direction`       | Factorio cardinal direction index. The border is drawn as a beam with the IO on the right side. |
-| `length`          | Length of border                                                                                |
-| `target_instance` | Instance ID of target server                                                                    |
-| `target_edge`     | Corresponding edge ID on the target server                                                      |
+1. Edge IDs are not random, but based on the grid square the edge connects. `edge_${from}_${to}` where `from` and `to` are x,y coordinates.
+2. At least during initial develpment, edges are refreshed on each instance start. This reduces the need for migrations, but means manual changes to the edge config can be unstable.
+3. Unlike the old edge transports integration, gridworld no longer overwrites edges it did not create. This allows for custom topologies.

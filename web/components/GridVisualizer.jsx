@@ -25,6 +25,7 @@ export default function GridVisualizer(props) {
 	const [mapData] = useMapData(props.grid_id);
 	const [activeInstance, setActiveInstance] = useState();
 	const [refreshTiles, setRefreshTiles] = useState("1");
+	const [edges] = control.plugins.get("universal_edges").useEdgeConfigs();
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -69,21 +70,25 @@ export default function GridVisualizer(props) {
 							maxNativeZoom={10} // 10 max
 							minNativeZoom={10} // 7 min
 						/>
+						{[...edges.values()].map(fullEdge => ["source", "target"].map((targetKey) => {
+							// Could probably save a bit of performance by not rendering both source and target when they overlap
+							// TODO: Filter by only edges belonging to this grid_id
+							const edge = fullEdge[targetKey];
+							const length = fullEdge.length;
+							// Coordinates are given as lat and long corresponding to Y and X in the grid
+							let origin = [-1 * edge.origin[1] / scaleFactor, edge.origin[0] / scaleFactor];
+							let destination = [...origin];
+							if (edge.direction === 0) { destination[1] += length / scaleFactor; }
+							if (edge.direction === 4) { destination[1] -= length / scaleFactor; }
+							if (edge.direction === 2) { destination[0] -= length / scaleFactor; }
+							if (edge.direction === 6) { destination[0] += length / scaleFactor; }
+							return <Polyline
+								key={fullEdge.id}
+								positions={[origin, destination]}
+								opacity={0.3}
+							/>;
+						}))}
 						{mapData?.map_data?.map?.(instance => <div key={instance.instance_id}>
-							{instance.edges.map(edge => {
-								// Coordinates are given as lat and long corresponding to Y and X in the grid
-								let origin = [-1 * edge.origin[1] / scaleFactor, edge.origin[0] / scaleFactor];
-								let destination = [...origin];
-								if (edge.direction === 0) { destination[1] += edge.length / scaleFactor; }
-								if (edge.direction === 4) { destination[1] -= edge.length / scaleFactor; }
-								if (edge.direction === 2) { destination[0] -= edge.length / scaleFactor; }
-								if (edge.direction === 6) { destination[0] += edge.length / scaleFactor; }
-								return <Polyline
-									key={`${instance.instance_id}edge${edge.id}`}
-									positions={[origin, destination]}
-									opacity={0.3}
-								/>;
-							})}
 							<InstanceRender
 								instance={instance}
 								activeInstance={activeInstance}

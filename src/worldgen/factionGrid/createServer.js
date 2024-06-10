@@ -53,6 +53,21 @@ module.exports = async function createServer({
 		plugin.controller.config.get("gridworld.gridworld_map_exchange_string")
 	);
 
+	// Update edges
+	let edges = getEdges({
+		x,
+		y,
+		x_size,
+		y_size,
+		instances: plugin.controller.instances,
+		grid_id: grid_id,
+		includeMissing: false, // Create edges for instances that are not generated yet
+		instanceId,
+	});
+	edges.forEach(edge => {
+		plugin.controller.plugins.get("universal_edges").handleSetEdgeConfigRequest({ edge });
+	});
+
 	return {
 		instanceId,
 	};

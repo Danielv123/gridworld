@@ -40,7 +40,6 @@ module.exports = async function getMapDataRequestHandler({ grid_id }) {
 					instance[1].config.get("gridworld.grid_y_size"),
 				],
 			],
-			edges: instance[1].config.get("edge_transports.internal").edges,
 		})),
 	};
 };

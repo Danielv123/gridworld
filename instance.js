@@ -119,6 +119,7 @@ class InstancePlugin extends BaseInstancePlugin {
 			await this.sendRcon(`/sc gridworld.create_spawn("${data.x_size}","${data.y_size}","${data.world_x}","${data.world_y}", false)`, true);
 			// Update neighboring nodes for edge_transports
 			await sleep(1000);
+			// TODO: The following command can be disabled once edge creation during instance creation is stable
 			await this.instance.sendTo("controller", new messages.UpdateEdgeTransportEdges({
 				instance_id: this.instance.config.get("instance.id"),
 			}));

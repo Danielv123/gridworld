@@ -74,24 +74,6 @@ module.exports = {
 									items: { type: "number" },
 								},
 							},
-							edges: {
-								type: "array",
-								items: {
-									type: "object",
-									properties: {
-										id: { type: "integer" },
-										origin: {
-											type: "array",
-											items: { type: "integer" },
-										},
-										surface: { type: "integer" },
-										direction: { type: "integer" },
-										length: { type: "integer" },
-										target_instance: { type: "integer" },
-										target_edge: { type: "integer" },
-									},
-								},
-							},
 						},
 					},
 				},

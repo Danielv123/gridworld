@@ -8,6 +8,7 @@
 	"repository": "Danielv123/gridworld",
 	"scripts": {
 		"prepare": "webpack-cli --env production && husky install",
+		"cloc": "cloc --exclude-dir=node_modules,dist .",
 		"lint": "eslint \"*.js\" src web --fix",
 		"luacheck": "luacheck module/",
 		"test": "spaces-to-tabs -s 4 module/**.lua module/**/**.lua module/**/**/**.lua module/**/**/**/**.lua module/**/**/**/**/**.lua && npm run lint && npm run luacheck"
@@ -41,7 +42,6 @@
 	},
 	"devDependencies": {
 		"@clusterio/web_ui": "^2.0.0-alpha.0",
-		"@codecov/webpack-plugin": "0.0.1-beta.6",
 		"@react-leaflet/core": "^2.1.0",
 		"@swc/core": "^1.4.0",
 		"antd": "^5.13.0",
