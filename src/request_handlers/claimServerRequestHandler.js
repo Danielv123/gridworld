@@ -15,6 +15,7 @@ module.exports = async function claimServerRequestHandler(message) {
 			message: "Faction does not exist",
 		};
 	}
+	// TODO: Method no longer exists
 	this.setInstanceConfigField(message.data.instance_id, "gridworld.claimed_by_faction", message.data.faction_id);
 	return {
 		ok: true,

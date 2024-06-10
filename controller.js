@@ -127,10 +127,8 @@ class ControllerPlugin extends BaseControllerPlugin {
 	async onInstanceStatusChanged(instance) {
 		if (instance.status === "running") {
 			let instanceId = instance.config.get("instance.id");
-			let hostId = instance.config.get("instance.assigned_host");
 			let x = instance.config.get("gridworld.grid_x_position");
 			let y = instance.config.get("gridworld.grid_y_position");
-			let hostConnection = this.controller.wsServer.hostConnections.get(hostId);
 			let instances = [...this.controller.instances];
 			await this.controller.sendTo({ instanceId }, new messages.PopulateNeighborData({
 				instance_id: instanceId,
@@ -144,22 +142,6 @@ class ControllerPlugin extends BaseControllerPlugin {
 					&& z[1].config.get("gridworld.grid_y_position") === y)?.[0] || null,
 			}));
 		}
-	}
-
-	async setInstanceConfigField(instanceId, field, value) {
-		// Code lifted from ControlConnection.js handleInstanceConfigSetFieldRequest(request)
-		let instance = this.controller.getRequestInstance(instanceId);
-		if (field === "instance.assigned_host") {
-			throw new lib.RequestError("instance.assigned_host must be set through the assign-host interface");
-		}
-
-		if (field === "instance.id") {
-			// XXX is this worth implementing?  It's race condition galore.
-			throw new lib.RequestError("Setting instance.id is not supported");
-		}
-
-		instance.config.set(field, value, "control");
-		await this.controller.instanceConfigUpdated(instance);
 	}
 
 	onControlConnectionEvent(connection, event) {
