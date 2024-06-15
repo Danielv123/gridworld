@@ -50,7 +50,7 @@ export class WebPlugin extends BaseWebPlugin {
 
 		this.control.handle(messages.PlayerPosition, this.playerPositionEventHandler.bind(this));
 		this.control.handle(messages.FactionUpdate, this.factionUpdateEventHandler.bind(this));
-		this.control.handle(messages.GridworldUpdate, this.gridworldUpdateEventHandler.bind(this));
+		this.control.handle(messages.GridworldUpdates, this.gridworldUpdatesEventHandler.bind(this));
 	}
 
 	onControllerConnectionEvent(event) {
@@ -75,7 +75,7 @@ export class WebPlugin extends BaseWebPlugin {
 		});
 	}
 
-	async gridworldUpdateEventHandler(message) {
+	async gridworldUpdatesEventHandler(message) {
 		this.updateHandlers.forEach(handler => {
 			if (handler.type === "gridworlds") {
 				handler.callback(message);

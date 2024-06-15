@@ -698,7 +698,7 @@ module.exports = {
 			return new this(json);
 		}
 	},
-	GridworldUpdate: class GridworldUpdate {
+	GridworldUpdates: class GridworldUpdates {
 		static type = "event";
 		static src = "controller";
 		static dst = "control";
@@ -707,24 +707,27 @@ module.exports = {
 		static jsonSchema = {
 			type: "object",
 			properties: {
-				lobby_server: { type: "integer" }, // Lobby server instance ID
-				id: { type: "integer" }, // grid_id
-				name_prefix: { type: "string" },
-				x_size: { type: "integer" },
-				y_size: { type: "integer" },
-				use_edge_transports: { type: "boolean" },
+				gridworlds: {
+					type: "array",
+					items: {
+						type: "object",
+						properties: {
+							lobby_server: { type: "integer" }, // Lobby server instance ID
+							id: { type: "integer" }, // grid_id
+							name_prefix: { type: "string" },
+							x_size: { type: "integer" },
+							y_size: { type: "integer" },
+							use_edge_transports: { type: "boolean" },
+						},
+					},
+				},
 			},
 		};
-		constructor(data) {
-			this.lobby_server = data.lobby_server;
-			this.id = data.id;
-			this.name_prefix = data.name_prefix;
-			this.x_size = data.x_size;
-			this.y_size = data.y_size;
-			this.use_edge_transports = data.use_edge_transports;
+		constructor(gridworlds) {
+			this.gridworlds = gridworlds;
 		}
 		static fromJSON(json) {
-			return new this(json);
+			return new this(json.gridworlds);
 		}
 	},
 };

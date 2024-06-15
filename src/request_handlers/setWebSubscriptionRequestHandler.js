@@ -18,9 +18,7 @@ async function transmitInitialPlayerPositionsData(controller, link) {
 
 async function transmitInitialGridworldsData(controller, link) {
 	// Transmit a full copy of the data to the new client
-	for (let [id, gridworld] of controller.gridworlds) {
-		controller.controller.sendTo(link, new messages.GridworldUpdate(gridworld));
-	}
+	controller.controller.sendTo(link, new messages.GridworldUpdates([...controller.gridworldDatastore.values()]));
 }
 
 module.exports = async function setWebSubscriptionRequestHandler(message, link) {

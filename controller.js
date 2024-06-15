@@ -65,11 +65,10 @@ class ControllerPlugin extends BaseControllerPlugin {
 	async init() {
 		this.gridworldDatastore = await loadDatabase(this.controller.config, "gridworld.json", this.logger);
 		this.factionsDatastore = await loadDatabase(this.controller.config, "factions.json", this.logger);
-		this.gridworlds = new Map();
 		// Reconstruct gridworld information by iterating over all instances and finding lobby servers
 		for (let [instanceId, instance] of this.controller.instances) {
 			if (instance.config.get("gridworld.is_lobby_server")) {
-				this.gridworlds.set(instance.config.get("gridworld.grid_id"), {
+				this.gridworldDatastore.set(instance.config.get("gridworld.grid_id"), {
 					lobby_server: instanceId,
 					id: instance.config.get("gridworld.grid_id"),
 					name_prefix: instance.config.get("gridworld.grid_name_prefix"),
@@ -77,6 +76,12 @@ class ControllerPlugin extends BaseControllerPlugin {
 					y_size: instance.config.get("gridworld.grid_y_size"),
 					use_edge_transports: true, // TODO: This should not be hardcoded
 				});
+			}
+		}
+		// Filter out deleted gridworlds
+		for (let [gridId, grid] of this.gridworldDatastore) {
+			if (!grid.id || !this.controller.instances.has(grid.lobby_server)) {
+				this.gridworldDatastore.delete(gridId);
 			}
 		}
 

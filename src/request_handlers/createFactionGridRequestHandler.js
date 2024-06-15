@@ -1,5 +1,6 @@
 "use strict";
 
+const messages = require("../../messages");
 const createFactionGrid = require("../worldgen/factionGrid/createFactionGrid");
 
 module.exports = async function createRequestHandler(message) {
@@ -21,7 +22,7 @@ module.exports = async function createRequestHandler(message) {
 	});
 
 	// Store in the controller database
-	this.gridworlds.set(grid.grid_id, {
+	this.gridworldDatastore.set(grid.grid_id, {
 		lobby_server: grid.lobby_server,
 		id: grid.grid_id,
 		name_prefix: message.data.name_prefix,
@@ -33,7 +34,7 @@ module.exports = async function createRequestHandler(message) {
 	// Send update to all connected clients
 	for (let sub of this.subscribedControlLinks) {
 		if (sub.gridworlds) {
-			await this.controller.sendTo(sub.link, this.gridworldDatastore.get(grid.grid_id));
+			await this.controller.sendTo(sub.link, new messages.GridworldUpdates([this.gridworldDatastore.get(grid.grid_id)]));
 		}
 	}
 

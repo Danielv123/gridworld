@@ -7,8 +7,10 @@ export default function useGridworlds() {
 	let [gridworlds, setGridworlds] = useState(new Map(plugin.gridworlds));
 
 	useEffect(() => {
-		function update(gridworld) {
-			plugin.gridworlds.set(gridworld.id, gridworld);
+		function update(data) {
+			for (let gridworld of data.gridworlds) {
+				plugin.gridworlds.set(gridworld.id, gridworld);
+			}
 			setGridworlds(new Map(plugin.gridworlds));
 		}
 
