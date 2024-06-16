@@ -4,6 +4,10 @@ local function setup_permission_groups()
 	local owner = permission_groups.get_group("Owner") or permission_groups.create_group("Owner")
 	local guest = permission_groups.get_group("Guest") or permission_groups.create_group("Guest")
 
+	if not admin or not owner or not guest then
+		error("Failed to create permission groups")
+	end
+
 	-- Admins can do everything
 	admin.set_allows_action(defines.input_action.write_to_console, true)
 
