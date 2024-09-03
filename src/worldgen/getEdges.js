@@ -47,6 +47,7 @@ module.exports = function getEdges({
 			direction: string_to_direction("West"), // Points west, exit is from the right side
 			ready: false,
 		},
+		link_destinations: {},
 	});
 	// Southern edge
 	edges.push({
@@ -72,6 +73,7 @@ module.exports = function getEdges({
 			direction: string_to_direction("West"), // Points west, entrance is from the right side
 			ready: false,
 		},
+		link_destinations: {},
 	});
 	// Eastern edge
 	edges.push({
@@ -97,6 +99,7 @@ module.exports = function getEdges({
 			direction: string_to_direction("South"), // Points south, entrance is from the right side
 			ready: false,
 		},
+		link_destinations: {},
 	});
 	// Western edge
 	edges.push({
@@ -122,6 +125,7 @@ module.exports = function getEdges({
 			direction: string_to_direction("South"), // Points south, entrance is from the right side
 			ready: false,
 		},
+		link_destinations: {},
 	});
 	if (includeMissing) {
 		return edges;
