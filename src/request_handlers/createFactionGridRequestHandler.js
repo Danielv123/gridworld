@@ -33,7 +33,7 @@ module.exports = async function createRequestHandler(message) {
 
 	// Send update to all connected clients
 	for (let sub of this.subscribedControlLinks) {
-		if (sub.gridworlds) {
+		if (sub.gridworlds && sub.link) {
 			await this.controller.sendTo(sub.link, new messages.GridworldUpdates([this.gridworldDatastore.get(grid.grid_id)]));
 		}
 	}
