@@ -48,7 +48,7 @@ Clone the repository in clusterio/external_plugins/
 	git clone https://github.com/clusterio/clusterio
 	cd clusterio/external_plugins
 	git clone https://github.com/Danielv123/gridworld
-	git clone https://github.com/clusterio/edge_transports
+	git clone https://github.com/Danielv123/universal_edges
 	cd ..
 	pnpm install
 
@@ -57,7 +57,7 @@ Interactive:
 	node packages/create --dev
 
 	node packages/ctl plugin add ./external_plugins/gridworld
-	node packages/ctl plugin add ./external_plugins/edge_transports
+	node packages/ctl plugin add ./external_plugins/universal_edges
 	pnpm install @hornwitser/server_select -w
 	node packages/controller bootstrap create-admin Danielv123
 	node packages/controller bootstrap create-ctl-config Danielv123
